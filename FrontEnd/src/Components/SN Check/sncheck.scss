@@ -1,0 +1,51 @@
+.sn-check {
+    margin: 75px 20px 0 20px;
+    position: sticky;
+    top: 0;
+    // background-color: white;
+    z-index: 1;
+
+    .btn-sncheck {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-bottom: 15px;
+
+        .btn-reset {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .reset-icon {
+                margin-right: 3px;
+                color: white;
+            }
+        }
+    }
+
+    .table-sn-check {
+        box-shadow: 0 0px 2px rgba(0, 0, 0, 0.2);
+        font-size: 12px;
+        max-height: 615px; /* Điều chỉnh chiều cao của bảng */
+        overflow-y: scroll;
+
+        .table-header {
+            position: sticky;
+            top: -0.5px; /* Điều chỉnh giá trị này để tương ứng với chiều cao của phần tử .btn-sncheck */
+            background-color: white;
+            z-index: 1;
+            overflow: hidden;
+
+        }
+    }
+}
+
+.label-import {
+    margin-right: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.import-icon {
+    margin-right: 3px;
+}

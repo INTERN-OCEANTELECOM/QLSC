@@ -107,17 +107,12 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
             Sheet sheet = workbook.getSheetAt(0); // Lấy sheet đầu tiên
             Iterator<Row> rowIterator = sheet.iterator();
 
-            // Bỏ qua hàng đầu tiên
-            if (rowIterator.hasNext()) {
-                Row row = rowIterator.next();
-                ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, RegexConstants.importProduct);
-                if(errorResponseImport != null) {
-                    listError.add(errorResponseImport);
-                    return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-                }
+            ErrorResponseImport errorResponse = processExcelFile.validateHeaderValue(rowIterator, RegexConstants.importProduct);
+            if(errorResponse != null) {
+                listError.add(errorResponse);
+                return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
             }
 
-            // Đọc từng hàng trong sheet và lưu vào database
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
                 int rowIndex = row.getRowNum() + 1;

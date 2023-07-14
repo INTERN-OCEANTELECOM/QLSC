@@ -3,7 +3,6 @@ import Table from "react-bootstrap/Table";
 import { AiOutlineDownload, AiOutlineSearch } from "react-icons/ai";
 import { FaFileImport } from "react-icons/fa";
 import { read, utils, writeFile } from "xlsx";
-import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "./tablehh.scss";
 import { toast } from "react-toastify";
@@ -49,7 +48,7 @@ export const TableHH = () => {
   const [startIndex, setStartIndex] = useState(0);
   const [isShowPoDetail, setIsShowPoDetail] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("10");
+  const [selectedOption, setSelectedOption] = useState("25");
   const [checkboxes, setCheckboxes] = useState({
     defaultCheck1: false,
     defaultCheck2: false,
@@ -325,9 +324,9 @@ export const TableHH = () => {
               }
               if (column === "Hạng mục SC") {
                 if (item.repairCategory === 0) {
-                  return "Nhập kho SC";
+                  return "Hàng SC";
                 } else if (item.repairCategory === 1) {
-                  return "Nhập kho BH";
+                  return "Hàng BH";
                 }
               }
               if (column === "Ưu Tiên SC") {
@@ -1258,7 +1257,7 @@ export const TableHH = () => {
               <th>Số serial</th>
               <th>Số PO</th>
               <th>Ngày nhập kho</th>
-              <th>HM SC</th>
+              <th>Hạng mục SC</th>
               <th>Ưu tiên SC</th>
               <th>Cập nhật SC</th>
               <th>Số BBXK</th>
@@ -1313,8 +1312,8 @@ export const TableHH = () => {
                     {/* <td>{item.bbbgNumber}</td> */}
                     <td>{data}</td>
                     <td>
-                      {item.repairCategory === 0 && "NK SC"}
-                      {item.repairCategory === 1 && "NK BH"}
+                      {item.repairCategory === 0 && "Hàng SC"}
+                      {item.repairCategory === 1 && "Hàng BH"}
                     </td>
                     <td>
                       {/* {item.priority === 0 && "Không UT"} */}
@@ -1403,7 +1402,6 @@ export const TableHH = () => {
             onChange={(event) => setSelectedOption(event.target.value)}
             value={selectedOption}
           >
-            <option value="10">10 / Trang</option>
             <option value="25">25 / Trang</option>
             <option value="50">50 / Trang</option>
             <option value="75">75 / Trang</option>
@@ -1454,7 +1452,7 @@ export const TableHH = () => {
                 <thead>
                   <tr>
                     <th>Loại lỗi</th>
-                    <th>Mã hàng hóa </th>
+                    <th>Số hàng </th>
                     <th>Mô tả lỗi </th>
                   </tr>
                 </thead>

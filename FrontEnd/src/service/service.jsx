@@ -219,7 +219,8 @@ const updatePo = (
   beginAt,
   endAt,
   contractWarrantyExpirationDate,
-  warrantyExpirationDate
+  warrantyExpirationDate,
+  note
 ) => {
   return axioss.put(
     `/po/update/${localStorage.getItem("po")}`,
@@ -231,6 +232,7 @@ const updatePo = (
       endAt,
       contractWarrantyExpirationDate,
       warrantyExpirationDate,
+      note
     },
     {
       headers: {
@@ -396,6 +398,16 @@ const deletePODetail = (id) => {
   return axioss.post(`/po-detail/deleteByID?id=${id}`,null, config);
 }
 
+const searchSerialNumber = (file) => {
+  const config = {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      email: localStorage.getItem("email"),
+    },
+  };
+  return axioss.post("/po-detail/search/serialNumber", file, config);
+}
+
 export {
   fecthAll,
   notify,
@@ -426,4 +438,5 @@ export {
   importPODetail,
   updateStatusPoDetail,
   deletePODetail,
+  searchSerialNumber,
 };

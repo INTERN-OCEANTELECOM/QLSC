@@ -4,6 +4,7 @@ import DatePicker from "react-datepicker";
 import { FaCalendarAlt } from "react-icons/fa";
 import { updatePo } from "../../../../service/service";
 import { toast } from "react-toastify";
+import "./modalupdatepo.scss"
 
 const ModalUpdatePo = (props) => {
   const { show, handleClose, dataPo, getAllPo } = props;
@@ -15,6 +16,7 @@ const ModalUpdatePo = (props) => {
   const [quantity, setQuantity] = useState("");
   const [isValidate, setIsValidate] = useState("");
   const [contractNumber, setContractNumber] = useState("")
+  const [note, setNote] = useState("")
 
   // check if show then get data po
   useEffect(() => {
@@ -27,6 +29,7 @@ const ModalUpdatePo = (props) => {
       setContractNumber(dataPo.contractNumber)
       setSelectedDate(dataPo.contractWarrantyExpirationDate);
       setSelectedDateWarranty(dataPo.warrantyExpirationDate);
+      setNote(dataPo.note);
       setIsValidate("")
     }
   }, [dataPo]);
@@ -69,7 +72,7 @@ const ModalUpdatePo = (props) => {
   // handle update po
   const handleUpdatePo = async () => {
     if (selectedDateStart >= selectedDateEnd) {
-      setIsValidate("Ngày bắt đầu phải nhỏ hơn ngày kết thúc");
+      setIsValidate("Ngày kết thúc phải sau ngày bắt đầu");
       return;
     } else {
       setIsValidate("");
@@ -84,54 +87,64 @@ const ModalUpdatePo = (props) => {
 
     const endDate = new Date(selectedDateEnd).getTime();
     const startDate = new Date(selectedDateStart).getTime();
-    const date = new Date(selectedDate).getTime();
-    const dateWarranty = new Date(selectedDateWarranty).getTime();
+    let date;
+    let dateWarranty;
+    if (selectedDate !== null) {
+      date = new Date(selectedDate).getTime();    
+    }
+    if (selectedDateWarranty !== null ) {
+      dateWarranty = new Date(selectedDateWarranty).getTime();
+    }
+      try {
+        let res = await updatePo(
+          contractNumber,
+          po,
+          quantity,
+          startDate,
+          endDate,
+          date,
+          dateWarranty,
+          note
+        );
 
-    try {
-      let res = await updatePo(
-        contractNumber,
-        po,
-        quantity,
-        startDate,
-        endDate,
-        date,
-        dateWarranty
-      );
-
-      if (res && res.statusCode === 200) {
-        handleClose();
-        toast.success("Cập nhật thông tin thành công!!");
-        localStorage.removeItem("po");
-        getAllPo();
-      } else if (res && res.statusCode === 205) {
-        if (
-          res.statusMessage === "YOU CAN ONLY UPDATE WITHIN THE FIRST 24 HOURS"
-        ) {
-          setIsValidate(
-            "Bạn chỉ được phép chỉnh PO và số Hợp đồng trong 24h!!"
+        if (res && res.statusCode === 200) {
+          handleClose();
+          toast.success("Cập nhật thông tin thành công!!");
+          localStorage.removeItem("po");
+          getAllPo();
+          setNote(null)
+        } else if (res && res.statusCode === 205) {
+          if (
+            res.statusMessage ===
+            "YOU CAN ONLY UPDATE WITHIN THE FIRST 24 HOURS"
+          ) {
+            setIsValidate(
+              "Bạn chỉ được phép chỉnh PO và số Hợp đồng trong 24h!!"
+            );
+          } else if (res.statusMessage === "NEW PO NUMBER ALREADY EXISTS") {
+            setIsValidate("Số PO đã tồn tại");
+            setPo(dataPo.poNumber);
+          } else {
+            setIsValidate("");
+          }
+        } else if (res && res.data.statusCode === 501) {
+          setIsValidate("");
+          handleClose();
+          toast.error(
+            "Cập nhật không thành công do đã import dữ liệu theo PO!!"
           );
-        } else if (res.statusMessage === "NEW PO NUMBER ALREADY EXISTS") {
-          setIsValidate("Số PO đã tồn tại");
           setPo(dataPo.poNumber);
         } else {
-          setIsValidate("")
+          setIsValidate("");
+          handleClose();
+          toast.error("Cập nhật không thành công!!");
         }
-      } else if (res && res.data.statusCode === 501) {
-        setIsValidate("");
+      } catch (error) {
+        // Xử lý lỗi ở đây
+        toast.error("Cập nhật không thành công!!!!");
         handleClose();
-        toast.error("Cập nhật không thành công do đã import dữ liệu theo PO!!");
-        setPo(dataPo.poNumber)
-      }else {
-        setIsValidate("");
-        handleClose();
-        toast.error("Cập nhật không thành công!!");
+        console.error(error);
       }
-    } catch (error) {
-      // Xử lý lỗi ở đây
-      toast.error("Cập nhật không thành công!!!!");
-      handleClose();
-      console.error(error);
-    }
   };
 
   return (
@@ -141,7 +154,7 @@ const ModalUpdatePo = (props) => {
     >
       <Modal show={show} onHide={handleClose} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Update PO</Modal.Title>
+          <Modal.Title>Edit PO</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="body-add-new">
@@ -149,11 +162,7 @@ const ModalUpdatePo = (props) => {
               <div className="validate-add-po">{isValidate}</div>
               <form className="input-po-detail">
                 <Row className="mb-3 ">
-                  <Form.Group
-                    as={Col}
-                    md="6"
-                    className="mb-3"
-                  >
+                  <Form.Group as={Col} md="6" className="mb-3">
                     <Form.Label>Số hợp đồng</Form.Label>
                     <Form.Control
                       type="text"
@@ -167,11 +176,7 @@ const ModalUpdatePo = (props) => {
                       }
                     />
                   </Form.Group>
-                  <Form.Group
-                    as={Col}
-                    md="6"
-                    className="mb-3"
-                  >
+                  <Form.Group as={Col} md="6" className="mb-3">
                     <Form.Label>Số PO</Form.Label>
                     <Form.Control
                       type="text"
@@ -185,11 +190,7 @@ const ModalUpdatePo = (props) => {
                   </Form.Group>
                 </Row>
                 <Row className="mb-3 ">
-                  <Form.Group
-                    as={Col}
-                    md="12"
-                    className="mb-3"
-                  >
+                  <Form.Group as={Col} md="12" className="mb-3">
                     <Form.Label>Số lượng</Form.Label>
                     <Form.Control
                       type="number"
@@ -202,11 +203,7 @@ const ModalUpdatePo = (props) => {
                   </Form.Group>
                 </Row>
                 <Row className="mb-3 ">
-                  <Form.Group
-                    as={Col}
-                    md="6"
-                    className="mb-3"
-                  >
+                  <Form.Group as={Col} md="6" className="mb-3">
                     <Form.Label>Ngày bắt đầu</Form.Label>
                     <DatePicker
                       selected={selectedDateStart}
@@ -217,11 +214,7 @@ const ModalUpdatePo = (props) => {
                       customInput={<CustomInput />}
                     />
                   </Form.Group>
-                  <Form.Group
-                    as={Col}
-                    md="6"
-                    className="mb-3"
-                  >
+                  <Form.Group as={Col} md="6" className="mb-3">
                     <Form.Label>Ngày kết thúc</Form.Label>
                     <DatePicker
                       selected={selectedDateEnd}
@@ -234,11 +227,7 @@ const ModalUpdatePo = (props) => {
                   </Form.Group>
                 </Row>
                 <Row className="mb-3 ">
-                  <Form.Group
-                    as={Col}
-                    md="6"
-                    className="mb-3"
-                  >
+                  <Form.Group as={Col} md="6" className="mb-3">
                     <Form.Label>Ngày hết hạn bảo lãnh THHĐ</Form.Label>
                     <DatePicker
                       selected={selectedDate}
@@ -263,6 +252,20 @@ const ModalUpdatePo = (props) => {
                       showYearDropdown
                       showMonthDropdown
                       customInput={<CustomInput />}
+                    />
+                  </Form.Group>
+                </Row>
+                <Row className="mb-3 ">
+                  <Form.Group
+                    className="mb-3"
+                    controlId="exampleForm.ControlTextarea1"
+                  >
+                    <Form.Label>Ghi chú</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      value={note}
+                      onChange={(event) => setNote(event.target.value)}
                     />
                   </Form.Group>
                 </Row>

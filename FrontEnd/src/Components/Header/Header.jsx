@@ -67,14 +67,22 @@ export const Header = () => {
               <>
                 <Nav className="me-auto nav-bar">
                   <NavLink to="/" className="nav-link ">
-                    Trang chủ
+                    Hợp đồng
                   </NavLink>
                   <NavLink to="/quanly" className="nav-link">
-                    Quản lý
+                    QLSC
                   </NavLink>
-                  <NavLink to="/sanpham" className="nav-link">
-                    Sản phẩm
-                  </NavLink>
+                  {localStorage.getItem("role") === "ROLE_ADMIN" ||
+                  localStorage.getItem("role") === "ROLE_MANAGER" ? (
+                    <>
+                      <NavLink to="/sn-check" className="nav-link">
+                        S/N Check
+                      </NavLink>
+                      <NavLink to="/sanpham" className="nav-link">
+                        QL Mã HH
+                      </NavLink>
+                    </>
+                  ) : null}
                 </Nav>
                 <Nav className="user-name">
                   {user && user.email ? (

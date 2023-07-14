@@ -222,7 +222,7 @@ const ModalShowPOStatistical = (props) => {
     <>
       <Modal show={show} onHide={handleClose} fullscreen size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Thống kê PO</Modal.Title>
+          <Modal.Title>Thống kê {dataStatistical.poNumber}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="chart-statistical">
@@ -305,7 +305,7 @@ const ModalShowPOStatistical = (props) => {
                       <th colSpan={3}>KCS</th>
                       <th colSpan={2}>Bảo hành</th>
                     </tr>
-                    <tr>
+                    <tr className="text-md-center">
                       <th className="col-content">Sửa chữa xong</th>
                       <th className="col-content">SC không được</th>
                       <th className="col-content">Cháy nổ</th>
@@ -322,7 +322,7 @@ const ModalShowPOStatistical = (props) => {
                   <tbody>
                     {listPo && Object.keys(listPo).length > 0 && (
                       <>
-                        <tr>
+                        <tr className="text-md-center">
                           <td>{listPo.TRANG_THAI_SC.SC_XONG}</td>
                           <td>{listPo.TRANG_THAI_SC.SC_KHONG_DUOC}</td>
                           <td>{listPo.TRANG_THAI_SC.CHAY_NO}</td>

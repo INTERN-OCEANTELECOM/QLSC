@@ -147,7 +147,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 //                rowIndex, poDetail.getPoDetailId() + errorMessage);
 //    }
 
-    public Object getPoDetail(PoDetailResponse poDetailResponse, int rowIndex, String attribute) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public Object setDataFromDTO(PoDetailResponse poDetailResponse, int rowIndex, String attribute) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Optional<PoDetail> isExistPoDetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());
         // If the PO Detail does not exist, add an error to the list of errors and continue to the next row
         if (isExistPoDetail.isEmpty()) {
@@ -202,11 +202,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      * @throws InvocationTargetException if a specified method cannot be invoked
      */
     public ListResponse<ErrorResponseImport> processFileUpdatePoDetail(MultipartFile file, String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
-        List<ErrorResponseImport> listError = new ArrayList<>();
+        List<ErrorResponseImport> listErrorResponse = new ArrayList<>();
         List<PoDetail> listUpdatePoDetail = new ArrayList<>();
 
         // Process the Excel file
-        Object dataFile = processExcelFile.processExcelFile(file);
+        Object dataFile = processExcelFile.getSheetIteratorFromExcelFile(file);
         //  If the Excel file could not be processed, return an error response
         if (dataFile instanceof ListResponse) {
             return (ListResponse) dataFile;
@@ -214,15 +214,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
 
         // Validate the header row
-        if (rowIterator.hasNext()) {
-            Row row = rowIterator.next();
-            RegexConstants regex = new RegexConstants();
-            Field field = RegexConstants.class.getDeclaredField(attribute + "Map");
-            ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, (HashMap<Integer, String>) field.get(regex));
-            if (errorResponseImport != null) {
-                listError.add(errorResponseImport);
-                return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-            }
+        RegexConstants regex = new RegexConstants();
+        Field field = RegexConstants.class.getDeclaredField(attribute + "Map");
+        ErrorResponseImport errorResponse = processExcelFile.validateHeaderValue(rowIterator, (HashMap<Integer, String>) field.get(regex));
+        if(errorResponse != null) {
+            listErrorResponse.add(errorResponse);
+            return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
         // Read each row in the sheet and update the corresponding PO Detail in the database
@@ -234,56 +231,52 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             int rowIndex = row.getRowNum() + 1;
 
             // Read the data from the row
-            Object data = readExcelUpdatePO(row, rowIndex, attribute);
+            Object data = readExcelRowUpdate(row, rowIndex, attribute);
 
             // If there is an error, add it to the list of errors; otherwise, update the corresponding PO Detail
             if (data instanceof ErrorResponseImport) {
                 ErrorResponseImport errorResponseImport = (ErrorResponseImport) data;
-                listError.add(errorResponseImport);
+                listErrorResponse.add(errorResponseImport);
             } else {
                 PoDetailResponse poDetailResponse = (PoDetailResponse) data;
 
                 if(listUpdatePoDetail.stream()
                         .anyMatch(poDetail -> poDetail.getPoDetailId().equals(poDetailResponse.getPoDetailId()))) {
-                    listError.add(new ErrorResponseImport(ErrorType.RECORD_EXISTED,
+                    listErrorResponse.add(new ErrorResponseImport(ErrorType.RECORD_EXISTED,
                             rowIndex, poDetailResponse.getPoDetailId() + " bị trùng"));
                     continue;
                 }
 
-                Object value = getPoDetail(poDetailResponse, rowIndex, attribute);
+                Object value = setDataFromDTO(poDetailResponse, rowIndex, attribute);
                 if(value instanceof ErrorResponseImport) {
-                    listError.add((ErrorResponseImport) value);
+                    listErrorResponse.add((ErrorResponseImport) value);
                 } else {
                     listUpdatePoDetail.add((PoDetail) value);
                 }
             }
         }
 
-        if (listError.isEmpty()) {
+        if (listErrorResponse.isEmpty()) {
             poDetailRepository.saveAll(listUpdatePoDetail);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " dòng update thành công")));
         }
-        return ResponseMapper.toListResponse(listError, listError.size(), 1, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        return ResponseMapper.toListResponse(listErrorResponse, listErrorResponse.size(), 1, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 
     public ListResponse<PoDetailResponse> searchBySerialNumbers(MultipartFile file) {
         List<ErrorResponseImport> listError = new ArrayList<>();
-        Object dataFile = processExcelFile.processExcelFile(file);
+        Object dataFile = processExcelFile.getSheetIteratorFromExcelFile(file);
         if(dataFile instanceof ListResponse<?>) {
             return (ListResponse) dataFile;
         }
         // Get an iterator over the rows in the Excel file
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
         // Validate header value
-        if (rowIterator.hasNext()) {
-            // First Rows - Header
-            Row row = rowIterator.next();
-            ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, RegexConstants.searchSerialNumbers);
-            if (errorResponseImport != null) {
-                listError.add(errorResponseImport);
-                return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-            }
+        ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(rowIterator, RegexConstants.searchSerialNumbers);
+        if(errorResponseImport != null) {
+            listError.add(errorResponseImport);
+            return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
         List<String> listSearchSerialNumber = new ArrayList<>();
@@ -291,7 +284,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
             Row row = rowIterator.next();
             int rowIndex = row.getRowNum() + 1;
-            System.out.println("rowindex: " +rowIndex);
 
             if (row.getCell(0).getCellType() == CellType.BLANK) {
                 // Stop reading data when an empty line is encountered
@@ -310,6 +302,43 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 .collect(Collectors.toList()));
     }
 
+    private ErrorResponseImport validateDataImport(PoDetailResponse poDetailResponse, List<PoDetail> listInsert, Integer rowIndex) {
+        // Check if the product in the row exists in the database
+        boolean isProductExist = productRepository.findAll().stream()
+                .anyMatch(p -> p.getProductId().equals(poDetailResponse.getProduct().getProductId()));
+
+        if (isProductExist) {
+            // If the product exists, continue processing the row
+
+            Optional<Po> isExistPoByPoNumber = poRepository.findByPoNumber(poDetailResponse.getPo().getPoNumber());
+            // // If the PO detail already exists in the database or has already been added to the list of PO details to be inserted, add an error
+            Optional<PoDetail> existPODetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());
+            if (existPODetail.isPresent() || listInsert.stream()
+                    .anyMatch(value -> value.getPoDetailId().equals(poDetailResponse.getPoDetailId()))) {
+                return new ErrorResponseImport(ErrorType.RECORD_EXISTED,
+                        rowIndex, poDetailResponse.getPoDetailId() + " đã tồn tại nên không thể import");
+            }
+            if (isExistPoByPoNumber.isEmpty()) {
+                // If the PO for the PO detail does not exist in the database, add an error
+                return new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
+                        rowIndex, poDetailResponse.getPoDetailId() + " có PO không tồn tại");
+            }
+
+            // If the number of PO details for the PO has reached the PO quantity, add an error
+            // and stop processing the file
+            Integer quantity = isExistPoByPoNumber.get().getQuantity();
+            Long countPoDetailByPoNumber = poDetailRepository.countByPoNumber(poDetailResponse.getPo().getPoNumber());
+            if (countPoDetailByPoNumber + listInsert.size() > quantity) {
+                return new ErrorResponseImport(poDetailResponse.getPo().getPoNumber(),
+                        "Import nhiều hơn số lượng cho phép");
+            }
+        } else {
+            return new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
+                    rowIndex, poDetailResponse.getPoDetailId() + " có ProductID không tồn tại");
+        }
+        return null;
+    }
+
     /**
      * Imports PO detail data from an Excel file and saves it to the database.
      *
@@ -319,11 +348,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      */
     @Transactional
     public ListResponse<ErrorResponseImport> importPODetail(MultipartFile file) {
-        List<ErrorResponseImport> listError = new ArrayList<>();
+        List<ErrorResponseImport> listErrorResponse = new ArrayList<>();
         List<PoDetail> listInsertPoDetail = new ArrayList<>();
 
         // Process the Excel file
-        Object dataFile = processExcelFile.processExcelFile(file);
+        Object dataFile = processExcelFile.getSheetIteratorFromExcelFile(file);
         // If the Excel file could not be processed, return an error response
         if (dataFile instanceof ListResponse) {
             return (ListResponse) dataFile;
@@ -333,17 +362,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
 
         // Validate header value
-        if (rowIterator.hasNext()) {
-            Row row = rowIterator.next();
-            ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, RegexConstants.importPOHeader);
-            if (errorResponseImport != null) {
-                listError.add(errorResponseImport);
-                return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-            }
+        ErrorResponseImport errorResponse = processExcelFile.validateHeaderValue(rowIterator, RegexConstants.importPOHeader);
+        if(errorResponse != null) {
+            listErrorResponse.add(errorResponse);
+            return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
-
-        // Get a list of all products in the database
-        List<Product> listAllProduct = productRepository.findAll();
 
         // Read each row in the Excel file and save the data to the database
         while (rowIterator.hasNext()) {
@@ -351,71 +374,38 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             int rowIndex = row.getRowNum() + 1;
 
             if(processExcelFile.isLastedRow(row)) {
-                System.out.println("Vao day");
                 break;
             }
 
             // Read the data from the row
-            Object data = readExcelRowData(row, rowIndex);
+            Object data = readExcelRowDataImport(row, rowIndex);
 
             // If there was an error reading the row, add it to the list of errors
             if (data instanceof ErrorResponseImport) {
-                ErrorResponseImport errorResponseImport = (ErrorResponseImport) data;
-                listError.add(errorResponseImport);
+                errorResponse = (ErrorResponseImport) data;
+                listErrorResponse.add(errorResponse);
             } else {
                 // If the row was read successfully, process the data
                 PoDetailResponse poDetailResponse = (PoDetailResponse) data;
 
-                // Check if the product in the row exists in the database
-                boolean isProductExist = listAllProduct.stream()
-                        .anyMatch(p -> p.getProductId().equals(poDetailResponse.getProduct().getProductId()));
-
-                if (isProductExist) {
-                    // If the product exists, continue processing the row
-
-                    Optional<Po> isExistPoByPoNumber = poRepository.findByPoNumber(poDetailResponse.getPo().getPoNumber());
-                    // // If the PO detail already exists in the database or has already been added to the list of PO details to be inserted, add an error
-                    Optional<PoDetail> existPODetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());
-                    if (existPODetail.isPresent() || listInsertPoDetail.stream()
-                            .anyMatch(value -> value.getPoDetailId().equals(poDetailResponse.getPoDetailId()))) {
-                        listError.add(new ErrorResponseImport(ErrorType.RECORD_EXISTED,
-                                rowIndex, poDetailResponse.getPoDetailId() + " đã tồn tại nên không thể import"));
-                        continue;
-                    }
-                    if (isExistPoByPoNumber.isEmpty()) {
-                        // If the PO for the PO detail does not exist in the database, add an error
-                        listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                                rowIndex, poDetailResponse.getPoDetailId() + " có PO không tồn tại"));
-                        continue;
-                    }
-
-                    // If the number of PO details for the PO has reached the PO quantity, add an error
-                    // and stop processing the file
-                    Integer quantity = isExistPoByPoNumber.get().getQuantity();
-                    Long countPoDetailByPoNumber = poDetailRepository.countByPoNumber(poDetailResponse.getPo().getPoNumber());
-                    if (countPoDetailByPoNumber + listInsertPoDetail.size() > quantity) {
-                        listError.add(new ErrorResponseImport(poDetailResponse.getPo().getPoNumber(),
-                                "Import nhiều hơn số lượng cho phép"));
-                        break;
-                    }
-
-                    // If the PO detail is valid, convert it to an entity and add it to the list of PO details to be inserted
-                    PoDetail poDetail = getBaseMapper().dtoToEntity(poDetailResponse);
-//                    System.out.println(poDetail);
-                    listInsertPoDetail.add(poDetail);
-                } else {
-                    listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                            rowIndex, poDetailResponse.getPoDetailId() + " có ProductID không tồn tại"));
+                // Validate poDetail
+                errorResponse = validateDataImport(poDetailResponse, listInsertPoDetail, rowIndex);
+                if(errorResponse != null) {
+                    listErrorResponse.add(errorResponse);
+                    continue;
                 }
+                // If the PO detail is valid, convert it to an entity and add it to the list of PO details to be inserted
+                PoDetail poDetail = getBaseMapper().dtoToEntity(poDetailResponse);
+                listInsertPoDetail.add(poDetail);
             }
         }
 
-        if (listError.isEmpty()) {
+        if (listErrorResponse.isEmpty()) {
             poDetailRepository.saveAll(listInsertPoDetail);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " dòng import thành công")));
         }
-        return ResponseMapper.toListResponse(listError, listError.size(), 1, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        return ResponseMapper.toListResponse(listErrorResponse, listErrorResponse.size(), 1, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 
     /**
@@ -425,9 +415,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      * @param rowIndex the index of the row in the Excel file
      * @return an object representing the data from the row, or an ErrorResponseImport object if there is an error
      */
-    public Object readExcelRowData(Row row, int rowIndex) {
+    public Object readExcelRowDataImport(Row row, int rowIndex) {
 
-        // Validate the numeric columns with function validateNumbericColumns on column 0, 1, 6 in file excel
+        // Validate the numeric columns with function validateNumbericColumns on column 0 in file excel
         ErrorResponseImport errorResponseImport = (ErrorResponseImport) processExcelFile.
                 validateNumbericColumns(row, rowIndex, 0);
         if (errorResponseImport != null) {
@@ -465,7 +455,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      * @param attribute the attribute to set
      * @return a PoDetailResponse object if the data is valid, otherwise an ErrorResponseImport object
      */
-    private Object readExcelUpdatePO(Row row, int rowIndex, String attribute) {
+    private Object readExcelRowUpdate(Row row, int rowIndex, String attribute) {
         // Validate the numeric columns with function validate NumbericColumns on column 0, 1, 4 in file excel
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
                 processExcelFile.validateNumbericColumns(row, rowIndex, 0, 3);

@@ -58,9 +58,7 @@ const ModelAddPO = (props) => {
       !po ||
       !quantity ||
       !selectedDateStart ||
-      !selectedDateStart ||
-      !selectedDate ||
-      !selectedDateWarranty
+      !selectedDateEnd 
     ) {
       setIsValidate("Cần nhập đầy đủ thông tin");
       return
@@ -74,10 +72,20 @@ const ModelAddPO = (props) => {
       setIsValidate("");
     } 
     if (selectedDateStart >= selectedDateEnd) {
-      setIsValidate("Ngày bắt đầu phải nhỏ hơn ngày kết thúc");
+      setIsValidate("Ngày kết thúc phải sau ngày bắt đầu");
       return
     } else {
       setIsValidate("");
+    }
+
+    let time
+    let timeWarrantyDate
+    if(selectedDate !== null) {
+      time = selectedDate.getTime()
+    }
+
+    if(selectedDateWarranty !== null) {
+      timeWarrantyDate = selectedDateWarranty.getTime();
     }
 
     let res = await createPo(
@@ -86,8 +94,8 @@ const ModelAddPO = (props) => {
       quantity,
       selectedDateStart.getTime(),
       selectedDateEnd.getTime(),
-      selectedDate.getTime(),
-      selectedDateWarranty.getTime()
+      time,
+      timeWarrantyDate
     );
 
     // call api
@@ -99,8 +107,8 @@ const ModelAddPO = (props) => {
       setQuantity("");
       setSelectedDateEnd("");
       setSelectedDateStart("");
-      setSelectedDate("")
-      setSelectedDateWarranty("")
+      setSelectedDate(null)
+      setSelectedDateWarranty(null)
       getAllPo();
       handleClose();
     } else {

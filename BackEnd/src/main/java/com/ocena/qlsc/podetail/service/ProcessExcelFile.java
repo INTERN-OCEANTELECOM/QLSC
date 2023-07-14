@@ -36,17 +36,22 @@ public class ProcessExcelFile {
      * @return an ErrorResponseImport object with an error message if the header values are invalid,
      * or null if the header values are valid
      */
-    public ErrorResponseImport validateHeaderValue(Row row, HashMap<Integer, String> map) {
-        if(row != null) {
-            for(Integer key : map.keySet()) {
-                if(!isValidHeader(row.getCell(key).getStringCellValue(), map.get(key))) {
-                    System.out.println(map.get(key).toString());
-                    System.out.println(row.getCell(key).getStringCellValue());
-                    return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (key + 1) + " sai");
+    public ErrorResponseImport validateHeaderValue(Iterator<Row> rowIterator, HashMap<Integer, String> map) {
+        try {
+            if (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+
+                for (Integer key : map.keySet()) {
+                    if (!isValidHeader(row.getCell(key).getStringCellValue(), map.get(key))) {
+                        return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (key + 1) + " sai");
+                    }
+                }
+
+                if (row.getLastCellNum() > map.size()){
+                    return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Header không đúng! Hãy kiểm tra lại");
                 }
             }
-        }
-        if (row.getLastCellNum() > map.size()){
+        } catch (Exception e) {
             return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Header không đúng! Hãy kiểm tra lại");
         }
         return null;
@@ -86,7 +91,7 @@ public class ProcessExcelFile {
      * @return an iterator over the rows in the Excel file if the file is valid,
      * or an ErrorResponseImport object with an error message if the file is invalid
      */
-    public Object processExcelFile(MultipartFile file) {
+    public Object getSheetIteratorFromExcelFile(MultipartFile file) {
         List<ErrorResponseImport> listError = new ArrayList<>();
 
         // Check whether the file has the correct format

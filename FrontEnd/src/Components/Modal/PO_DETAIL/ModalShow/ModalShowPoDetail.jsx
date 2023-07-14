@@ -29,27 +29,41 @@ const ModalShowPoDetail = (props) => {
   // check if show then get data po detail
   useEffect(() => {
     // convert date import and warranty, format date dd/mm/yy
-    const time = dateShowPoDetail.importDate;
-    const data = moment(time).format("DD/MM/YYYY");
-    const timeExport = dateShowPoDetail.exportPartner
-    const timeWarranty = dateShowPoDetail.warrantyPeriod;
-    const dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
-    const dataExportPartner = moment(timeExport).format("DD/MM/YYYY")
-    if (show) {
-      setProductId(dateShowPoDetail.product.productId);
-      setProductName(dateShowPoDetail.product.productName);
-      setSerialNumber(dateShowPoDetail.serialNumber);
-      setPo(dateShowPoDetail.po.poNumber);
-      setBbbg(dateShowPoDetail.bbbgNumber);
-      setImportDate(data);
-      setRepairCategory(dateShowPoDetail.repairCategory);
-      setRepairStatus(dateShowPoDetail.repairStatus);
-      setExportPartner(dataExportPartner);
-      setKcsVT(dateShowPoDetail.kcsVT);
-      setWarrantyPeriod(dataWarranty);
-      setPrioritize(dateShowPoDetail.priority);
-      setBbbgPartner(dateShowPoDetail.bbbgNumberExport);
+    let time
+    let data 
+    let timeExport 
+    let timeWarranty
+    let dataWarranty;
+    let dataExportPartner;
+
+    if (dateShowPoDetail.importDate !== null) {
+        time = dateShowPoDetail.importDate;
+        data = moment(time).format("DD/MM/YYYY");
     }
+    if (dateShowPoDetail.exportPartner !== null) {
+      timeExport = dateShowPoDetail.exportPartner;
+      dataExportPartner = moment(timeExport).format("DD/MM/YYYY")
+    }
+
+    if (dateShowPoDetail.warrantyPeriod !== null) {
+      timeWarranty = dateShowPoDetail.warrantyPeriod
+      dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
+    }
+      if (show) {
+        setProductId(dateShowPoDetail.product.productId);
+        setProductName(dateShowPoDetail.product.productName);
+        setSerialNumber(dateShowPoDetail.serialNumber);
+        setPo(dateShowPoDetail.po.poNumber);
+        setBbbg(dateShowPoDetail.bbbgNumber);
+        setImportDate(data);
+        setRepairCategory(dateShowPoDetail.repairCategory);
+        setRepairStatus(dateShowPoDetail.repairStatus);
+        setExportPartner(dataExportPartner);
+        setKcsVT(dateShowPoDetail.kcsVT);
+        setWarrantyPeriod(dataWarranty);
+        setPrioritize(dateShowPoDetail.priority);
+        setBbbgPartner(dateShowPoDetail.bbbgNumberExport);
+      }
   }, [dateShowPoDetail]);
 
   return (
@@ -59,7 +73,7 @@ const ModalShowPoDetail = (props) => {
     >
       <Modal show={show} onHide={handleCloses} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Chi tiết Po Detail</Modal.Title>
+          <Modal.Title>Thông tin thiết bị chi tiết</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="body-add-new">
@@ -147,7 +161,7 @@ const ModalShowPoDetail = (props) => {
                         required
                         readOnly
                         value={
-                          repairCategory === 0 ? "Nhập kho SC" : "Nhập kho BH"
+                          repairCategory === 0 ? "Hàng SC" : repairCategory === 1 ? "Hàng BH" : "Hạng mục SC"
                         }
                         onChange={(e) => setRepairCategory(e.target.value)}
                       />
@@ -216,7 +230,7 @@ const ModalShowPoDetail = (props) => {
                       readOnly
                       type="text"
                       placeholder="Cập nhật KCS"
-                      value={kcsVT === 0 ? "FAIL" : "PASS"}
+                      value={kcsVT === 0 ? "FAIL" : kcsVT === 1 ? "PASS" : "Cập nhật KCS"}
                       onChange={(e) => setKcsVT(e.target.value)}
                     />
                   </Form.Group>

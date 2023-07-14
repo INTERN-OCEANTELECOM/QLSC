@@ -143,6 +143,7 @@ const ModalUpdatePoDetail = (props) => {
       setPrioritize(null)
       setRepairStatus(null)
       setKcsVT(null)
+      setNote(null)
     } else {
       toast.error("Cập nhật thất bại !!!");
     }
@@ -251,8 +252,8 @@ const ModalUpdatePoDetail = (props) => {
                       }}
                     >
                       <option value={null}>Chưa cập nhật</option>
-                      <option value="0">Nhập kho SC</option>
-                      <option value="1">Nhập kho BH</option>
+                      <option value="0">Hàng SC</option>
+                      <option value="1">Hàng BH</option>
                     </Form.Select>
                   </Form.Group>
                 </Row>

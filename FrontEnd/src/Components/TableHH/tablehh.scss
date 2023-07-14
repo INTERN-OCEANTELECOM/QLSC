@@ -171,7 +171,7 @@
 }
 
 .btn-action {
-  max-width: 100px;
+  width: 100px;
 }
 
 .col-note {
@@ -180,4 +180,13 @@
   word-wrap: break-word;
 }
 
+// .custom-datepicker {
+//    font-size: 16px; /* Tùy chỉnh kích thước font chữ */
+//   width: 200px;
+// }
+
+.react-datepicker__month-container {
+  width: 220px;
+  font-size: 14px;
+}
 

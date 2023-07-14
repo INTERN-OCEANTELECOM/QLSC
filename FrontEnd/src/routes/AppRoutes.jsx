@@ -10,6 +10,7 @@ import ResetPassword from "../Components/ResetPassword/ResetPassword.jsx";
 import { CheckEmail } from "../Components/CheckEmail/CheckEmail.jsx";
 import { ForgotPassword } from "../Components/ForgotPassword/ForgotPassword.jsx";
 import Product from "../Components/Product/Product.jsx";
+import SNCheck from "../Components/SN Check/SNCheck.jsx";
 
 const AppRoutes = () => {
   return (
@@ -33,14 +34,10 @@ const AppRoutes = () => {
               </PrivateRoutes>
             }
           />
+          <Route path="sn-check" element={<SNCheck/>} />
         </Route>
         <Route path="signin" element={<Signin />} />
-        <Route
-          path="admin"
-          element={
-              <Admin />
-          }
-        />
+        <Route path="admin" element={<Admin />} />
         <Route path="reset-password" element={<ResetPassword />} />
         <Route path="check-email" element={<CheckEmail />} />
         <Route path="forgot-password" element={<ForgotPassword />} />

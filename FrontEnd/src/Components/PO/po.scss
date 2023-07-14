@@ -1,7 +1,7 @@
 .po-tables {
   margin-top: 75px;
-  margin-right: 10%;
-  margin-left: 10%;
+  margin-right: 5%;
+  margin-left: 5%;
   font-size: 14px;
 }
 
@@ -35,4 +35,14 @@
       color: #3434c3;
     }
   }
+}
+
+.col-note {
+  max-width: 300px;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.col-action {
+  width: 150px;
 }

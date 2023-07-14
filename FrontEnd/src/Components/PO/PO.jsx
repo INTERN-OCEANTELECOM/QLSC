@@ -126,6 +126,7 @@ const PO = () => {
               <th>Ngày kết thúc</th>
               <th>Ngày hết hạn bảo lãnh THHĐ</th>
               <th>Ngày hết hạn bảo lãnh bảo hành</th>
+              <th>Ghi chú</th>
               {user && user.auth && <th>Action</th>}
             </tr>
           </thead>
@@ -138,43 +139,50 @@ const PO = () => {
                 const timeEnd = item.endAt;
                 const datEnd = moment(timeEnd).format("DD/MM/YYYY");
                 const time = item.contractWarrantyExpirationDate;
-                const dataTime = moment(time).format("DD/MM/YYYY");
+                let dataTime
+                if(time !== null) {
+                  dataTime = moment(time).format("DD/MM/YYYY");
+                }
                 const timeWarranty = item.warrantyExpirationDate;
-                const dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
-                return (
-                  <tr
-                    key={`po-${index}`}
-                    onDoubleClick={() => handleShowPo(item)}
-                  >
-                    <td>{index + 1}</td>
-                    <td>{item.contractNumber}</td>
-                    <td>{item.poNumber}</td>
-                    <td>{item.quantity}</td>
-                    <td>{dataBegin}</td>
-                    <td>{datEnd}</td>
-                    <td>{dataTime}</td>
-                    <td>{dataWarranty}</td>
-                    <td>
-                      {localStorage.getItem("role") === "ROLE_MANAGER" ||
-                      localStorage.getItem("role") === "ROLE_ADMIN" ? (
-                        <>
-                          <button
-                            className="btn btn-warning btn-xl"
-                            onClick={() => handleUpdatePO(item)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="btn btn-primary mx-3 btn-xl"
-                            onClick={() => handleViewPo(item)}
-                          >
-                            View
-                          </button>
-                        </>
-                      ) : null}
-                    </td>
-                  </tr>
-                );
+                let dataWarranty 
+                if (timeWarranty !== null) {
+                  dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
+                }
+                  return (
+                    <tr
+                      key={`po-${index}`}
+                      onDoubleClick={() => handleShowPo(item)}
+                    >
+                      <td>{index + 1}</td>
+                      <td>{item.contractNumber}</td>
+                      <td>{item.poNumber}</td>
+                      <td>{item.quantity}</td>
+                      <td>{dataBegin}</td>
+                      <td>{datEnd}</td>
+                      <td>{dataTime}</td>
+                      <td>{dataWarranty}</td>
+                      <td className="col-note">{item.note}</td>
+                      <td className="col-action">
+                        {localStorage.getItem("role") === "ROLE_MANAGER" ||
+                        localStorage.getItem("role") === "ROLE_ADMIN" ? (
+                          <>
+                            <button
+                              className="btn btn-warning btn-xl"
+                              onClick={() => handleUpdatePO(item)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="btn btn-primary mx-2 btn-xl"
+                              onClick={() => handleViewPo(item)}
+                            >
+                              View
+                            </button>
+                          </>
+                        ) : null}
+                      </td>
+                    </tr>
+                  );
               })}
           </tbody>
         </Table>
