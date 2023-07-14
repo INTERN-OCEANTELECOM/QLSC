@@ -42,33 +42,11 @@ services:
       - MYSQL_SERVICE_PORT=3306
     volumes:
       - mysql_data:/var/lib/mysql
-    command: --lower_case_table_names=0
     networks:
       - networkDB
-  portainer:
-    image: portainer/portainer-ce
-    ports:
-      - 9000:9000
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer-data:/data
-    networks:
-      - networkDB
-  duplicati:
-    image: lscr.io/linuxserver/duplicati:latest
-    container_name: duplicati
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-    # volumes:
-    #   - C:\Program Files\Docker:/docker
-    ports:
-      - 8200:8200
-    restart: unless-stopped
+
 volumes:
   mysql_data:
-  portainer-data:
 
 networks:
   networkDB:
