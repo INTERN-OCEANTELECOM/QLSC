@@ -125,4 +125,10 @@ public final class RegexConstants {
             put(1, regexProductName);
         }
     };
+
+    public static final HashMap<Integer, String> searchSerialNumbers = new HashMap<>() {
+        {
+            put(0, regexSerialNumber);
+        }
+    };
 }

@@ -73,6 +73,12 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
         return poDetailService.importPODetail(file);
     }
 
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
+    @PostMapping("/search/serialNumber")
+    public ListResponse<PoDetailResponse> searchBySerialNumbers(@RequestParam("file") MultipartFile file) {
+        return poDetailService.searchBySerialNumbers(file);
+    }
+
     @Override
     public ListResponse<PoDetailResponse> getAll() {
         return super.getAll();

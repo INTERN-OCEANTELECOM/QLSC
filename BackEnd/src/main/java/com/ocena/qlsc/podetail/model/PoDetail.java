@@ -40,6 +40,7 @@ public class PoDetail extends BaseModel implements Serializable {
     private Short priority;
     @Column(name = "bbbg_number_export")
     private String bbbgNumberExport;
+    @Column(length = 401)
     private String note;
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
@@ -47,6 +48,7 @@ public class PoDetail extends BaseModel implements Serializable {
     @ManyToOne
     @JoinColumn(name = "po_number", referencedColumnName = "po_number")
     private Po po;
+
     @Override
     public String toString() {
         return "PoDetail{" +

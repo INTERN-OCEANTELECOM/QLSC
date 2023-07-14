@@ -109,4 +109,13 @@ public class ProcessExcelFile {
             return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
     }
+
+    public boolean isLastedRow(Row row) {
+        if ((row.getCell(0) == null || row.getCell(0).getCellType() == CellType.BLANK) &&
+                (row.getCell(1) == null || row.getCell(1).getCellType() == CellType.BLANK) &&
+                (row.getCell(2) == null || row.getCell(2).getCellType() == CellType.BLANK)) {
+            return true;
+        }
+        return false;
+    }
 }

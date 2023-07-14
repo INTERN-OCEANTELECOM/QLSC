@@ -48,4 +48,6 @@ public interface PoDetailRepository extends BaseRepository<PoDetail> {
 
     @Query("select pd from PoDetail pd where pd.po.poNumber = ?1")
     List<PoDetail> findByPoNumber(String poNumber);
+
+    List<PoDetail> findBySerialNumberIn(List<String> serialNumbers);
 }

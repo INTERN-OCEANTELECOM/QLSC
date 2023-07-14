@@ -32,6 +32,9 @@ public class Po extends BaseModel implements Serializable {
     @Column(name = "end_at")
     private Long endAt;
 
+    @Column(length = 401)
+    private String note;
+
     @Column(name = "warranty_expiration_date")
     private Long warrantyExpirationDate;
 

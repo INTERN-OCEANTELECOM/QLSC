@@ -117,43 +117,35 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                         .stream().map(poDetail -> getBaseMapper().entityToDto(poDetail)).collect(Collectors.toList()));
     }
 
-    /**
-     * Validates whether a PoDetail can be updated with a specific type of update.
-     *
-     * @param poDetail  the PoDetail to be updated
-     * @param attribute The type of update to be performed on the PoDetail ({@link UpdateField} constants)
-     * @param rowIndex  The index of the row in the import file that contains the PoDetail
-     * @return true if the PoDetail can be updated with the specified type of update, false otherwise
-     */
-    public ErrorResponseImport validatePoDetailUpdate(PoDetail poDetail, String attribute, Integer rowIndex) {
-        String errorMessage = "";
-        if (attribute.equals(UpdateField.EXPORT_PARTNER)) {
-            if (poDetail.getRepairStatus() == null) {
-                errorMessage = " phải cập nhật trang thái SC trước khi cập nhật trạng thái xuất kho";
-            }
-        }
-        if (attribute.equals(UpdateField.KCS_VT)) {
-            if (poDetail.getExportPartner() == null) {
-                errorMessage = " phải cập nhật trang thái SC và trạng thái xuất kho trước khi cập nhật KCS VT";
-            }
-//            if (poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
-//                errorMessage = " có trạng thái SC là " + RepairStatus.values()[poDetail.getRepairStatus()].name();
+//    public ErrorResponseImport validatePoDetailUpdate(PoDetail poDetail, String attribute, Integer rowIndex) {
+//        String errorMessage = "";
+//        if (attribute.equals(UpdateField.EXPORT_PARTNER)) {
+//            if (poDetail.getRepairStatus() == null) {
+//                errorMessage = " phải cập nhật trang thái SC trước khi cập nhật trạng thái xuất kho";
 //            }
-        }
-        if (attribute.equals(UpdateField.WARRANTY_PERIOD)) {
-            if (poDetail.getKcsVT() == null) {
-                errorMessage = " phải cập nhật trang thái KSC VT trước khi cập nhật thông tin bảo hành";
-            }
-//            if (poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
-//                errorMessage = " có trạng thái SC là " + RepairStatus.values()[poDetail.getRepairStatus()].name();
+//        }
+//        if (attribute.equals(UpdateField.KCS_VT)) {
+//            if (poDetail.getExportPartner() == null) {
+//                errorMessage = " phải cập nhật trang thái SC và trạng thái xuất kho trước khi cập nhật KCS VT";
 //            }
-        }
-        if(errorMessage.equals("")) {
-            return null;
-        }
-        return new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                rowIndex, poDetail.getPoDetailId() + errorMessage);
-    }
+////            if (poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
+////                errorMessage = " có trạng thái SC là " + RepairStatus.values()[poDetail.getRepairStatus()].name();
+////            }
+//        }
+//        if (attribute.equals(UpdateField.WARRANTY_PERIOD)) {
+//            if (poDetail.getKcsVT() == null) {
+//                errorMessage = " phải cập nhật trang thái KSC VT trước khi cập nhật thông tin bảo hành";
+//            }
+////            if (poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
+////                errorMessage = " có trạng thái SC là " + RepairStatus.values()[poDetail.getRepairStatus()].name();
+////            }
+//        }
+//        if(errorMessage.equals("")) {
+//            return null;
+//        }
+//        return new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
+//                rowIndex, poDetail.getPoDetailId() + errorMessage);
+//    }
 
     public Object getPoDetail(PoDetailResponse poDetailResponse, int rowIndex, String attribute) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Optional<PoDetail> isExistPoDetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());
@@ -163,12 +155,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                     rowIndex, poDetailResponse.getPoDetailId() + " không tồn tại");
         }
         PoDetail poDetail = isExistPoDetail.get();
-
-        // If the update violates any validation rules, add an error to the list of errors and continue to the next row
-        ErrorResponseImport validationError = validatePoDetailUpdate(poDetail, attribute, rowIndex);
-        if (validationError != null) {
-            return validationError;
-        }
 
         try {
             Field field = PoDetailResponse.class.getDeclaredField(attribute);
@@ -242,8 +228,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Read each row in the sheet and update the corresponding PO Detail in the database
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
-            if (row.getCell(0) == null || row.getCell(0).getCellType() == CellType.BLANK) {
-                // Stop reading data when an empty line is encountered
+            if(processExcelFile.isLastedRow(row)) {
                 break;
             }
             int rowIndex = row.getRowNum() + 1;
@@ -257,6 +242,14 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 listError.add(errorResponseImport);
             } else {
                 PoDetailResponse poDetailResponse = (PoDetailResponse) data;
+
+                if(listUpdatePoDetail.stream()
+                        .anyMatch(poDetail -> poDetail.getPoDetailId().equals(poDetailResponse.getPoDetailId()))) {
+                    listError.add(new ErrorResponseImport(ErrorType.RECORD_EXISTED,
+                            rowIndex, poDetailResponse.getPoDetailId() + " bị trùng"));
+                    continue;
+                }
+
                 Object value = getPoDetail(poDetailResponse, rowIndex, attribute);
                 if(value instanceof ErrorResponseImport) {
                     listError.add((ErrorResponseImport) value);
@@ -274,6 +267,49 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         return ResponseMapper.toListResponse(listError, listError.size(), 1, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 
+    public ListResponse<PoDetailResponse> searchBySerialNumbers(MultipartFile file) {
+        List<ErrorResponseImport> listError = new ArrayList<>();
+        Object dataFile = processExcelFile.processExcelFile(file);
+        if(dataFile instanceof ListResponse<?>) {
+            return (ListResponse) dataFile;
+        }
+        // Get an iterator over the rows in the Excel file
+        Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
+        // Validate header value
+        if (rowIterator.hasNext()) {
+            // First Rows - Header
+            Row row = rowIterator.next();
+            ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, RegexConstants.searchSerialNumbers);
+            if (errorResponseImport != null) {
+                listError.add(errorResponseImport);
+                return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+            }
+        }
+
+        List<String> listSearchSerialNumber = new ArrayList<>();
+        while (rowIterator.hasNext()) {
+
+            Row row = rowIterator.next();
+            int rowIndex = row.getRowNum() + 1;
+            System.out.println("rowindex: " +rowIndex);
+
+            if (row.getCell(0).getCellType() == CellType.BLANK) {
+                // Stop reading data when an empty line is encountered
+                listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex, "Dữ liệu không được để trống"));
+            }
+
+            String serialNumber = row.getCell(0).getStringCellValue();
+            listSearchSerialNumber.add(serialNumber);
+        }
+        if(!listError.isEmpty()) {
+            return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        }
+        List<PoDetail> listResults = poDetailRepository.findBySerialNumberIn(listSearchSerialNumber);
+        return ResponseMapper.toListResponseSuccess(listResults.stream()
+                .map(value -> getBaseMapper().entityToDto(value))
+                .collect(Collectors.toList()));
+    }
+
     /**
      * Imports PO detail data from an Excel file and saves it to the database.
      *
@@ -289,12 +325,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Process the Excel file
         Object dataFile = processExcelFile.processExcelFile(file);
         // If the Excel file could not be processed, return an error response
-        if (processExcelFile.processExcelFile(file) instanceof ListResponse) {
+        if (dataFile instanceof ListResponse) {
             return (ListResponse) dataFile;
         }
 
         // Get an iterator over the rows in the Excel file
-        Iterator<Row> rowIterator = (Iterator<Row>) processExcelFile.processExcelFile(file);
+        Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
 
         // Validate header value
         if (rowIterator.hasNext()) {
@@ -314,8 +350,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             Row row = rowIterator.next();
             int rowIndex = row.getRowNum() + 1;
 
-            if (row.getCell(0) == null || row.getCell(0).getCellType() == CellType.BLANK) {
-                // Stop reading data when an empty line is encountered
+            if(processExcelFile.isLastedRow(row)) {
+                System.out.println("Vao day");
                 break;
             }
 

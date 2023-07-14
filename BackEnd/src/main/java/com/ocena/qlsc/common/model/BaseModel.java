@@ -21,12 +21,12 @@ public class BaseModel {
     @Column
     private Long created;
 
-    @Column(length = 30)
+    @Column
     private String creator;
 
     private Long updated;
 
-    @Column(length = 30)
+    @Column
     private String modifier;
 
     @Column(name = "removed", columnDefinition = "boolean default true")

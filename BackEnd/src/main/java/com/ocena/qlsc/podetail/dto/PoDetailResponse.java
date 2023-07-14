@@ -14,13 +14,16 @@ import lombok.*;
 public class PoDetailResponse {
     private String poDetailId;
     private ProductDTO product;
+
+    @Size(min = 1, message = "SerialNumber không được để trống")
     private String serialNumber;
+
     private PoDTO po;
 
     private String bbbgNumberImport;
 
     @Min(value = 946684800000L, message = "Giá trị ngày nhâp kho không hợp lệ")
-    // Min value is date 01/01/2020
+    // Min value is date 01/01/2000
     private Long importDate;
     @Min(value = 0, message = "Giá trị hạng muc không hợp lệ")
     @Max(value = RepairCategory.LENGTH - 1, message = "Giá trị hạng mục không hợp lệ")
@@ -39,6 +42,10 @@ public class PoDetailResponse {
     @Min(value = 0, message = "Giá trị ưu tiên không hợp lệ")
     @Max(value = Priority.LENGTH - 1, message = "Giá trị ưu tiên không hợp lệ")
     private Short priority;
+
+    @Size(min = 1, message = "BBBG XK không được để trống")
     private String bbbgNumberExport;
+
+    @Size(max = 400, message = "Ghi chú phải bé hơn 400 ký tự")
     private String note;
 }
