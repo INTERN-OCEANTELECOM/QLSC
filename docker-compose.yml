@@ -1,0 +1,76 @@
+version: '3'
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    networks:
+      - networkDB
+  backend:
+    build:
+      context: ./BackEnd
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/userdb?autoReconnect=true&useSSL=false
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+    depends_on:
+      - mysql-db
+      - redis
+    networks:
+      - networkDB
+
+  frontend:
+    build:
+      context: ./FrontEnd
+      dockerfile: Dockerfile
+    ports:
+      - 5173:5173
+    networks:
+      - networkDB
+
+  mysql-db:
+    image: mysql:8.0.26
+    ports:
+      - 3307:3306
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=userdb
+      - MYSQL_SERVICE_PORT=3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --lower_case_table_names=0
+    networks:
+      - networkDB
+  portainer:
+    image: portainer/portainer-ce
+    ports:
+      - 9000:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-data:/data
+    networks:
+      - networkDB
+  duplicati:
+    image: lscr.io/linuxserver/duplicati:latest
+    container_name: duplicati
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    # volumes:
+    #   - C:\Program Files\Docker:/docker
+    ports:
+      - 8200:8200
+    restart: unless-stopped
+volumes:
+  mysql_data:
+  portainer-data:
+
+networks:
+  networkDB:
+    name: network
+    driver: bridge

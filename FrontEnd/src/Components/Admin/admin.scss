@@ -1,0 +1,46 @@
+.po-table {
+  margin: 75px 100px 0 100px;
+  font-size: 14px;
+}
+
+.table-shadow {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.role-user {
+  float: left;
+}
+
+.btn-search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-ocean-admin {
+  margin-top: 75px;
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -0%);
+  width: 40%;
+}
+
+.title {
+  margin-top: 20px;
+  text-align: center;
+  color: #444444;
+  .title-welcom {
+    font-size: 400;
+  }
+
+  .title-sign {
+    .sign-account {
+      display: inline-block;
+      color: #444444;
+      font-size: 24px;
+      text-decoration: underline;
+      color: #3434c3;
+    }
+  }
+}

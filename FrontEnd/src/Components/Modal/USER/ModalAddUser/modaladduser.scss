@@ -1,0 +1,33 @@
+.custom-input {
+    position: relative;
+}
+
+.icon-container {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.calendar-icon {
+    font-size: 1.2rem;
+    color: gray;
+}
+
+.icon-eye-add {
+    position: absolute;
+    top: 10px;
+    right: 3px;
+    color: #999;
+    font-size: 19px;
+}
+
+.validate {
+    color: red;
+}
+
+.validate-add {
+    color: red;
+    font-size: 14px;
+}

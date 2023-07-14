@@ -1,0 +1,144 @@
+.fullscreen-modal {
+    .modal-dialog {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+
+    .modal-content {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.modal-lg, .modal-xl {
+    --bs-modal-width: 100%;
+}
+
+.statistical-sc{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    .table-sc {
+        // width: 50%;
+    }
+    .card {
+        
+    }
+}
+
+.table-sum {
+    // width: 50%;
+    // margin-left: 100px;
+}
+
+.header-tb {
+    margin-bottom: 73px;
+}
+
+.chart-statistical {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.total-po {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 75px 0 10px 0;
+    .total {
+        width: 46%;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        h4 {
+            padding-left: 50px;
+            color: rgb(45, 45, 51);
+        }
+        h1 {
+            text-align: center;
+            color: rgb(1, 1, 88);
+        }
+    }
+
+    .total-import {
+        width: 46%;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        h4 {
+            padding-left: 50px;
+            color: rgb(45, 45, 51);
+        }
+        h1 {
+            text-align: center;
+            color: rgb(1, 1, 88);
+        }
+    }
+}
+
+.table-status {
+    display: flex;
+    margin-top: 20px;
+    align-items: center;
+    justify-content: space-around;
+    .table-sc {
+        border-radius: 5px;
+        width: 100%;
+        
+
+        .table-statistical {
+            box-shadow: 0 0px 2px rgba(0, 0, 0, 0.2);
+        }
+    }
+    .table-xk {
+        padding: 20px 0 0 0;
+        margin-right: 15px;
+        border-radius: 5px;
+        padding-left: 14%;
+    }
+}
+
+.table-kcs-bh {
+    display: flex;
+    margin-top: -10px;
+    align-items: center;
+    justify-content: space-around;
+    margin-right: 11%;
+    .table-kcs {
+        margin-right: 15px;
+        border-radius: 5px;
+    }
+    .table-bh {
+        padding: 20px;
+        margin-right: 15px;
+        border-radius: 5px;
+        margin-left: 25%;
+        padding-left: 14%;
+    }
+}
+
+.col-content {
+    width: 150px;
+}
+
+.chart-statistical {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chart-name {
+    margin-top: 20px;
+  text-align: center;
+}

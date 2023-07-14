@@ -1,0 +1,16 @@
+.custom-input {
+    position: relative;
+}
+
+.icon-container {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.calendar-icon {
+    font-size: 1.2rem;
+    color: gray;
+}

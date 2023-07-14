@@ -1,0 +1,32 @@
+.product {
+  margin-top: 75px;
+  margin-right: 10%;
+  margin-left: 10%;
+
+  .table-product {
+    margin: 10px 10px 10px 10px;
+  }
+
+  .import-product {
+    margin-right: -5px;
+  }
+}
+
+.export-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-size {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  .form-select-size {
+    float: right;
+    width: 10%;
+    margin-top: -15px;
+    margin-left: 10px;
+  }
+}

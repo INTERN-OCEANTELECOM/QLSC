@@ -1,0 +1,30 @@
+.navbars {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  .header-logo {
+    display: flex;
+    justify-content: spa;
+    align-items: center;
+    margin-left: 15px;
+    font-weight: 500;
+    color: rgb(26, 26, 187);
+  }
+}
+
+.nav-bar {
+  font-weight: 400;
+}
+
+.icon-avatar {
+  font-size: 25px;
+}
+
+.icon-search {
+  font-size: 25px;
+}
+
+.user-name {
+  margin-right: -20px;
+}
