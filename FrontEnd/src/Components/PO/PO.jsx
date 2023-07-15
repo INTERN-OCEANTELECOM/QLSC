@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Table from "react-bootstrap/Table";
 import "./po.scss";
-import { AiFillFileAdd, AiOutlineSortAscending } from "react-icons/ai";
+import { AiFillFileAdd, AiOutlineSearch } from "react-icons/ai";
 import ModelAddPO from "../Modal/PO/ModalAddPO/ModelAddPO";
 import ModalUpdatePo from "../Modal/PO/ModalUpdate/ModalUpdatePo";
 import { getPo } from "../../service/service";
@@ -11,6 +11,7 @@ import ModalShowPO from "../Modal/PO/ModalShow/ModalShowPO";
 import ModalShowPOStatistical from "../Modal/PO/ModalShow/ModalShowPOStatistical";
 import logo from "../../assets/logo_28-06-2017_LogoOceanTelecomtailieupng-removebg-preview.png";
 import { useSelector } from "react-redux";
+import _ from "lodash";
 
 const PO = () => {
 
@@ -26,6 +27,7 @@ const PO = () => {
   const [statistical, setStatistical] = useState(false);
   const [dataStatistical, setDataStatistical] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
+  const [search, setSearch] = useState("")
 
   // call get all po when load page
   useEffect(() => {
@@ -93,23 +95,55 @@ const PO = () => {
     setDataStatistical(item);
   };
 
+  const handleSearch = () => {
+    if (search) {
+      let cloneListUser = _.cloneDeep(listPo);
+      cloneListUser = listPo.filter(
+        (item) =>
+          item.poNumber.toLowerCase().includes(search.toLowerCase()) ||
+          item.contractNumber.toLowerCase().includes(search.toLowerCase())
+      );
+      setListPo(cloneListUser);
+    } else {
+      getAllPo();
+    }
+  };
+
   return (
     <div className="po-tables">
       {user && user.auth && (
         <div className="my-3 add-new d-flex justify-content-between">
-          <div className="col-3"></div>
-          <div className="group-btn d-flex">
-            {localStorage.getItem("role") === "ROLE_MANAGER" ||
-            localStorage.getItem("role") === "ROLE_ADMIN" ? (
-              <div className="update-po">
+          <div className="col-6">
+            <div className="col-6">
+              <div className="btn-search input-group w-75">
+                <input
+                  className="form-control"
+                  placeholder="Search..."
+                  onChange={(e) => setSearch(e.target.value)}
+                />
                 <button
-                  className="btn btn-success"
-                  onClick={() => setIsShowAddPO(true)}
+                  className="btn btn-primary"
+                  onClick={() => handleSearch()}
                 >
-                  <AiFillFileAdd />
-                  Add New PO
+                  <AiOutlineSearch />
                 </button>
               </div>
+            </div>
+          </div>
+          <div className="group-btn d-flex justify-content-between">
+            {localStorage.getItem("role") === "ROLE_MANAGER" ||
+            localStorage.getItem("role") === "ROLE_ADMIN" ? (
+              <>
+                <div className="update-po">
+                  <button
+                    className="btn btn-success"
+                    onClick={() => setIsShowAddPO(true)}
+                  >
+                    <AiFillFileAdd />
+                    Add New PO
+                  </button>
+                </div>
+              </>
             ) : null}
           </div>
         </div>
@@ -131,58 +165,58 @@ const PO = () => {
             </tr>
           </thead>
           <tbody>
-            {sortedListPo &&
-              sortedListPo.length > 0 &&
-              sortedListPo.map((item, index) => {
+            {listPo &&
+              listPo.length > 0 &&
+              listPo.map((item, index) => {
                 const timeBegin = item.beginAt;
                 const dataBegin = moment(timeBegin).format("DD/MM/YYYY");
                 const timeEnd = item.endAt;
                 const datEnd = moment(timeEnd).format("DD/MM/YYYY");
                 const time = item.contractWarrantyExpirationDate;
-                let dataTime
-                if(time !== null) {
+                let dataTime;
+                if (time !== null) {
                   dataTime = moment(time).format("DD/MM/YYYY");
                 }
                 const timeWarranty = item.warrantyExpirationDate;
-                let dataWarranty 
+                let dataWarranty;
                 if (timeWarranty !== null) {
                   dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
                 }
-                  return (
-                    <tr
-                      key={`po-${index}`}
-                      onDoubleClick={() => handleShowPo(item)}
-                    >
-                      <td>{index + 1}</td>
-                      <td>{item.contractNumber}</td>
-                      <td>{item.poNumber}</td>
-                      <td>{item.quantity}</td>
-                      <td>{dataBegin}</td>
-                      <td>{datEnd}</td>
-                      <td>{dataTime}</td>
-                      <td>{dataWarranty}</td>
-                      <td className="col-note">{item.note}</td>
-                      <td className="col-action">
-                        {localStorage.getItem("role") === "ROLE_MANAGER" ||
-                        localStorage.getItem("role") === "ROLE_ADMIN" ? (
-                          <>
-                            <button
-                              className="btn btn-warning btn-xl"
-                              onClick={() => handleUpdatePO(item)}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              className="btn btn-primary mx-2 btn-xl"
-                              onClick={() => handleViewPo(item)}
-                            >
-                              View
-                            </button>
-                          </>
-                        ) : null}
-                      </td>
-                    </tr>
-                  );
+                return (
+                  <tr
+                    key={`po-${index}`}
+                    onDoubleClick={() => handleShowPo(item)}
+                  >
+                    <td>{index + 1}</td>
+                    <td>{item.contractNumber}</td>
+                    <td>{item.poNumber}</td>
+                    <td>{item.quantity}</td>
+                    <td>{dataBegin}</td>
+                    <td>{datEnd}</td>
+                    <td>{dataTime}</td>
+                    <td>{dataWarranty}</td>
+                    <td className="col-note">{item.note}</td>
+                    <td className="col-action">
+                      {localStorage.getItem("role") === "ROLE_MANAGER" ||
+                      localStorage.getItem("role") === "ROLE_ADMIN" ? (
+                        <>
+                          <button
+                            className="btn btn-warning btn-xl"
+                            onClick={() => handleUpdatePO(item)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="btn btn-primary mx-2 btn-xl"
+                            onClick={() => handleViewPo(item)}
+                          >
+                            View
+                          </button>
+                        </>
+                      ) : null}
+                    </td>
+                  </tr>
+                );
               })}
           </tbody>
         </Table>

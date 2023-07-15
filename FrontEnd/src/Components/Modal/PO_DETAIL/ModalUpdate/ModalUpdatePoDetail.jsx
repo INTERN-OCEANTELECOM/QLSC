@@ -370,7 +370,7 @@ const ModalUpdatePoDetail = (props) => {
                     <Form.Control
                       as="textarea"
                       rows={3}
-                      value={note}
+                      value={note === null ? "" : note}
                       onChange={(event) => setNote(event.target.value)}
                     />
                   </Form.Group>

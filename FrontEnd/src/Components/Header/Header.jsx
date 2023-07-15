@@ -63,7 +63,8 @@ export const Header = () => {
             {((user && user.auth) ||
               window.location.pathname === "/" ||
               window.location.pathname === "/quanly" ||
-              window.location.pathname === "/sanpham") && (
+              window.location.pathname === "/sanpham" ||
+              window.location.pathname === "/sn-check") && (
               <>
                 <Nav className="me-auto nav-bar">
                   <NavLink to="/" className="nav-link ">
@@ -72,12 +73,12 @@ export const Header = () => {
                   <NavLink to="/quanly" className="nav-link">
                     QLSC
                   </NavLink>
+                  <NavLink to="/sn-check" className="nav-link">
+                    S/N Check
+                  </NavLink>
                   {localStorage.getItem("role") === "ROLE_ADMIN" ||
                   localStorage.getItem("role") === "ROLE_MANAGER" ? (
                     <>
-                      <NavLink to="/sn-check" className="nav-link">
-                        S/N Check
-                      </NavLink>
                       <NavLink to="/sanpham" className="nav-link">
                         QL Mã HH
                       </NavLink>

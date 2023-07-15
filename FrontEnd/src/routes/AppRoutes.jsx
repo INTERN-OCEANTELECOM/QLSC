@@ -34,7 +34,14 @@ const AppRoutes = () => {
               </PrivateRoutes>
             }
           />
-          <Route path="sn-check" element={<SNCheck/>} />
+          <Route
+            path="sn-check"
+            element={
+              <PrivateRoutes>
+                <SNCheck />
+              </PrivateRoutes>
+            }
+          />
         </Route>
         <Route path="signin" element={<Signin />} />
         <Route path="admin" element={<Admin />} />

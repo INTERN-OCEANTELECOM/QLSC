@@ -32,6 +32,7 @@ const ModalUpdatePo = (props) => {
       setNote(dataPo.note);
       setIsValidate("")
     }
+    
   }, [dataPo]);
 
   // handle change date start
@@ -112,7 +113,6 @@ const ModalUpdatePo = (props) => {
           toast.success("Cập nhật thông tin thành công!!");
           localStorage.removeItem("po");
           getAllPo();
-          setNote(null)
         } else if (res && res.statusCode === 205) {
           if (
             res.statusMessage ===
@@ -264,7 +264,7 @@ const ModalUpdatePo = (props) => {
                     <Form.Control
                       as="textarea"
                       rows={3}
-                      value={note}
+                      value={note === null ? "" : note}
                       onChange={(event) => setNote(event.target.value)}
                     />
                   </Form.Group>

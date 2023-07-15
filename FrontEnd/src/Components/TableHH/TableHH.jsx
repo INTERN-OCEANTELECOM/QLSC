@@ -608,8 +608,8 @@ export const TableHH = () => {
                   }}
                 >
                   <option>Tất cả</option>
-                  <option value="0">Nhập kho sửa chữa</option>
-                  <option value="1">Nhập kho bảo hành</option>
+                  <option value="0">Hàng SC</option>
+                  <option value="1">Hàng BH</option>
                 </Form.Select>
               </Form.Group>
             </Row>
