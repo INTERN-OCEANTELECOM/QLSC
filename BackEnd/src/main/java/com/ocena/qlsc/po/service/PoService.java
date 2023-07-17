@@ -80,9 +80,17 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     public DataResponse<PoDTO> validationPoRequest(PoDTO poDTO, boolean isUpdate, String key) {
         // get list error and Po by PoNumber
         List<String> result = validationRequest(poDTO);
-        if (result != null || (poDTO.getBeginAt() > poDTO.getEndAt()))
-            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
 
+        if (result != null){
+            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        }
+
+        if (poDTO.getBeginAt() != null
+                && poDTO.getEndAt() != null) {
+            if (poDTO.getBeginAt() > poDTO.getEndAt()) {
+                return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
+            }
+        }
         Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
         Optional<Po> poOld = poRepository.findByPoNumber(key);
 

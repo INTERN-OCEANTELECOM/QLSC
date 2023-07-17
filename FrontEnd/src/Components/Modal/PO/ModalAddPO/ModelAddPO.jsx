@@ -56,11 +56,9 @@ const ModelAddPO = (props) => {
     if (
       !contract ||
       !po ||
-      !quantity ||
-      !selectedDateStart ||
-      !selectedDateEnd 
+      !quantity 
     ) {
-      setIsValidate("Cần nhập đầy đủ thông tin");
+      setIsValidate("Cần nhập số hợp đồng, PO và số lượng");
       return
     } else {
       setIsValidate("");
@@ -71,15 +69,12 @@ const ModelAddPO = (props) => {
     }else {
       setIsValidate("");
     } 
-    if (selectedDateStart >= selectedDateEnd) {
-      setIsValidate("Ngày kết thúc phải sau ngày bắt đầu");
-      return
-    } else {
-      setIsValidate("");
-    }
+    
 
     let time
     let timeWarrantyDate
+    let timeStart
+    let timeEnd
     if(selectedDate !== null) {
       time = selectedDate.getTime()
     }
@@ -88,12 +83,27 @@ const ModelAddPO = (props) => {
       timeWarrantyDate = selectedDateWarranty.getTime();
     }
 
+  if (selectedDateStart !== null) {
+    timeStart = selectedDateStart.getTime()
+  }
+
+  if(selectedDateEnd !== null) {
+    timeEnd = selectedDateEnd.getTime() 
+  }
+
+  if (timeStart && timeEnd && timeStart >= timeEnd) {
+    setIsValidate("Ngày kết thúc phải sau ngày bắt đầu");
+    return;
+  } else {
+    setIsValidate("");
+  }
+
     let res = await createPo(
       contract,
       po,
       quantity,
-      selectedDateStart.getTime(),
-      selectedDateEnd.getTime(),
+      timeStart,
+      timeEnd,
       time,
       timeWarrantyDate
     );
@@ -105,8 +115,8 @@ const ModelAddPO = (props) => {
       setContract("")
       setPo("");
       setQuantity("");
-      setSelectedDateEnd("");
-      setSelectedDateStart("");
+      setSelectedDateEnd(null);
+      setSelectedDateStart(null);
       setSelectedDate(null)
       setSelectedDateWarranty(null)
       getAllPo();
@@ -120,7 +130,6 @@ const ModelAddPO = (props) => {
       } else {
         setIsValidate("")
         toast.error("Thêm không thành công!!!")
-        handleClose();
       }
     }
   };

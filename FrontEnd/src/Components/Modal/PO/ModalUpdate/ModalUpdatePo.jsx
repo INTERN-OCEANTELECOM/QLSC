@@ -72,12 +72,12 @@ const ModalUpdatePo = (props) => {
 
   // handle update po
   const handleUpdatePo = async () => {
-    if (selectedDateStart >= selectedDateEnd) {
-      setIsValidate("Ngày kết thúc phải sau ngày bắt đầu");
-      return;
-    } else {
-      setIsValidate("");
-    }
+    // if (selectedDateStart >= selectedDateEnd) {
+    //   setIsValidate("Ngày kết thúc phải sau ngày bắt đầu");
+    //   return;
+    // } else {
+    //   setIsValidate("");
+    // }
 
     if (quantity <= 0) {
       setIsValidate("Số lượng phải lớn hơn 0");
@@ -86,15 +86,28 @@ const ModalUpdatePo = (props) => {
       setIsValidate("");
     }
 
-    const endDate = new Date(selectedDateEnd).getTime();
-    const startDate = new Date(selectedDateStart).getTime();
+    let endDate;
+    let startDate;
     let date;
     let dateWarranty;
-    if (selectedDate !== null) {
-      date = new Date(selectedDate).getTime();    
+    if (selectedDateStart !== null) {
+        startDate = new Date(selectedDateStart).getTime();
     }
+    if (selectedDateEnd !== null) {
+        endDate = new Date(selectedDateEnd).getTime();
+    }
+      if (selectedDate !== null) {
+        date = new Date(selectedDate).getTime();
+      }
     if (selectedDateWarranty !== null ) {
       dateWarranty = new Date(selectedDateWarranty).getTime();
+    }
+    
+    if (startDate && endDate && startDate >=endDate) {
+      setIsValidate("Ngày kết thúc phải sau ngày bắt đầu");
+      return;
+    } else {
+      setIsValidate("");
     }
       try {
         let res = await updatePo(

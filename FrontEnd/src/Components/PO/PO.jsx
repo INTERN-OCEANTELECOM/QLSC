@@ -169,9 +169,9 @@ const PO = () => {
               listPo.length > 0 &&
               listPo.map((item, index) => {
                 const timeBegin = item.beginAt;
-                const dataBegin = moment(timeBegin).format("DD/MM/YYYY");
+                let dataBegin;
                 const timeEnd = item.endAt;
-                const datEnd = moment(timeEnd).format("DD/MM/YYYY");
+                let datEnd 
                 const time = item.contractWarrantyExpirationDate;
                 let dataTime;
                 if (time !== null) {
@@ -181,6 +181,13 @@ const PO = () => {
                 let dataWarranty;
                 if (timeWarranty !== null) {
                   dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
+                }
+                if(timeBegin !== null) {
+                    dataBegin = moment(timeBegin).format("DD/MM/YYYY");
+                }
+
+                if(timeEnd !== null) {
+                  datEnd = moment(timeEnd).format("DD/MM/YYYY");
                 }
                 return (
                   <tr
