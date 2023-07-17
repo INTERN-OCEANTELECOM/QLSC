@@ -127,19 +127,34 @@ const ModelAddPO = (props) => {
         res.statusCode === 205
       ) {
         setIsValidate("PO đã tồn tại");
+        
       } else {
         setIsValidate("")
         toast.error("Thêm không thành công!!!")
       }
+
     }
   };
+
+  const handleCloses = () => {
+    setIsValidate("");
+    setContract("");
+    setPo("");
+    setQuantity("");
+    setSelectedDateEnd(null);
+    setSelectedDateStart(null);
+    setSelectedDate(null);
+    setSelectedDateWarranty(null);
+    handleClose(); // Gọi hàm handleClose được truyền từ props
+  };
+  
 
   return (
     <div
       className="modal show"
       style={{ display: "block", position: "initial" }}
     >
-      <Modal show={show} onHide={handleClose} size="lg">
+      <Modal show={show} onHide={handleCloses} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Add new PO</Modal.Title>
         </Modal.Header>
@@ -275,7 +290,7 @@ const ModelAddPO = (props) => {
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+          <Button variant="secondary" onClick={handleCloses}>
             Close
           </Button>
           <Button variant="primary" onClick={handleAddPO}>

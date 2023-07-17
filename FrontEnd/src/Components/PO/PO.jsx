@@ -41,6 +41,7 @@ const PO = () => {
     setIsShowPODetail(false);
     setStatistical(false);
     setDataStatistical("")
+    setDataPo("")
   };
 
   // call api get all po
