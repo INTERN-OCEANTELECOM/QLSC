@@ -61,7 +61,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
 
     @Override
     protected Function<String, Optional<Product>> getFindByFunction() {
-        return (id) -> productRepository.findByProductId(Long.parseLong(id));
+        return productRepository::findByProductId;
     }
 
     /**
@@ -184,16 +184,16 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
      */
     public Object readExcelRowData(Row row, int rowIndex) {
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
-                processExcelFile.validateNumbericColumns(row, rowIndex, 0);
+                processExcelFile.validateTextColumns(row, rowIndex, 0);
 
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
 
         //Get Data and Create Object
-        Long productId = Math.round(row.getCell(0).getNumericCellValue());
+        String productId = row.getCell(0).getStringCellValue();
         String productName = row.getCell(1).getStringCellValue();
-        ProductDTO productDTO = new ProductDTO(productId, productName);
+        ProductDTO productDTO = new ProductDTO(productId.trim(), productName.trim());
 
         //Validate DTO
         List<String> resultError = validationRequest(productDTO);

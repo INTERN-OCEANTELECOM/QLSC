@@ -50,13 +50,13 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     }
 
     @Override
-    @CacheEvict(value = "getAllPO", allEntries = true)
+    @CacheEvict(value = {"getAllPO", "getAllByPage"}, allEntries = true)
     public DataResponse<PoDTO> add(PoDTO objectDTO) {
         return (poService.validationPoRequest(objectDTO, false, null) == null) ? super.add(objectDTO) : poService.validationPoRequest(objectDTO, false, null);
     }
 
     @Override
-    @CacheEvict(value = "getAllPO", allEntries = true)
+    @CacheEvict(value = {"getAllPO", "getAllByPage"}, allEntries = true)
     public DataResponse<PoDTO> update(PoDTO objectDTO, String key) {
         return (poService.validationPoRequest(objectDTO, true, key) == null) ?
                 super.update(objectDTO, key) :
@@ -66,6 +66,17 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     @GetMapping(value = "/{poNumber}")
     public DataResponse<HashMap<String, HashMap<String, Integer>>> getStatisticsByPoNumber(@PathVariable("poNumber") String poNumber) {
         return poService.getStatisticsByPoNumber(poNumber);
+    }
+
+    @Override
+    public ListResponse<Po> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+        return super.searchByKeyword(searchKeywordDto);
+    }
+
+    @Override
+    @Cacheable(value = "getAllByPage")
+    public ListResponse<PoDTO> getAllByPage(int page, int size) {
+        return super.getAllByPage(page, size);
     }
 
     /*Use For Swagger*/
@@ -87,16 +98,6 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     @Hidden
     @Override
     public ListResponse<Po> getAllByKeyword(String keyword) {
-        return null;
-    }
-    @Hidden
-    @Override
-    public ListResponse<Po> searchByKeyword(SearchKeywordDto searchKeywordDto) {
-        return null;
-    }
-    @Hidden
-    @Override
-    public ListResponse<PoDTO> getAllByPage(int page, int size) {
         return null;
     }
 }

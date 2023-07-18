@@ -31,7 +31,6 @@ public class ProcessExcelFile {
 
     /**
      * Validates the header values in a given row against a map of expected header values.
-     * @param row the row containing the header values to be validated
      * @param map a map containing the expected header values, where the keys are the column indices and the values are the expected header values
      * @return an ErrorResponseImport object with an error message if the header values are invalid,
      * or null if the header values are valid
@@ -66,6 +65,10 @@ public class ProcessExcelFile {
         return cell != null && cell.getCellType() == CellType.NUMERIC;
     }
 
+    private boolean isTextCell(Cell cell) {
+        return cell != null && cell.getCellType() == CellType.STRING;
+    }
+
     /**
      * Validates whether the cells in a given row and specified columns contain numeric values.
      * @param row the row containing the cells to be validated
@@ -79,7 +82,19 @@ public class ProcessExcelFile {
             Cell cell = row.getCell(columnIndex);
             if (!isNumericCell(cell)) {
                 return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex,
-                        "Hàng " + rowIndex + " Cột " + (columnIndex + 1) + " không phải kiểu numberic");
+                        "Hàng " + rowIndex + " Cột " + (columnIndex + 1) + " không phải dạng numberic");
+            }
+        }
+        return null;
+    }
+
+
+    public Object validateTextColumns(Row row, int rowIndex, int... columnIndexes) {
+        for (int columnIndex : columnIndexes) {
+            Cell cell = row.getCell(columnIndex);
+            if (!isTextCell(cell)) {
+                return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex,
+                        "Hàng " + rowIndex + " Cột " + (columnIndex + 1) + " không phải dạng Text");
             }
         }
         return null;

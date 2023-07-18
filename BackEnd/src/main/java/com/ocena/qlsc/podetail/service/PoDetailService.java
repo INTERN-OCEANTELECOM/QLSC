@@ -201,6 +201,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      * @throws IllegalAccessException    if access to a specified field is denied
      * @throws InvocationTargetException if a specified method cannot be invoked
      */
+    @SuppressWarnings("unchecked")
     public ListResponse<ErrorResponseImport> processFileUpdatePoDetail(MultipartFile file, String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
         List<ErrorResponseImport> listErrorResponse = new ArrayList<>();
         List<PoDetail> listUpdatePoDetail = new ArrayList<>();
@@ -347,6 +348,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      * @throws IOException
      */
     @Transactional
+    @SuppressWarnings("unchecked")
     public ListResponse<ErrorResponseImport> importPODetail(MultipartFile file) {
         List<ErrorResponseImport> listErrorResponse = new ArrayList<>();
         List<PoDetail> listInsertPoDetail = new ArrayList<>();
@@ -416,16 +418,15 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      * @return an object representing the data from the row, or an ErrorResponseImport object if there is an error
      */
     public Object readExcelRowDataImport(Row row, int rowIndex) {
+        // Validate the text columns
+        ErrorResponseImport errorResponseImport = (ErrorResponseImport)
+                processExcelFile.validateTextColumns(row, rowIndex, 0, 1, 2);
 
-        // Validate the numeric columns with function validateNumbericColumns on column 0 in file excel
-        ErrorResponseImport errorResponseImport = (ErrorResponseImport) processExcelFile.
-                validateNumbericColumns(row, rowIndex, 0);
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
-
         // If the columns are numeric, process the data
-        Long productId = Long.valueOf((long) row.getCell(0).getNumericCellValue());
+        String productId = row.getCell(0).getStringCellValue();
         String serialNumber = row.getCell(1).getStringCellValue();
         String poNumber = row.getCell(2).getStringCellValue();
 
@@ -456,22 +457,25 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      * @return a PoDetailResponse object if the data is valid, otherwise an ErrorResponseImport object
      */
     private Object readExcelRowUpdate(Row row, int rowIndex, String attribute) {
-        // Validate the numeric columns with function validate NumbericColumns on column 0, 1, 4 in file excel
+        // Validate the numeric columns
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
-                processExcelFile.validateNumbericColumns(row, rowIndex, 0, 3);
+                processExcelFile.validateNumbericColumns(row, rowIndex, 3);
 
+        errorResponseImport = (ErrorResponseImport)
+                processExcelFile.validateTextColumns(row, rowIndex, 0, 1, 2);
 
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
 
-        Long productId = Long.valueOf((long) row.getCell(0).getNumericCellValue());
+        String productId = row.getCell(0).getStringCellValue();
         String serialNumber = row.getCell(1).getStringCellValue();
         String poNumber = row.getCell(2).getStringCellValue();
         String poDetailId = poNumber + "-" + productId + "-" + serialNumber;
 
         PoDetailResponse poDetailResponse = PoDetailResponse.builder()
                 .product(new ProductDTO(productId))
+                .serialNumber(serialNumber)
                 .poDetailId(poDetailId)
                 .po(new PoDTO(poNumber))
                 .build();
@@ -573,5 +577,16 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             }
         }
         return false;
+    }
+
+    public ListResponse<PoDetailResponse> getBySerialNumber(String serialNumber){
+        List<PoDetail> poDetails = poDetailRepository.getPoDetailsBySerialNumber(serialNumber);
+
+        List<PoDetailResponse> poDetailResponses = poDetails
+                .stream()
+                .map(poDetail -> poDetailMapper.entityToDto(poDetail))
+                .collect(Collectors.toList());
+
+        return ResponseMapper.toListResponseSuccess(poDetailResponses);
     }
 }

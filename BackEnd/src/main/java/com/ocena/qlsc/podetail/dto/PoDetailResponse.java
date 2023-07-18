@@ -14,12 +14,10 @@ import lombok.*;
 public class PoDetailResponse {
     private String poDetailId;
     private ProductDTO product;
-
     @Size(min = 1, message = "SerialNumber không được để trống")
+    @Pattern(regexp = "[^\\s]+", message = "Số S/N không được chứa khoảng trắng")
     private String serialNumber;
-
     private PoDTO po;
-
     private String bbbgNumberImport;
 
     @Min(value = 946684800000L, message = "Giá trị ngày nhâp kho không hợp lệ")

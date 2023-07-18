@@ -89,6 +89,13 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
         return super.searchByKeyword(searchKeywordDto);
     }
 
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
+    @GetMapping("/serialNumber")
+    public ListResponse<PoDetailResponse> getBySerialNumber(String serialNumber) {
+        return poDetailService.getBySerialNumber(serialNumber);
+    }
+
+
     /*Use For Swagger*/
     @Hidden
     @Override

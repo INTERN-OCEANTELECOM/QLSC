@@ -102,4 +102,9 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
         return userService.validateDeleteUser(email, emailHeader) ? super.delete(email) :
                 ResponseMapper.toDataResponse("", StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
     }
+
+    @Override
+    public ListResponse<User> getAllByKeyword(String keyword) {
+        return super.getAllByKeyword(keyword);
+    }
 }

@@ -13,9 +13,10 @@ import java.io.Serializable;
 @Builder
 public class ProductDTO implements Serializable {
     private static final long serialVersionUID = 5364187189081705233L;
-    @Positive(message = "ID sản phẩm phải là một số nguyên dương")
-    @NotNull(message = "ID sản phẩm không được NULL")
-    private Long productId;
+
+    @Size(min = 2, message = "Kích thước mã hàng hóa phải lớn hơn 2 chứ số")
+    @Pattern(regexp = "^[\\d]*$", message = "Mã hàng hóa chỉ chứa số và không chứa khoảng trắng")
+    private String productId;
 
     private String productName;
 
@@ -23,10 +24,10 @@ public class ProductDTO implements Serializable {
 //
 //    private Long repairStatusSuccessful;
 
-    public ProductDTO(Long productId) {
+
+    public ProductDTO(String productId) {
         this.productId = productId;
     }
-
 
     @Override
     public String toString() {

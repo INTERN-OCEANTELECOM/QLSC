@@ -23,17 +23,14 @@ import java.util.Objects;
 @Setter
 @Table(name = "product")
 public class Product extends BaseModel implements Serializable{
-
-
-    @Column(name = "product_id", unique = true)
-    private Long productId;
+    @Column(name = "product_id", unique = true, length = 100)
+    private String productId;
 
     @Column(name = "product_name")
-//    @Size(min = 1, message = "Tên sản phẩm là rỗng")
     private String productName;
 
-    public Product(Long productId) {
+
+    public Product(String productId) {
         this.productId = productId;
     }
-
 }
