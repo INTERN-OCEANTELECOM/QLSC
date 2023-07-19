@@ -47,7 +47,7 @@ const ModalUpdateInforUser = (props) => {
       className="modal show"
       style={{ display: "block", position: "initial" }}
     >
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} backdrop="static">
         <Modal.Header closeButton>
           <Modal.Title>Thông tin tài khoản</Modal.Title>
         </Modal.Header>

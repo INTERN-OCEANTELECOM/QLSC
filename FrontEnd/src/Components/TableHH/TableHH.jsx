@@ -28,6 +28,7 @@ import ModalUpdatePoDetail from "../Modal/PO_DETAIL/ModalUpdate/ModalUpdatePoDet
 import ModalShowPoDetail from "../Modal/PO_DETAIL/ModalShow/ModalShowPoDetail";
 import { saveAs } from "file-saver";
 import ModalDeletePODetail from "../Modal/PO_DETAIL/ModalDelete/ModalDeletePODetail";
+import Autosuggest from "react-autosuggest";
 
 export const TableHH = () => {
   const [listPoDetail, setListPoDetail] = useState([]);
@@ -48,7 +49,7 @@ export const TableHH = () => {
   const [startIndex, setStartIndex] = useState(0);
   const [isShowPoDetail, setIsShowPoDetail] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("25");
+  const [selectedOption, setSelectedOption] = useState("100");
   const [checkboxes, setCheckboxes] = useState({
     defaultCheck1: false,
     defaultCheck2: false,
@@ -70,6 +71,11 @@ export const TableHH = () => {
   const [currenPage, setCurrentPage] = useState("")
   const [showDelete, setShowDelete] = useState(false)
   const [dataDeletePODetail, setDataDeletePoDetail] = useState("")
+  const [suggestions, setSuggestions] = useState([]);
+  const [value1, setValue1] = useState(""); // State cho ô tìm kiếm thứ nhất
+  const [value2, setValue2] = useState("getAll");
+  const [debounceTimeout, setDebounceTimeout] = useState(null);
+
 
   // call api when load page
   useEffect(() => {
@@ -293,7 +299,7 @@ export const TableHH = () => {
       checkboxes.defaultCheck3 ||
       checkboxes.defaultCheck4
     ) {
-      let res = await exportByPO(po);
+      let res = await exportByPO(value2);
       if (res && res.statusCode === 200) {
         selectedData = res.data;
       }
@@ -417,7 +423,7 @@ export const TableHH = () => {
       [
         productId,
         serialNumber,
-        poNumber,
+        value1,
         bbbg,
         time,
         repairCategory,
@@ -517,6 +523,57 @@ export const TableHH = () => {
     setDataDeletePoDetail(item)
   }
 
+  const onChange1 = (event, { newValue }) => {
+    setValue1(newValue);
+  };
+
+  const onChange2 = (event, { newValue }) => {
+    setValue2(newValue);
+  };
+
+  const getSuggestions = (inputValue) => {
+    const inputValueLowerCase = inputValue.toLowerCase();
+    return listPo.filter((item) =>
+      item.poNumber.toLowerCase().includes(inputValueLowerCase)
+    );
+  };
+
+  const getSuggestionValue = (suggestion) => suggestion.poNumber;
+
+  const renderSuggestion = (suggestion) => <div>{suggestion.poNumber}</div>;
+
+  const onSuggestionsFetchRequested = ({ value }) => {
+    // Xóa timeout hiện tại (nếu có)
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+
+    // Tạo timeout mới
+    const timeout = setTimeout(() => {
+      setSuggestions(getSuggestions(value));
+    }, 1000); // Khoảng thời gian trễ (1 giây)
+
+    // Lưu trữ timeout để có thể xóa nó trong lần gọi tiếp theo
+    setDebounceTimeout(timeout);
+  };
+
+
+  const onSuggestionsClearRequested = () => {
+    setSuggestions([]);
+  };
+
+  const inputProps1 = {
+    placeholder: "Nhập PO",
+    value: value1,
+    onChange: onChange1,
+  };
+
+  const inputProps2 = {
+    placeholder: "Nhập PO",
+    value: value2 === "getAll" ? "Tất cả PO" : value2,
+    onChange: onChange2,
+  };
+
   return (
     <>
       <div className="tables">
@@ -550,27 +607,25 @@ export const TableHH = () => {
                   placeholder="Số serial"
                 />
               </Form.Group>
-              <Form.Group as={Col} md="2" controlId="validationCustomUsername1">
+              <Form.Group
+                as={Col}
+                md="2"
+                controlId="validationCustomUsername99"
+              >
                 <Form.Label>Số PO</Form.Label>
-                <Form.Select
-                  aria-label="Default select example"
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setPoNumber(value === "Tất cả PO" ? null : value);
+                <Autosuggest
+                  suggestions={suggestions}
+                  onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+                  onSuggestionsClearRequested={onSuggestionsClearRequested}
+                  getSuggestionValue={getSuggestionValue}
+                  renderSuggestion={renderSuggestion}
+                  inputProps={{
+                    ...inputProps1,
+                    className: "form-control second-autosuggest", // Thêm lớp CSS cho ô tìm kiếm thứ hai
                   }}
-                >
-                  <option>Tất cả PO</option>
-                  {listPo &&
-                    listPo.length > 0 &&
-                    listPo.map((item, index) => {
-                      return (
-                        <option key={index} value={item.poNumber}>
-                          {item.poNumber}
-                        </option>
-                      );
-                    })}
-                </Form.Select>
+                />
               </Form.Group>
+
               <Form.Group as={Col} md="2" controlId="validationCustom05">
                 <Form.Label>Ưu tiên SC</Form.Label>
                 <Form.Select
@@ -680,7 +735,9 @@ export const TableHH = () => {
                   md="2"
                   controlId="validationCustomUsername7"
                 >
-                  <Form.Label>Trạng thái xuất: </Form.Label>
+                  <Form.Label>
+                    <b>Trạng thái xuất: </b>
+                  </Form.Label>
                 </Form.Group>
                 <Form.Group
                   as={Col}
@@ -688,24 +745,17 @@ export const TableHH = () => {
                   controlId="validationCustomUsername99"
                 >
                   {/* <Form.Label>Xuất theo PO</Form.Label> */}
-                  <Form.Select
-                    aria-label="Default select example"
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setPo(value === "Tất cả PO" ? "getAll" : value);
+                  <Autosuggest
+                    suggestions={suggestions}
+                    onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+                    onSuggestionsClearRequested={onSuggestionsClearRequested}
+                    getSuggestionValue={getSuggestionValue}
+                    renderSuggestion={renderSuggestion}
+                    inputProps={{
+                      ...inputProps2,
+                      className: "form-control", // Áp dụng class form-control của React Bootstrap
                     }}
-                  >
-                    <option>Tất cả PO</option>
-                    {listPo &&
-                      listPo.length > 0 &&
-                      listPo.map((item, index) => {
-                        return (
-                          <option key={index} value={item.poNumber}>
-                            {item.poNumber}
-                          </option>
-                        );
-                      })}
-                  </Form.Select>
+                  />
                 </Form.Group>
                 <Form.Group
                   as={Col}
@@ -824,7 +874,9 @@ export const TableHH = () => {
                   md="2"
                   controlId="validationCustomUsername7"
                 >
-                  <Form.Label>Trạng thái xuất: </Form.Label>
+                  <Form.Label>
+                    <b>Trạng thái xuất: </b>
+                  </Form.Label>
                 </Form.Group>
                 <Form.Group
                   as={Col}
@@ -832,24 +884,17 @@ export const TableHH = () => {
                   controlId="validationCustomUsername99"
                 >
                   {/* <Form.Label>Xuất theo PO</Form.Label> */}
-                  <Form.Select
-                    aria-label="Default select example"
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setPo(value === "Tất cả PO" ? "getAll" : value);
+                  <Autosuggest
+                    suggestions={suggestions}
+                    onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+                    onSuggestionsClearRequested={onSuggestionsClearRequested}
+                    getSuggestionValue={getSuggestionValue}
+                    renderSuggestion={renderSuggestion}
+                    inputProps={{
+                      ...inputProps2,
+                      className: "form-control", // Áp dụng class form-control của React Bootstrap
                     }}
-                  >
-                    <option>Tất cả PO</option>
-                    {listPo &&
-                      listPo.length > 0 &&
-                      listPo.map((item, index) => {
-                        return (
-                          <option key={index} value={item.poNumber}>
-                            {item.poNumber}
-                          </option>
-                        );
-                      })}
-                  </Form.Select>
+                  />
                 </Form.Group>
                 <Form.Group
                   as={Col}
@@ -887,7 +932,9 @@ export const TableHH = () => {
                   md="2"
                   controlId="validationCustomUsername7"
                 >
-                  <Form.Label>Trạng thái xuất: </Form.Label>
+                  <Form.Label>
+                    <b>Trạng thái xuất: </b>
+                  </Form.Label>
                 </Form.Group>
                 <Form.Group
                   as={Col}
@@ -895,24 +942,17 @@ export const TableHH = () => {
                   controlId="validationCustomUsername99"
                 >
                   {/* <Form.Label>Xuất theo PO</Form.Label> */}
-                  <Form.Select
-                    aria-label="Default select example"
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setPo(value === "Tất cả PO" ? "getAll" : value);
+                  <Autosuggest
+                    suggestions={suggestions}
+                    onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+                    onSuggestionsClearRequested={onSuggestionsClearRequested}
+                    getSuggestionValue={getSuggestionValue}
+                    renderSuggestion={renderSuggestion}
+                    inputProps={{
+                      ...inputProps2,
+                      className: "form-control", // Áp dụng class form-control của React Bootstrap
                     }}
-                  >
-                    <option>Tất cả PO</option>
-                    {listPo &&
-                      listPo.length > 0 &&
-                      listPo.map((item, index) => {
-                        return (
-                          <option key={index} value={item.poNumber}>
-                            {item.poNumber}
-                          </option>
-                        );
-                      })}
-                  </Form.Select>
+                  />
                 </Form.Group>
                 <Form.Group
                   as={Col}
@@ -945,7 +985,7 @@ export const TableHH = () => {
           </div>
 
           {/* button */}
-          <div className="my-3 add-new d-flex justify-content-between">
+          <div className="my-1 add-new d-flex justify-content-between">
             <div className="col-3"></div>
             <div className="group-btn d-flex">
               {/* button search */}
@@ -1402,10 +1442,9 @@ export const TableHH = () => {
             onChange={(event) => setSelectedOption(event.target.value)}
             value={selectedOption}
           >
-            <option value="25">25 / Trang</option>
-            <option value="50">50 / Trang</option>
-            <option value="75">75 / Trang</option>
             <option value="100">100 / Trang</option>
+            <option value="300">300 / Trang</option>
+            <option value="500">500 / Trang</option>
           </Form.Select>
         </div>
 
@@ -1423,6 +1462,7 @@ export const TableHH = () => {
           dateEditPoDetail={dateEditPoDetail}
           getProducts={getProducts}
           currenPage={currenPage}
+          handleSearch={handleSearch}
         />
 
         <ModalDeletePODetail

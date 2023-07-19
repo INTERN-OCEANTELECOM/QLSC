@@ -17,6 +17,7 @@ const ModelAddPO = (props) => {
   const [quantity, setQuantity] = useState("");
   const [isValidate, setIsValidate] = useState("");
   const [contract, setContract] = useState("")
+  const [note, setNote] = useState("")
 
   //handle change date start
   const handleDateChangeStart = (date) => {
@@ -105,7 +106,8 @@ const ModelAddPO = (props) => {
       timeStart,
       timeEnd,
       time,
-      timeWarrantyDate
+      timeWarrantyDate,
+      note
     );
 
     // call api
@@ -119,7 +121,7 @@ const ModelAddPO = (props) => {
       setSelectedDateStart(null);
       setSelectedDate(null)
       setSelectedDateWarranty(null)
-      getAllPo();
+      getAllPo(0);
       handleClose();
     } else {
       if (
@@ -154,7 +156,7 @@ const ModelAddPO = (props) => {
       className="modal show"
       style={{ display: "block", position: "initial" }}
     >
-      <Modal show={show} onHide={handleCloses} size="lg">
+      <Modal show={show} onHide={handleCloses} size="lg" backdrop="static">
         <Modal.Header closeButton>
           <Modal.Title>Add new PO</Modal.Title>
         </Modal.Header>
@@ -167,7 +169,6 @@ const ModelAddPO = (props) => {
                   <Form.Group
                     as={Col}
                     md="6"
-                    className="mb-3"
                     controlId="exampleForm.ControlTextarea1"
                   >
                     <Form.Label>Nhập số hợp đồng</Form.Label>
@@ -184,7 +185,6 @@ const ModelAddPO = (props) => {
                   <Form.Group
                     as={Col}
                     md="6"
-                    className="mb-3"
                     controlId="exampleForm.ControlTextarea1"
                   >
                     <Form.Label>Nhập số PO</Form.Label>
@@ -203,7 +203,6 @@ const ModelAddPO = (props) => {
                   <Form.Group
                     as={Col}
                     md="12"
-                    className="mb-3"
                     controlId="exampleForm.ControlTextarea1"
                   >
                     <Form.Label>Số lượng</Form.Label>
@@ -221,7 +220,6 @@ const ModelAddPO = (props) => {
                   <Form.Group
                     as={Col}
                     md="6"
-                    className="mb-3"
                     controlId="exampleForm.ControlTextarea1"
                   >
                     <Form.Label>Ngày bắt đầu</Form.Label>
@@ -237,7 +235,6 @@ const ModelAddPO = (props) => {
                   <Form.Group
                     as={Col}
                     md="6"
-                    className="mb-3"
                     controlId="exampleForm.ControlTextarea1"
                   >
                     <Form.Label>Ngày kết thúc</Form.Label>
@@ -255,7 +252,6 @@ const ModelAddPO = (props) => {
                   <Form.Group
                     as={Col}
                     md="6"
-                    className="mb-3"
                     controlId="exampleForm.ControlTextarea1999"
                   >
                     <Form.Label>Ngày hết hạn bảo lãnh THHĐ</Form.Label>
@@ -271,7 +267,6 @@ const ModelAddPO = (props) => {
                   <Form.Group
                     as={Col}
                     md="6"
-                    className="mb-3"
                     controlId="exampleForm.ControlTextarea199"
                   >
                     <Form.Label>Ngày hết hạn bảo lãnh bảo hành</Form.Label>
@@ -282,6 +277,19 @@ const ModelAddPO = (props) => {
                       dateFormat="dd/MM/yyyy"
                       showYearDropdown
                       showMonthDropdown
+                    />
+                  </Form.Group>
+                </Row>
+                <Row className="mb-3 ">
+                  <Form.Group
+                    controlId="exampleForm.ControlTextarea1"
+                  >
+                    <Form.Label>Ghi chú</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      value={note === null ? "" : note}
+                      onChange={(event) => setNote(event.target.value)}
                     />
                   </Form.Group>
                 </Row>

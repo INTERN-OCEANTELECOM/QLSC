@@ -13,6 +13,15 @@ const fecthAll = (page, size) => {
   );
 };
 
+const getAllPO = (page, size) => {
+  const config = {
+    headers: {
+      email: localStorage.getItem("email"),
+    },
+  };
+  return axioss.get(`/po/get-all-by-page?page=${page}&size=${size}`, config);
+}
+
 const notify = () => {
   // return axioss.post('/api/v1/order/import')
 };
@@ -180,7 +189,8 @@ const createPo = (
   beginAt,
   endAt,
   contractWarrantyExpirationDate,
-  warrantyExpirationDate
+  warrantyExpirationDate,
+  note
 ) => {
   return axioss.post(
     "/po/add",
@@ -192,6 +202,7 @@ const createPo = (
       endAt,
       contractWarrantyExpirationDate,
       warrantyExpirationDate,
+      note
     },
     {
       headers: {
@@ -408,6 +419,33 @@ const searchSerialNumber = (file) => {
   return axioss.post("/po-detail/search/serialNumber", file, config);
 }
 
+const searchPO = (keyword, property, pageIndex, pageSize) => {
+  const config = {
+    headers: {
+      email: localStorage.getItem("email"),
+    },
+  };
+  return axioss.post(
+    "/po/search-by-keyword",
+    {
+      keyword: Array.isArray(keyword) ? keyword : [keyword],
+      property,
+      pageIndex,
+      pageSize,
+    },
+    config
+  );
+}
+
+const checkBarcode = (serialNumber) => {
+  const config = {
+    headers: {
+      email: localStorage.getItem("email"),
+    },
+  };
+  return axioss.get(`/po-detail/serialNumber?serialNumber=${serialNumber}`, config);
+}
+
 export {
   fecthAll,
   notify,
@@ -439,4 +477,7 @@ export {
   updateStatusPoDetail,
   deletePODetail,
   searchSerialNumber,
+  searchPO,
+  getAllPO,
+  checkBarcode,
 };

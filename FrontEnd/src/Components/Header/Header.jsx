@@ -76,14 +76,12 @@ export const Header = () => {
                   <NavLink to="/sn-check" className="nav-link">
                     S/N Check
                   </NavLink>
-                  {localStorage.getItem("role") === "ROLE_ADMIN" ||
-                  localStorage.getItem("role") === "ROLE_MANAGER" ? (
-                    <>
-                      <NavLink to="/sanpham" className="nav-link">
-                        QL Mã HH
-                      </NavLink>
-                    </>
-                  ) : null}
+                  <NavLink to="/barcode-check" className="nav-link">
+                    Barcode Check
+                  </NavLink>
+                  <NavLink to="/sanpham" className="nav-link">
+                    QL Mã HH
+                  </NavLink>
                 </Nav>
                 <Nav className="user-name">
                   {user && user.email ? (

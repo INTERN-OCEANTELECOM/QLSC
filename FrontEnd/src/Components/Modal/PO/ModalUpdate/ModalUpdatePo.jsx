@@ -7,7 +7,15 @@ import { toast } from "react-toastify";
 import "./modalupdatepo.scss"
 
 const ModalUpdatePo = (props) => {
-  const { show, handleClose, dataPo, getAllPo } = props;
+  const {
+    show,
+    handleClose,
+    dataPo,
+    getAllPo,
+    currentPage,
+    handleSearch,
+    search,
+  } = props;
   const [selectedDateStart, setSelectedDateStart] = useState(null);
   const [selectedDateEnd, setSelectedDateEnd] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -79,6 +87,12 @@ const ModalUpdatePo = (props) => {
     //   setIsValidate("");
     // }
 
+    let page;
+    if (currentPage) {
+      page = currentPage;
+    } else {
+      page = 0;
+    }
     if (quantity <= 0) {
       setIsValidate("Số lượng phải lớn hơn 0");
       return;
@@ -125,7 +139,12 @@ const ModalUpdatePo = (props) => {
           handleClose();
           toast.success("Cập nhật thông tin thành công!!");
           localStorage.removeItem("po");
-          getAllPo();
+          
+          if (search) {
+            handleSearch(page);
+          } else {
+            getAllPo(page);
+          }
         } else if (res && res.statusCode === 205) {
           if (
             res.statusMessage ===
@@ -165,7 +184,7 @@ const ModalUpdatePo = (props) => {
       className="modal show"
       style={{ display: "block", position: "initial" }}
     >
-      <Modal show={show} onHide={handleClose} size="lg">
+      <Modal show={show} onHide={handleClose} size="lg" backdrop="static">
         <Modal.Header closeButton>
           <Modal.Title>Edit PO</Modal.Title>
         </Modal.Header>
@@ -175,7 +194,7 @@ const ModalUpdatePo = (props) => {
               <div className="validate-add-po">{isValidate}</div>
               <form className="input-po-detail">
                 <Row className="mb-3 ">
-                  <Form.Group as={Col} md="6" className="mb-3">
+                  <Form.Group as={Col} md="6" >
                     <Form.Label>Số hợp đồng</Form.Label>
                     <Form.Control
                       type="text"
@@ -189,7 +208,7 @@ const ModalUpdatePo = (props) => {
                       }
                     />
                   </Form.Group>
-                  <Form.Group as={Col} md="6" className="mb-3">
+                  <Form.Group as={Col} md="6" >
                     <Form.Label>Số PO</Form.Label>
                     <Form.Control
                       type="text"
@@ -203,7 +222,7 @@ const ModalUpdatePo = (props) => {
                   </Form.Group>
                 </Row>
                 <Row className="mb-3 ">
-                  <Form.Group as={Col} md="12" className="mb-3">
+                  <Form.Group as={Col} md="12" >
                     <Form.Label>Số lượng</Form.Label>
                     <Form.Control
                       type="number"
@@ -216,7 +235,7 @@ const ModalUpdatePo = (props) => {
                   </Form.Group>
                 </Row>
                 <Row className="mb-3 ">
-                  <Form.Group as={Col} md="6" className="mb-3">
+                  <Form.Group as={Col} md="6">
                     <Form.Label>Ngày bắt đầu</Form.Label>
                     <DatePicker
                       selected={selectedDateStart}
@@ -227,7 +246,7 @@ const ModalUpdatePo = (props) => {
                       customInput={<CustomInput />}
                     />
                   </Form.Group>
-                  <Form.Group as={Col} md="6" className="mb-3">
+                  <Form.Group as={Col} md="6" >
                     <Form.Label>Ngày kết thúc</Form.Label>
                     <DatePicker
                       selected={selectedDateEnd}
@@ -240,7 +259,7 @@ const ModalUpdatePo = (props) => {
                   </Form.Group>
                 </Row>
                 <Row className="mb-3 ">
-                  <Form.Group as={Col} md="6" className="mb-3">
+                  <Form.Group as={Col} md="6">
                     <Form.Label>Ngày hết hạn bảo lãnh THHĐ</Form.Label>
                     <DatePicker
                       selected={selectedDate}
@@ -254,7 +273,6 @@ const ModalUpdatePo = (props) => {
                   <Form.Group
                     as={Col}
                     md="6"
-                    className="mb-3"
                     controlId="exampleForm.ControlTextarea19999999"
                   >
                     <Form.Label>Ngày hết hạn bảo lãnh bảo hành</Form.Label>
@@ -270,7 +288,6 @@ const ModalUpdatePo = (props) => {
                 </Row>
                 <Row className="mb-3 ">
                   <Form.Group
-                    className="mb-3"
                     controlId="exampleForm.ControlTextarea1"
                   >
                     <Form.Label>Ghi chú</Form.Label>

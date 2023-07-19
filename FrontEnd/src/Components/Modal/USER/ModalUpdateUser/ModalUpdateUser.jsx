@@ -58,7 +58,7 @@ const ModalUpdateUser = (props) => {
       className="modal show"
       style={{ display: "block", position: "initial" }}
     >
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} backdrop="static">
         <Modal.Header closeButton>
           <Modal.Title>Edit User</Modal.Title>
         </Modal.Header>

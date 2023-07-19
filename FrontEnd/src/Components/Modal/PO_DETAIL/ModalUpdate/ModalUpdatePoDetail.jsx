@@ -13,8 +13,14 @@ import moment from "moment";
 
 const ModalUpdatePoDetail = (props) => {
 
-  const { show, handleCloses, dateEditPoDetail, getProducts, currenPage } =
-    props;
+  const {
+    show,
+    handleCloses,
+    dateEditPoDetail,
+    getProducts,
+    currenPage,
+    handleSearch,
+  } = props;
   const [selectedDateStart, setSelectedDateStart] = useState(null);
   const [selectedDateWarrity, setSelectedDateWarrity] = useState(null);
   const [selectedDateExportPartner, setSelectedDateExportPartner] =
@@ -137,7 +143,11 @@ const ModalUpdatePoDetail = (props) => {
     );
     if (res && res.statusCode === 200) {
       toast.success("Cập nhật thành công !!!");
-      getProducts(page);
+      if (handleSearch) {
+        handleSearch(page)
+      } else {
+        getProducts(page);
+      } 
       handleCloses();
       setRepairCategory(null)
       setPrioritize(null)
@@ -154,7 +164,7 @@ const ModalUpdatePoDetail = (props) => {
       className="modal show"
       style={{ display: "block", position: "initial" }}
     >
-      <Modal show={show} onHide={handleCloses} size="lg">
+      <Modal show={show} onHide={handleCloses} size="lg" backdrop="static">
         <Modal.Header closeButton>
           <Modal.Title>Update Po Detail</Modal.Title>
         </Modal.Header>

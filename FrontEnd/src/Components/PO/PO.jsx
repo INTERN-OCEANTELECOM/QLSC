@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import Table from "react-bootstrap/Table";
 import "./po.scss";
 import { AiFillFileAdd, AiOutlineSearch } from "react-icons/ai";
+import { BiReset } from "react-icons/bi";
 import ModelAddPO from "../Modal/PO/ModalAddPO/ModelAddPO";
 import ModalUpdatePo from "../Modal/PO/ModalUpdate/ModalUpdatePo";
-import { getPo } from "../../service/service";
+import { getAllPO, getPo, searchPO } from "../../service/service";
 import moment from "moment";
 import { Link } from "react-router-dom";
 import ModalShowPO from "../Modal/PO/ModalShow/ModalShowPO";
@@ -12,6 +13,8 @@ import ModalShowPOStatistical from "../Modal/PO/ModalShow/ModalShowPOStatistical
 import logo from "../../assets/logo_28-06-2017_LogoOceanTelecomtailieupng-removebg-preview.png";
 import { useSelector } from "react-redux";
 import _ from "lodash";
+import { Form } from "react-bootstrap";
+import ReactPaginate from "react-paginate";
 
 const PO = () => {
 
@@ -28,11 +31,30 @@ const PO = () => {
   const [dataStatistical, setDataStatistical] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
   const [search, setSearch] = useState("")
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [selectedOption, setSelectedOption] = useState("50");
+  const [startIndex, setStartIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState("");
 
   // call get all po when load page
   useEffect(() => {
-    getAllPo();
-  }, []);
+    if (search) {
+      handleSearch(0);
+    } else {
+      getAllPo(0);
+    }
+  }, [selectedOption]);
+
+  useEffect(() => {
+    if(listPo !== null) {
+      const sortedList = Array.from(listPo).sort((a, b) =>
+        a.poNumber.localeCompare(b.poNumber)
+      );
+      setSortedListPo(sortedList);
+    } else {
+      setSortedListPo("")
+    }
+  }, [listPo]);
 
 // handle close modal
   const handleClose = () => {
@@ -45,10 +67,25 @@ const PO = () => {
   };
 
   // call api get all po
-  const getAllPo = async () => {
-    let res = await getPo();
+  const getAllPo = async (page) => {
+    let res = await getAllPO(page, selectedOption);
     if (res && res.data) {
       setListPo(res.data);
+      setTotalProducts(res.totalPages);
+    }
+  };
+
+  const itemsPerPage = selectedOption;
+  const handlePageClick = async (event) => {
+    const selectedPage = event.selected;
+    const newStartIndex = selectedPage * itemsPerPage;
+    setStartIndex(newStartIndex);
+    if (search) {
+      handleSearch(+event.selected);
+      setCurrentPage(selectedPage);
+    } else {
+      getAllPo(+event.selected);
+      setCurrentPage(selectedPage);
     }
   };
 
@@ -64,25 +101,6 @@ const PO = () => {
     setSortBy(sortBy);
   };
 
-  useEffect(() => {
-    if (!Array.isArray(listPo)) {
-      return;
-    }
-    const sortedList = [...listPo];
-
-    sortedList.sort((a, b) => {
-      const aNumber = parseInt(a.poNumber.substring(2));
-      const bNumber = parseInt(b.poNumber.substring(2));
-
-      if (sortOrder === "asc") {
-        return aNumber - bNumber;
-      } else {
-        return bNumber - aNumber;
-      }
-    });
-
-    setSortedListPo(sortedList);
-  }, [listPo, sortOrder, sortBy]);
 
   // handle show modal po
   const handleShowPo = (item) => {
@@ -96,30 +114,40 @@ const PO = () => {
     setDataStatistical(item);
   };
 
-  const handleSearch = () => {
+  const handleSearch = async(page) => {
     if (search) {
-      let cloneListUser = _.cloneDeep(listPo);
-      cloneListUser = listPo.filter(
-        (item) =>
-          item.poNumber.toLowerCase().includes(search.toLowerCase()) ||
-          item.contractNumber.toLowerCase().includes(search.toLowerCase())
-      );
-      setListPo(cloneListUser);
+      let res = await searchPO([search], "ALL", page, itemsPerPage);
+      if(res && res.statusCode === 200) {
+        setListPo(res.data)
+        setTotalProducts(res.totalPages);
+      } else {
+        if(res && res.statusCode === 204) {
+          setListPo(res.data);
+        }
+      }
     } else {
-      getAllPo();
+      getAllPo(0);
     }
   };
+
+  const handleReset = () => {
+    getAllPo(0)
+    setSearch("")
+  }
+
+
 
   return (
     <div className="po-tables">
       {user && user.auth && (
         <div className="my-3 add-new d-flex justify-content-between">
-          <div className="col-6">
+          <div className="col-6 d-flex">
             <div className="col-6">
-              <div className="btn-search input-group w-75">
+              <div className="btn-search input-group w-100">
                 <input
-                  className="form-control"
+                  className="form-control1"
                   placeholder="Search..."
+                  value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
                 <button
@@ -129,6 +157,14 @@ const PO = () => {
                   <AiOutlineSearch />
                 </button>
               </div>
+            </div>
+            <div className="update-po col-2 mx-2">
+              <button
+                className="btn btn-primary "
+                onClick={() => handleReset()}
+              >
+                Reset
+              </button>
             </div>
           </div>
           <div className="group-btn d-flex justify-content-between">
@@ -150,84 +186,122 @@ const PO = () => {
         </div>
       )}
       {localStorage.getItem("role") ? (
-        <Table striped bordered hover className="shadow-sm bg-white rounded">
-          <thead>
-            <tr>
-              <th>Stt</th>
-              <th>Số hợp đồng</th>
-              <th>Số PO </th>
-              <th>Số lượng</th>
-              <th>Ngày bắt đầu</th>
-              <th>Ngày kết thúc</th>
-              <th>Ngày hết hạn bảo lãnh THHĐ</th>
-              <th>Ngày hết hạn bảo lãnh bảo hành</th>
-              <th>Ghi chú</th>
-              {user && user.auth && <th>Action</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {listPo &&
-              listPo.length > 0 &&
-              listPo.map((item, index) => {
-                const timeBegin = item.beginAt;
-                let dataBegin;
-                const timeEnd = item.endAt;
-                let datEnd 
-                const time = item.contractWarrantyExpirationDate;
-                let dataTime;
-                if (time !== null) {
-                  dataTime = moment(time).format("DD/MM/YYYY");
-                }
-                const timeWarranty = item.warrantyExpirationDate;
-                let dataWarranty;
-                if (timeWarranty !== null) {
-                  dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
-                }
-                if(timeBegin !== null) {
+        <>
+          <Table striped bordered hover className="shadow-sm bg-white rounded">
+            <thead>
+              <tr className="header-table">
+                <th>Stt</th>
+                <th>Số hợp đồng</th>
+                <th>Số PO </th>
+                <th>Số lượng</th>
+                <th className="col-date">Ngày bắt đầu</th>
+                <th className="col-date">Ngày kết thúc</th>
+                <th className="col-date">Ngày hết hạn bảo lãnh THHĐ</th>
+                <th className="col-date">Ngày hết hạn bảo lãnh bảo hành</th>
+                <th>Ghi chú</th>
+                {user && user.auth && <th>Action</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {sortedListPo &&
+                sortedListPo.length > 0 &&
+                sortedListPo.map((item, index) => {
+                  const currentIndex = startIndex + index;
+                  const timeBegin = item.beginAt;
+                  let dataBegin;
+                  const timeEnd = item.endAt;
+                  let datEnd;
+                  const time = item.contractWarrantyExpirationDate;
+                  let dataTime;
+                  if (time !== null) {
+                    dataTime = moment(time).format("DD/MM/YYYY");
+                  }
+                  const timeWarranty = item.warrantyExpirationDate;
+                  let dataWarranty;
+                  if (timeWarranty !== null) {
+                    dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
+                  }
+                  if (timeBegin !== null) {
                     dataBegin = moment(timeBegin).format("DD/MM/YYYY");
-                }
+                  }
 
-                if(timeEnd !== null) {
-                  datEnd = moment(timeEnd).format("DD/MM/YYYY");
-                }
-                return (
-                  <tr
-                    key={`po-${index}`}
-                    onDoubleClick={() => handleShowPo(item)}
-                  >
-                    <td>{index + 1}</td>
-                    <td>{item.contractNumber}</td>
-                    <td>{item.poNumber}</td>
-                    <td>{item.quantity}</td>
-                    <td>{dataBegin}</td>
-                    <td>{datEnd}</td>
-                    <td>{dataTime}</td>
-                    <td>{dataWarranty}</td>
-                    <td className="col-note">{item.note}</td>
-                    <td className="col-action">
-                      {localStorage.getItem("role") === "ROLE_MANAGER" ||
-                      localStorage.getItem("role") === "ROLE_ADMIN" ? (
-                        <>
-                          <button
-                            className="btn btn-warning btn-xl"
-                            onClick={() => handleUpdatePO(item)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="btn btn-primary mx-2 btn-xl"
-                            onClick={() => handleViewPo(item)}
-                          >
-                            View
-                          </button>
-                        </>
-                      ) : null}
-                    </td>
-                  </tr>
-                );
-              })}
-          </tbody>
-        </Table>
+                  if (timeEnd !== null) {
+                    datEnd = moment(timeEnd).format("DD/MM/YYYY");
+                  }
+                  return (
+                    <tr
+                      key={`po-${currentIndex}`}
+                      onDoubleClick={() => handleShowPo(item)}
+                      className="header-table "
+                    >
+                      <td>{currentIndex + 1}</td>
+                      <td>{item.contractNumber}</td>
+                      <td>{item.poNumber}</td>
+                      <td>{item.quantity}</td>
+                      <td>{dataBegin}</td>
+                      <td>{datEnd}</td>
+                      <td>{dataTime}</td>
+                      <td>{dataWarranty}</td>
+                      <td className="col-note">{item.note}</td>
+                      <td className="col-action">
+                        {localStorage.getItem("role") === "ROLE_MANAGER" ||
+                        localStorage.getItem("role") === "ROLE_ADMIN" ? (
+                          <>
+                            <button
+                              className="btn btn-warning btn-sm"
+                              onClick={() => handleUpdatePO(item)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="btn btn-primary mx-2 btn-sm"
+                              onClick={() => handleViewPo(item)}
+                            >
+                              View
+                            </button>
+                          </>
+                        ) : null}
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </Table>
+
+          <div className="page-size ">
+            <ReactPaginate
+              breakLabel="..."
+              nextLabel="next >"
+              onPageChange={handlePageClick}
+              pageRangeDisplayed={5}
+              pageCount={totalProducts}
+              previousLabel="< previous"
+              pageClassName="page-item"
+              pageLinkClassName="page-link"
+              previousClassName="page-item"
+              previousLinkClassName="page-link"
+              nextClassName="page-item"
+              nextLinkClassName="page-link"
+              breakClassName="page-item"
+              breakLinkClassName="page-link"
+              containerClassName="pagination"
+              activeClassName="active"
+              renderOnZeroPageCount={null}
+            />
+
+            <Form.Select
+              aria-label="Default select example"
+              className="form-select-size"
+              onChange={(event) => setSelectedOption(event.target.value)}
+              value={selectedOption}
+            >
+              <option value="50">50 / Trang</option>
+              <option value="75">75 / Trang</option>
+              <option value="100">100 / Trang</option>
+              <option value="150">150 / Trang</option>
+            </Form.Select>
+          </div>
+        </>
       ) : (
         <>
           <div>
@@ -257,6 +331,9 @@ const PO = () => {
         handleClose={handleClose}
         dataPo={dataPo}
         getAllPo={getAllPo}
+        currentPage={currentPage}
+        handleSearch={handleSearch}
+        search={search}
       />
 
       <ModalShowPO

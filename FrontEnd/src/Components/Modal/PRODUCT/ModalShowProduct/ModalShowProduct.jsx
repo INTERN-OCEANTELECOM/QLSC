@@ -7,7 +7,15 @@ import { updateProduct } from "../../../../service/service";
 import { toast } from "react-toastify";
 
 const ModalShowProduct = (props) => {
-  const { show, handleClose, dataDetail, getProducts, currentPage } = props;
+  const {
+    show,
+    handleClose,
+    dataDetail,
+    getProducts,
+    currentPage,
+    handleSearch,
+    search
+  } = props;
   const [productId, setProductId] = useState("");
   const [productName, setProductName] = useState("");
 
@@ -31,7 +39,12 @@ const ModalShowProduct = (props) => {
     if (res && res.statusCode === 200) {
       handleClose();
       toast.success("Cập nhật thành công!!!");
-      getProducts(page);
+      
+      if(search) {
+        handleSearch(page);
+      } else {
+        getProducts(page);
+      }
     } else {
       toast.error("Cập nhật không thành công!!");
     }

@@ -9,6 +9,7 @@ import { Modal, Button } from "react-bootstrap";
 import { fecthAll, getAllProduct, searchProduct } from "../../service/service";
 import {  FaFileExport } from "react-icons/fa";
 import { AiOutlineSearch } from "react-icons/ai";
+import { BiReset } from "react-icons/bi";
 import Form from "react-bootstrap/Form";
 import ModalShowProduct from "../Modal/PRODUCT/ModalShowProduct/ModalShowProduct";
 import ModalAddProduct from "../Modal/PRODUCT/ModalAddProduct/ModalAddProduct";
@@ -24,7 +25,7 @@ const Product = () => {
   const [search, setSearch] = useState("");
   const [startIndex, setStartIndex] = useState(0);
   const [dataDetail, setDataDetail] = useState("");
-  const [selectedOption, setSelectedOption] = useState("10");
+  const [selectedOption, setSelectedOption] = useState("50");
   const [isShowAddProduct, setIsShowAddProduct] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentPage, setCurrentPage] = useState("")
@@ -117,6 +118,10 @@ const Product = () => {
           setTotalProducts(res.totalPages);
           setTotalPages(res.totalPages);
           // setStartIndex(page * itemsPerPage);
+        } else {
+          if(res && res.statusCode === 204) {
+            setListHH(res.data);
+          }
         }
       } catch (error) {
         console.error(error);
@@ -131,17 +136,23 @@ const Product = () => {
     setDataDetail(product);
   };
 
+  const handleReset = () => {
+    getProducts(0)
+    setSearch("")
+  }
+
   return (
     <>
       <div className="product">
         {/* button */}
 
         <div className="my-3 add-new d-flex justify-content-between">
-          <div className="col-5">
+          <div className="col-5 d-flex">
             <div className="btn-search input-group w-75">
               <input
-                className="form-control"
+                className="form-control2"
                 placeholder="Search..."
+                value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
               <button
@@ -149,6 +160,14 @@ const Product = () => {
                 onClick={() => handleSearch()}
               >
                 <AiOutlineSearch />
+              </button>
+            </div>
+            <div className="update-po col-2 mx-2">
+              <button
+                className="btn btn-primary "
+                onClick={() => handleReset()}
+              >
+                Reset
               </button>
             </div>
           </div>
@@ -167,18 +186,18 @@ const Product = () => {
                     Add new
                   </button>
                 </div>
-                <div className="export">
-                  <button
-                    htmlFor="test"
-                    className="btn btn-success label-import export-btn"
-                    onClick={handleExport}
-                  >
-                    <FaFileExport className="icon-export" />
-                    Export
-                  </button>
-                </div>
               </>
             ) : null}
+            <div className="export">
+              <button
+                htmlFor="test"
+                className="btn btn-success label-import export-btn"
+                onClick={handleExport}
+              >
+                <FaFileExport className="icon-export" />
+                Export
+              </button>
+            </div>
           </div>
         </div>
 
@@ -240,8 +259,6 @@ const Product = () => {
             onChange={(event) => setSelectedOption(event.target.value)}
             value={selectedOption}
           >
-            <option value="10">10 / Trang</option>
-            <option value="25">25 / Trang</option>
             <option value="50">50 / Trang</option>
             <option value="75">75 / Trang</option>
             <option value="100">100 / Trang</option>
@@ -263,6 +280,8 @@ const Product = () => {
           dataDetail={dataDetail}
           getProducts={getProducts}
           currentPage={currentPage}
+          search = {search}
+          handleSearch = {handleSearch}
         />
 
         <div

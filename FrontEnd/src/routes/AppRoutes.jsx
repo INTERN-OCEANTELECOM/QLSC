@@ -11,6 +11,7 @@ import { CheckEmail } from "../Components/CheckEmail/CheckEmail.jsx";
 import { ForgotPassword } from "../Components/ForgotPassword/ForgotPassword.jsx";
 import Product from "../Components/Product/Product.jsx";
 import SNCheck from "../Components/SN Check/SNCheck.jsx";
+import BarCodeCheck from "../Components/BarCodeCheck/BarCodeCheck.jsx";
 
 const AppRoutes = () => {
   return (
@@ -39,6 +40,14 @@ const AppRoutes = () => {
             element={
               <PrivateRoutes>
                 <SNCheck />
+              </PrivateRoutes>
+            }
+          />
+          <Route
+            path="barcode-check"
+            element={
+              <PrivateRoutes>
+                <BarCodeCheck />
               </PrivateRoutes>
             }
           />

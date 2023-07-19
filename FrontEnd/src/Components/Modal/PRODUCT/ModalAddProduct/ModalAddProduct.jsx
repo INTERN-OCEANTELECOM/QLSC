@@ -23,6 +23,7 @@ const ModalAddProduct = (props) => {
     if (show) {
       setProductId(dataDetail.productId);
       setProductName(dataDetail.productName);
+      setValidate("")
     }
   }, [dataDetail]);
 
@@ -34,9 +35,10 @@ const ModalAddProduct = (props) => {
     } else {
       page = 0;
     }
-    //validate 
+    validate 
     if (!productId || !productName) {
       setValidate("Cần điền đầy đủ thông tin");
+      return
     } else {
       setValidate("");
     }
@@ -52,12 +54,17 @@ const ModalAddProduct = (props) => {
       setValidate(res.data.data);
     }
   };
+
+  const handleClose = () => {
+    handleCloses()
+    setValidate("")
+  }
   return (
     <div
       className="modal show"
       style={{ display: "block", position: "initial" }}
     >
-      <Modal show={show} onHide={handleCloses}>
+      <Modal show={show} onHide={handleClose} backdrop="static">
         <Modal.Header closeButton>
           <Modal.Title>Chi tiết sản phẩm</Modal.Title>
         </Modal.Header>
@@ -88,7 +95,7 @@ const ModalAddProduct = (props) => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloses}>
+          <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
           <Button variant="primary" onClick={handleAddProduct}>
