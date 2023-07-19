@@ -145,13 +145,13 @@ const PO = () => {
             <div className="col-6">
               <div className="btn-search input-group w-100">
                 <input
-                  className="form-control1"
+                  className="form-control"
                   placeholder="Search..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
                 <button
-                  className="btn btn-primary"
+                  className="btn2 btn-primary2"
                   onClick={() => handleSearch()}
                 >
                   <AiOutlineSearch />
@@ -160,7 +160,7 @@ const PO = () => {
             </div>
             <div className="update-po col-2 mx-2">
               <button
-                className="btn btn-primary "
+                className="btn2 btn-primary2  "
                 onClick={() => handleReset()}
               >
                 Reset

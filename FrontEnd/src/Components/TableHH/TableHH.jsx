@@ -49,7 +49,7 @@ export const TableHH = () => {
   const [startIndex, setStartIndex] = useState(0);
   const [isShowPoDetail, setIsShowPoDetail] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("100");
+  const [selectedOption, setSelectedOption] = useState("50");
   const [checkboxes, setCheckboxes] = useState({
     defaultCheck1: false,
     defaultCheck2: false,
@@ -73,7 +73,7 @@ export const TableHH = () => {
   const [dataDeletePODetail, setDataDeletePoDetail] = useState("")
   const [suggestions, setSuggestions] = useState([]);
   const [value1, setValue1] = useState(""); // State cho ô tìm kiếm thứ nhất
-  const [value2, setValue2] = useState("getAll");
+  const [value2, setValue2] = useState("");
   const [debounceTimeout, setDebounceTimeout] = useState(null);
 
 
@@ -82,7 +82,7 @@ export const TableHH = () => {
     if (
       productId ||
       serialNumber ||
-      poNumber ||
+      value1 ||
       bbbg ||
       selectedDateStart ||
       repairCategory ||
@@ -245,7 +245,7 @@ export const TableHH = () => {
     if (
       productId ||
       serialNumber ||
-      poNumber ||
+      value1 ||
       bbbg ||
       selectedDateStart ||
       repairCategory ||
@@ -528,15 +528,34 @@ export const TableHH = () => {
   };
 
   const onChange2 = (event, { newValue }) => {
-    setValue2(newValue);
+    // Kiểm tra nếu người dùng nhập "Tất cả" hoặc "All", đặt giá trị của value2 thành "getAll"
+    const updatedValue =
+      newValue.toLowerCase() === "tất cả" ||
+      newValue.toLowerCase() === "all" ||
+      newValue.toLowerCase() === "Tất cả" ||
+      newValue.toLowerCase() === "All" ||
+      newValue.toLowerCase() === "ALL" ||
+      newValue.toLowerCase() === "TẤT CẢ"
+        ? "getAll"
+        : newValue;
+    setValue2(updatedValue);
   };
 
   const getSuggestions = (inputValue) => {
     const inputValueLowerCase = inputValue.toLowerCase();
-    return listPo.filter((item) =>
-      item.poNumber.toLowerCase().includes(inputValueLowerCase)
-    );
+    const allOption = { poNumber: "Tất cả" }; // Tạo option "Tất cả"
+
+    // Lấy danh sách gợi ý từ listPo và thêm option "Tất cả" vào đầu mảng
+    const suggestions = [
+      allOption,
+      ...listPo.filter((item) =>
+        item.poNumber.toLowerCase().includes(inputValueLowerCase)
+      ),
+    ];
+
+    return suggestions;
   };
+
 
   const getSuggestionValue = (suggestion) => suggestion.poNumber;
 
@@ -570,7 +589,7 @@ export const TableHH = () => {
 
   const inputProps2 = {
     placeholder: "Nhập PO",
-    value: value2 === "getAll" ? "Tất cả PO" : value2,
+    value: value2 === "getAll" ? "Tất cả" : value2,
     onChange: onChange2,
   };
 

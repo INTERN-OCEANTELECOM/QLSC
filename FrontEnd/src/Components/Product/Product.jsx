@@ -150,13 +150,13 @@ const Product = () => {
           <div className="col-5 d-flex">
             <div className="btn-search input-group w-75">
               <input
-                className="form-control2"
+                className="form-control"
                 placeholder="Search..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
               <button
-                className="btn btn-primary"
+                className="btn1 btn-primary1"
                 onClick={() => handleSearch()}
               >
                 <AiOutlineSearch />
@@ -164,7 +164,7 @@ const Product = () => {
             </div>
             <div className="update-po col-2 mx-2">
               <button
-                className="btn btn-primary "
+                className="btn1 btn-primary1 btn-reset "
                 onClick={() => handleReset()}
               >
                 Reset
@@ -280,8 +280,8 @@ const Product = () => {
           dataDetail={dataDetail}
           getProducts={getProducts}
           currentPage={currentPage}
-          search = {search}
-          handleSearch = {handleSearch}
+          search={search}
+          handleSearch={handleSearch}
         />
 
         <div
