@@ -10,7 +10,7 @@ COPY package*.json ./
 # Cài đặt các dependencies của ứng dụng
 RUN npm install use-scan-detection --legacy-peer-deps
 
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 RUN npm install axios
 
