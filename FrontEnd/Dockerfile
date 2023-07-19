@@ -12,9 +12,9 @@ RUN npm install use-scan-detection --legacy-peer-deps
 
 RUN npm install --legacy-peer-deps
 
-RUN npm install axios
+RUN npm install axios --legacy-peer-deps
 
-RUN npm install sass
+RUN npm install sass --legacy-peer-deps
 
 # Sao chép toàn bộ mã nguồn của ứng dụng vào container
 COPY . .
