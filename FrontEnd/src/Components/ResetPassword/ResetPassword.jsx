@@ -61,6 +61,12 @@ const ResetPassword = () => {
     }
   };
 
+  const handlePressEnter = (event) => {
+    if (event && event.key === "Enter") {
+      handleLogin();
+    }
+  };
+
   return (
     <div>
       <img className="wave" src={wave} />
@@ -128,6 +134,7 @@ const ResetPassword = () => {
                   placeholder="Confirm Password"
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
+                  onKeyDown={(e) => handlePressEnter(e)}
                 />
               </div>
             </div>

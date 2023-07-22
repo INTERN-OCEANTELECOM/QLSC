@@ -77,6 +77,13 @@ export const ForgotPassword = () => {
       setIsValidation("Email/OTP incorrect");
     }
   };
+
+  const handlePressEnter = (event) => {
+    if (event && event.key === "Enter") {
+      handleVerify();
+    }
+  };
+
   return (
     <div>
       <img className="wave" src={wave} />
@@ -155,6 +162,7 @@ export const ForgotPassword = () => {
                   placeholder="Confirm Password"
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
+                  onKeyDown={(e) => handlePressEnter(e)}
                 />
               </div>
             </div>

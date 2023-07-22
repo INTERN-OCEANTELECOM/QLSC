@@ -16,18 +16,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { handleLogoutRedux } from "../../redux/actions/userAction";
 
 export const Header = () => {
-
-  const user = useSelector(state => state.user.account)
-  const dispatch = useDispatch()
+  const user = useSelector((state) => state.user.account);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isShowModalUpdate, SetIsShowModalUpdate] = useState(false);
   const [dataGetUser, setDataGetUser] = useState("");
 
   useEffect(() => {
-    if(user && user.auth === false && window.location.pathname !== "/signin") {
+    if (user && user.auth === false && window.location.pathname !== "/signin") {
       navigate("/");
     }
-  }, [user])
+  }, [user]);
 
   // handle logout
   const handleLogout = () => {
@@ -50,7 +49,7 @@ export const Header = () => {
 
   return (
     <>
-      <div className="navbars shadow-sm  bg-white rounded">
+      <div className="navbars shadow-sm bg-white rounded">
         <Navbar bg="" expand="lg" className="px-4">
           <Navbar.Brand href="/">
             <div className="header-logo">
@@ -64,26 +63,27 @@ export const Header = () => {
               window.location.pathname === "/" ||
               window.location.pathname === "/quanly" ||
               window.location.pathname === "/sanpham" ||
-              window.location.pathname === "/sn-check") && (
+              window.location.pathname === "/sn-check" ||
+              window.location.pathname === "/barcode-check") && (
               <>
                 <Nav className="me-auto nav-bar">
-                  <NavLink to="/" className="nav-link ">
+                  <NavLink to="/" className="nav-link">
                     Hợp đồng
                   </NavLink>
                   <NavLink to="/quanly" className="nav-link">
                     QLSC
                   </NavLink>
-                  <NavLink to="/sn-check" className="nav-link">
+                  {/* <NavLink to="/sn-check" className="nav-link">
                     S/N Check
-                  </NavLink>
-                  <NavLink to="/barcode-check" className="nav-link">
+                  </NavLink> */}
+                  {/* <NavLink to="/barcode-check" className="nav-link">
                     Barcode Check
-                  </NavLink>
+                  </NavLink> */}
                   <NavLink to="/sanpham" className="nav-link">
                     QL Mã HH
                   </NavLink>
                 </Nav>
-                <Nav className="user-name">
+                <Nav className="user-name ">
                   {user && user.email ? (
                     <span className="nav-link">{user.email}</span>
                   ) : (

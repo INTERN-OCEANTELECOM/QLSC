@@ -1,6 +1,8 @@
 package com.ocena.qlsc.podetail.service;
 
-import com.ocena.qlsc.common.constants.RoleUser;
+import com.ocena.qlsc.common.util.ReflectionUtil;
+import com.ocena.qlsc.podetail.status.UpdateFieldsVN;
+import com.ocena.qlsc.user.model.RoleUser;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
@@ -15,7 +17,6 @@ import com.ocena.qlsc.po.dto.PoDTO;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
-import com.ocena.qlsc.podetail.enums.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.model.PoDetailMapper;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
@@ -24,11 +25,13 @@ import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.podetail.status.RegexConstants;
 import com.ocena.qlsc.podetail.status.UpdateField;
 import com.ocena.qlsc.product.dto.ProductDTO;
-import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.repository.RoleRepository;
-import org.springframework.transaction.annotation.Propagation;
+import com.ocena.qlsc.user_history.enums.Action;
+import com.ocena.qlsc.user_history.enums.ObjectName;
+import com.ocena.qlsc.user_history.model.SpecificationDesc;
+import com.ocena.qlsc.user_history.service.HistoryService;
 import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +68,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     @Autowired
     ProcessExcelFile processExcelFile;
 
+    @Autowired
+    HistoryService historyService;
+
     @Override
     public List<String> validationRequest(Object object) {
         return super.validationRequest(object);
@@ -83,6 +89,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     @Override
     protected Function<String, Optional<PoDetail>> getFindByFunction() {
         return poDetailRepository::findByPoDetailId;
+    }
+
+    @Override
+    protected Class<PoDetail> getEntityClass() {
+        return PoDetail.class;
     }
 
     @Override
@@ -203,7 +214,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      */
     @SuppressWarnings("unchecked")
     public ListResponse<ErrorResponseImport> processFileUpdatePoDetail(MultipartFile file, String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
-        List<ErrorResponseImport> listErrorResponse = new ArrayList<>();
+        LinkedList<ErrorResponseImport> listErrorResponse = new LinkedList<>();
         List<PoDetail> listUpdatePoDetail = new ArrayList<>();
 
         // Process the Excel file
@@ -215,9 +226,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
 
         // Validate the header row
-        RegexConstants regex = new RegexConstants();
-        Field field = RegexConstants.class.getDeclaredField(attribute + "Map");
-        ErrorResponseImport errorResponse = processExcelFile.validateHeaderValue(rowIterator, (HashMap<Integer, String>) field.get(regex));
+        ErrorResponseImport errorResponse = processExcelFile.
+                validateHeaderValue(rowIterator, (HashMap<Integer, String>) ReflectionUtil.getFieldValueByReflection(attribute + "Map", new RegexConstants()));
         if(errorResponse != null) {
             listErrorResponse.add(errorResponse);
             return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
@@ -247,7 +257,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                             rowIndex, poDetailResponse.getPoDetailId() + " bị trùng"));
                     continue;
                 }
-
                 Object value = setDataFromDTO(poDetailResponse, rowIndex, attribute);
                 if(value instanceof ErrorResponseImport) {
                     listErrorResponse.add((ErrorResponseImport) value);
@@ -257,8 +266,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             }
         }
 
-        if (listErrorResponse.isEmpty()) {
+        if (listErrorResponse.isEmpty() && listUpdatePoDetail.size() > 0) {
             poDetailRepository.saveAll(listUpdatePoDetail);
+            saveHistoryImportDataExcel(Action.UPDATE.getValue(), listUpdatePoDetail, attribute);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " dòng update thành công")));
         }
@@ -266,7 +276,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     }
 
     public ListResponse<PoDetailResponse> searchBySerialNumbers(MultipartFile file) {
-        List<ErrorResponseImport> listError = new ArrayList<>();
+        LinkedList<ErrorResponseImport> listError = new LinkedList<>();
         Object dataFile = processExcelFile.getSheetIteratorFromExcelFile(file);
         if(dataFile instanceof ListResponse<?>) {
             return (ListResponse) dataFile;
@@ -335,9 +345,31 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             }
         } else {
             return new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                    rowIndex, poDetailResponse.getPoDetailId() + " có ProductID không tồn tại");
+                    rowIndex, poDetailResponse.getPoDetailId() + " có Mã Hàng Hóa không tồn tại");
         }
         return null;
+    }
+
+    public void saveHistoryImportDataExcel(String action, List<PoDetail> listInsertPoDetail, String attribute) {
+        // Get List PoNumber distinct
+        List<String> distinctPoNumber = listInsertPoDetail.stream()
+                .map(poDetail -> poDetail.getPo().getPoNumber())
+                .distinct()
+                .collect(Collectors.toList());
+
+        SpecificationDesc specificationDesc = new SpecificationDesc();
+        specificationDesc.setRecord(String.join(", ", distinctPoNumber));
+        specificationDesc.setAmount(((Integer) listInsertPoDetail.size()).toString());
+        if(!attribute.equals("")) {
+            String fields = (String) ReflectionUtil.getFieldValueByReflection(attribute, new UpdateFieldsVN());
+            specificationDesc.setFields(fields);
+        }
+        String descriptionHistory = "";
+        for (PoDetail poDetail : listInsertPoDetail) {
+            descriptionHistory += "<" + poDetail.getSerialNumber().toString() + "> ";
+        }
+        specificationDesc.setDescription(specificationDesc.setDesc(descriptionHistory));
+        historyService.saveHistory(action, ObjectName.PoDetail, specificationDesc.getSpecification(), "");
     }
 
     /**
@@ -350,7 +382,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     @Transactional
     @SuppressWarnings("unchecked")
     public ListResponse<ErrorResponseImport> importPODetail(MultipartFile file) {
-        List<ErrorResponseImport> listErrorResponse = new ArrayList<>();
+        LinkedList<ErrorResponseImport> listErrorResponse = new LinkedList<>();
         List<PoDetail> listInsertPoDetail = new ArrayList<>();
 
         // Process the Excel file
@@ -394,6 +426,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 errorResponse = validateDataImport(poDetailResponse, listInsertPoDetail, rowIndex);
                 if(errorResponse != null) {
                     listErrorResponse.add(errorResponse);
+                    if (errorResponse.getErrorDescription().equals("Import nhiều hơn số lượng cho phép"))
+                        break;
                     continue;
                 }
                 // If the PO detail is valid, convert it to an entity and add it to the list of PO details to be inserted
@@ -402,8 +436,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             }
         }
 
-        if (listErrorResponse.isEmpty()) {
+        if (listErrorResponse.isEmpty() && listInsertPoDetail.size() > 0) {
             poDetailRepository.saveAll(listInsertPoDetail);
+            saveHistoryImportDataExcel(Action.IMPORT.getValue(), listInsertPoDetail, "");
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " dòng import thành công")));
         }
@@ -420,14 +455,14 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     public Object readExcelRowDataImport(Row row, int rowIndex) {
         // Validate the text columns
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
-                processExcelFile.validateTextColumns(row, rowIndex, 0, 1, 2);
-
+                processExcelFile.validateTextColumns(row, rowIndex, 2);
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
         // If the columns are numeric, process the data
-        String productId = row.getCell(0).getStringCellValue();
-        String serialNumber = row.getCell(1).getStringCellValue();
+
+        String productId = processExcelFile.getCellValueIsNumberOrString(row, 0);
+        String serialNumber = processExcelFile.getCellValueIsNumberOrString(row, 1);
         String poNumber = row.getCell(2).getStringCellValue();
 
         String poDetailId = poNumber + "-" + productId + "-" + serialNumber;
@@ -460,16 +495,17 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Validate the numeric columns
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
                 processExcelFile.validateNumbericColumns(row, rowIndex, 3);
-
+        if (errorResponseImport != null) {
+            return errorResponseImport;
+        }
         errorResponseImport = (ErrorResponseImport)
-                processExcelFile.validateTextColumns(row, rowIndex, 0, 1, 2);
-
+                processExcelFile.validateTextColumns(row, rowIndex, 2);
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
 
-        String productId = row.getCell(0).getStringCellValue();
-        String serialNumber = row.getCell(1).getStringCellValue();
+        String productId = processExcelFile.getCellValueIsNumberOrString(row, 0);
+        String serialNumber = processExcelFile.getCellValueIsNumberOrString(row, 1);
         String poNumber = row.getCell(2).getStringCellValue();
         String poDetailId = poNumber + "-" + productId + "-" + serialNumber;
 
@@ -537,6 +573,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(key);
         // Update the PO detail record with the new data
         if (poDetail.isPresent()) {
+            SpecificationDesc specificationDesc = new SpecificationDesc();
+            specificationDesc.setRecord(poDetailResponse.getPoDetailId());
+            String compare = poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse), Action.EDIT, specificationDesc);
+            specificationDesc.setDescription(compare);
+
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
             poDetail.get().setKcsVT(poDetailResponse.getKcsVT());
@@ -548,18 +589,24 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             poDetail.get().setPriority(poDetailResponse.getPriority());
 
             poDetailRepository.save(poDetail.get());
+            historyService.saveHistory(Action.EDIT.getValue(), ObjectName.PoDetail, specificationDesc.getSpecification(), "");
 
             return ResponseMapper.toDataResponse("", StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
         }
 
         // Return an error response if the PO detail record was not found
-        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
     }
 
     public DataResponse<String> deletePoDetail(String id) {
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(id);
         if (poDetail.isPresent()) {
+            /* Save History */
+            SpecificationDesc specificationDesc = new SpecificationDesc();
+            specificationDesc.setRecord(poDetail.get().getPoDetailId());
+
             poDetailRepository.delete(poDetail.get());
+            historyService.saveHistory(Action.DELETE.getValue(), ObjectName.PoDetail, specificationDesc.getSpecification(), "");
             return ResponseMapper.toDataResponseSuccess("Success");
         }
         return ResponseMapper.toDataResponseSuccess(null);

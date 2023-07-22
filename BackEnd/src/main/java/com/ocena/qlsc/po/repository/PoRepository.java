@@ -4,6 +4,8 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.po.model.Po;
 
 import com.ocena.qlsc.podetail.model.PoDetail;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +18,6 @@ import java.util.Optional;
 
 @Repository
 public interface PoRepository extends BaseRepository<Po> {
-
     Optional<Po> findByPoNumber(String poNumber);
 
     Optional<Po> findById(String id);

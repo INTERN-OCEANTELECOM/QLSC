@@ -16,7 +16,7 @@ export const handleLoginRedux = (email, password) => {
     return  async(dispatch, getState) => {
         dispatch({type: FETCH_USER_LOGIN})
 
-        let res = await loginAdmin(email, password);
+        let res = await loginAdmin(email.trim(), password);
         if (res && res.statusCode === 200 && res.data.status === 0) {
             localStorage.setItem("email", email)
             dispatch({

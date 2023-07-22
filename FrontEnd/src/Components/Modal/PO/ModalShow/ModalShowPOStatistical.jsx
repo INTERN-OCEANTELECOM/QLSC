@@ -3,6 +3,7 @@ import "./modalstatistical.scss";
 import { Modal, Table } from "react-bootstrap";
 import Chart from "chart.js";
 import { showStatistical } from "../../../../service/service";
+import { GrClose } from "react-icons/gr";
 // import { Bar } from "react-chartjs-2";
 
 const ModalShowPOStatistical = (props) => {
@@ -221,8 +222,11 @@ const ModalShowPOStatistical = (props) => {
   return (
     <>
       <Modal show={show} onHide={handleClose} fullscreen size="lg">
-        <Modal.Header closeButton>
+        <Modal.Header >
           <Modal.Title>Thống kê {dataStatistical.poNumber}</Modal.Title>
+          <button type="button" class="btn-closes" aria-label="Close" onClick={handleClose}>
+            <GrClose/>
+          </button>
         </Modal.Header>
         <Modal.Body>
           <div className="chart-statistical">

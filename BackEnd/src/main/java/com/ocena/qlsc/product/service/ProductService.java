@@ -64,6 +64,11 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         return productRepository::findByProductId;
     }
 
+    @Override
+    protected Class<Product> getEntityClass() {
+        return Product.class;
+    }
+
     /**
      * get Product By Page
      *

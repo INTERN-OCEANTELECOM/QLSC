@@ -15,6 +15,7 @@ const ModalUpdatePo = (props) => {
     currentPage,
     handleSearch,
     search,
+    currentPageSearch,
   } = props;
   const [selectedDateStart, setSelectedDateStart] = useState(null);
   const [selectedDateEnd, setSelectedDateEnd] = useState(null);
@@ -141,7 +142,7 @@ const ModalUpdatePo = (props) => {
           localStorage.removeItem("po");
           
           if (search) {
-            handleSearch(page);
+            handleSearch(currentPageSearch);
           } else {
             getAllPo(page);
           }
@@ -194,7 +195,7 @@ const ModalUpdatePo = (props) => {
               <div className="validate-add-po">{isValidate}</div>
               <form className="input-po-detail">
                 <Row className="mb-3 ">
-                  <Form.Group as={Col} md="6" >
+                  <Form.Group as={Col} md="6">
                     <Form.Label>Số hợp đồng</Form.Label>
                     <Form.Control
                       type="text"
@@ -208,7 +209,7 @@ const ModalUpdatePo = (props) => {
                       }
                     />
                   </Form.Group>
-                  <Form.Group as={Col} md="6" >
+                  <Form.Group as={Col} md="6">
                     <Form.Label>Số PO</Form.Label>
                     <Form.Control
                       type="text"
@@ -222,7 +223,7 @@ const ModalUpdatePo = (props) => {
                   </Form.Group>
                 </Row>
                 <Row className="mb-3 ">
-                  <Form.Group as={Col} md="12" >
+                  <Form.Group as={Col} md="12">
                     <Form.Label>Số lượng</Form.Label>
                     <Form.Control
                       type="number"
@@ -243,10 +244,10 @@ const ModalUpdatePo = (props) => {
                       dateFormat="dd/MM/yyyy"
                       showYearDropdown
                       showMonthDropdown
-                      customInput={<CustomInput />}
+                      customInput={<Form.Control />}
                     />
                   </Form.Group>
-                  <Form.Group as={Col} md="6" >
+                  <Form.Group as={Col} md="6">
                     <Form.Label>Ngày kết thúc</Form.Label>
                     <DatePicker
                       selected={selectedDateEnd}
@@ -254,7 +255,7 @@ const ModalUpdatePo = (props) => {
                       dateFormat="dd/MM/yyyy"
                       showYearDropdown
                       showMonthDropdown
-                      customInput={<CustomInput />}
+                      customInput={<Form.Control />}
                     />
                   </Form.Group>
                 </Row>
@@ -267,7 +268,7 @@ const ModalUpdatePo = (props) => {
                       dateFormat="dd/MM/yyyy"
                       showYearDropdown
                       showMonthDropdown
-                      customInput={<CustomInput />}
+                      customInput={<Form.Control />}
                     />
                   </Form.Group>
                   <Form.Group
@@ -282,14 +283,12 @@ const ModalUpdatePo = (props) => {
                       dateFormat="dd/MM/yyyy"
                       showYearDropdown
                       showMonthDropdown
-                      customInput={<CustomInput />}
+                      customInput={<Form.Control />}
                     />
                   </Form.Group>
                 </Row>
                 <Row className="mb-3 ">
-                  <Form.Group
-                    controlId="exampleForm.ControlTextarea1"
-                  >
+                  <Form.Group controlId="exampleForm.ControlTextarea1">
                     <Form.Label>Ghi chú</Form.Label>
                     <Form.Control
                       as="textarea"

@@ -19,6 +19,7 @@ import {
   handleRefresh,
 } from "../../redux/actions/userAction";
 import logo from "../../assets/logo_28-06-2017_LogoOceanTelecomtailieupng-removebg-preview.png";
+import { toast } from "react-toastify";
 
 const Admin = () => {
   
@@ -117,6 +118,12 @@ const Admin = () => {
     setListUser(cloneListUser);
   };
 
+  const handlePressEnter = (event) => {
+    if (event && event.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   return (
     <div className="admin">
       <div className="navbars shadow-sm  bg-white rounded">
@@ -134,6 +141,9 @@ const Admin = () => {
             <Nav className="me-auto">
               <NavLink to="/admin" className="nav-link">
                 Quản lý User
+              </NavLink>
+              <NavLink to="/history" className="nav-link">
+                Nhật ký
               </NavLink>
             </Nav>
             <Nav>
@@ -170,6 +180,7 @@ const Admin = () => {
                 className="form-control"
                 placeholder="Search..."
                 onChange={(event) => setSearch(event.target.value)}
+                onKeyDown={(e) => handlePressEnter(e)}
               />
               <button
                 className="btn btn-primary"
@@ -235,49 +246,49 @@ const Admin = () => {
                 <th>Action</th>
               </tr>
             </thead>
-              <tbody>
-                {listUser &&
-                  listUser.length > 0 &&
-                  listUser.map((item, index) => {
-                    if (item.removed === true) {
-                      return null;
-                    }
-                    return (
-                      <tr key={`sc-${index}`}>
-                        <td>{index + 1}</td>
-                        <td>{item.fullName}</td>
-                        <td>{item.email}</td>
-                        <td>{item.phoneNumber}</td>
-                        <td>{item.roles[0].roleName}</td>
-                        <td>
-                          {item.status === 0 && "Mới"}
-                          {item.status === 1 && "Đã đổi mật khẩu"}
-                          {item.status === 2 && "Đã xóa"}
-                        </td>
-                        <td>
-                          {item.status !== 2 && (
-                            <>
+            <tbody>
+              {listUser &&
+                listUser.length > 0 &&
+                listUser.map((item, index) => {
+                  if (item.removed === true) {
+                    return null;
+                  }
+                  return (
+                    <tr key={`sc-${index}`}>
+                      <td>{index + 1}</td>
+                      <td>{item.fullName}</td>
+                      <td>{item.email}</td>
+                      <td>{item.phoneNumber}</td>
+                      <td>{item.roles[0].roleName}</td>
+                      <td>
+                        {item.status === 0 && "Mới"}
+                        {item.status === 1 && "Đã đổi mật khẩu"}
+                        {item.status === 2 && "Đã xóa"}
+                      </td>
+                      <td>
+                        {item.status !== 2 && (
+                          <>
+                            <button
+                              className="btn btn-warning mx-1 btn-sm"
+                              onClick={() => hanldeEditUser(item)}
+                            >
+                              Edit
+                            </button>
+                            {item.email !== localStorage.getItem("email") && (
                               <button
-                                className="btn btn-warning mx-1 btn-sm"
-                                onClick={() => hanldeEditUser(item)}
+                                className="btn btn-danger btn-sm"
+                                onClick={() => handleDeleteUser(item)}
                               >
-                                Edit
+                                Delete
                               </button>
-                              {item.email !== localStorage.getItem("email") && (
-                                <button
-                                  className="btn btn-danger btn-sm"
-                                  onClick={() => handleDeleteUser(item)}
-                                >
-                                  Delete
-                                </button>
-                              )}
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
+                            )}
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
           </Table>
         </div>
       ) : (

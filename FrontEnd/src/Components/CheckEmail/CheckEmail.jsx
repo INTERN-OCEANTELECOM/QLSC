@@ -45,6 +45,11 @@ export const CheckEmail = () => {
     }
   };
 
+  const handlePressEnter = (event) => {
+    if (event && event.key === "Enter") {
+      handleOTP();
+    }
+  };
   return (
     <div>
       <img className="wave" src={wave} />
@@ -67,6 +72,7 @@ export const CheckEmail = () => {
                   placeholder="Enter your email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
+                  onKeyDown={(e) => handlePressEnter(e)}
                 />
               </div>
             </div>

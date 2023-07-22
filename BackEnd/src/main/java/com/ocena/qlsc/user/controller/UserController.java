@@ -11,6 +11,7 @@ import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.user.dto.*;
 import com.ocena.qlsc.user.model.User;
 import com.ocena.qlsc.user.service.UserService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.servlet.http.HttpServletRequest;
@@ -98,7 +99,6 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         String emailHeader = request.getHeader("email");
-        System.out.println(emailHeader);
         return userService.validateDeleteUser(email, emailHeader) ? super.delete(email) :
                 ResponseMapper.toDataResponse("", StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
     }
@@ -106,5 +106,12 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     @Override
     public ListResponse<User> getAllByKeyword(String keyword) {
         return super.getAllByKeyword(keyword);
+    }
+
+    /*User For Swagger*/
+    @Hidden
+    @Override
+    public DataResponse<UserDTO> update(UserDTO objectDTO, String key) {
+        return null;
     }
 }

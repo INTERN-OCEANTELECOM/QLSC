@@ -43,7 +43,6 @@ const ModelAddPO = (props) => {
         className="form-control"
         value={value}
         onClick={onClick}
-        readOnly
       />
       <div className="icon-container" onClick={onClick}>
         <FaCalendarAlt className="calendar-icon" />
@@ -226,7 +225,7 @@ const ModelAddPO = (props) => {
                     <DatePicker
                       selected={selectedDateStart}
                       onChange={handleDateChangeStart}
-                      customInput={<CustomInput />}
+                      customInput={<Form.Control />}
                       dateFormat="dd/MM/yyyy"
                       showYearDropdown
                       showMonthDropdown
@@ -241,7 +240,7 @@ const ModelAddPO = (props) => {
                     <DatePicker
                       selected={selectedDateEnd}
                       onChange={handleDateChangeEnd}
-                      customInput={<CustomInput />}
+                      customInput={<Form.Control />}
                       dateFormat="dd/MM/yyyy"
                       showYearDropdown
                       showMonthDropdown
@@ -258,7 +257,7 @@ const ModelAddPO = (props) => {
                     <DatePicker
                       selected={selectedDate}
                       onChange={handleDateChange}
-                      customInput={<CustomInput />}
+                      customInput={<Form.Control />}
                       dateFormat="dd/MM/yyyy"
                       showYearDropdown
                       showMonthDropdown
@@ -273,7 +272,7 @@ const ModelAddPO = (props) => {
                     <DatePicker
                       selected={selectedDateWarranty}
                       onChange={handleDateChangeWarranty}
-                      customInput={<CustomInput />}
+                      customInput={<Form.Control />}
                       dateFormat="dd/MM/yyyy"
                       showYearDropdown
                       showMonthDropdown
@@ -281,9 +280,7 @@ const ModelAddPO = (props) => {
                   </Form.Group>
                 </Row>
                 <Row className="mb-3 ">
-                  <Form.Group
-                    controlId="exampleForm.ControlTextarea1"
-                  >
+                  <Form.Group controlId="exampleForm.ControlTextarea1">
                     <Form.Label>Ghi chú</Form.Label>
                     <Form.Control
                       as="textarea"

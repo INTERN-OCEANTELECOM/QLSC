@@ -41,6 +41,8 @@ public class ProcessExcelFile {
                 Row row = rowIterator.next();
 
                 for (Integer key : map.keySet()) {
+                    System.out.println(row.getCell(key).getStringCellValue());
+                    System.out.println(map.get(key));
                     if (!isValidHeader(row.getCell(key).getStringCellValue(), map.get(key))) {
                         return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (key + 1) + " sai");
                     }
@@ -82,7 +84,7 @@ public class ProcessExcelFile {
             Cell cell = row.getCell(columnIndex);
             if (!isNumericCell(cell)) {
                 return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex,
-                        "Hàng " + rowIndex + " Cột " + (columnIndex + 1) + " không phải dạng numberic");
+                        "Hàng " + rowIndex + " Cột " + (columnIndex + 1) + " không phải dạng Numberic");
             }
         }
         return null;
@@ -137,5 +139,13 @@ public class ProcessExcelFile {
             return true;
         }
         return false;
+    }
+
+    public String getCellValueIsNumberOrString(Row row, int col) {
+        CellType cellType = row.getCell(col).getCellType();
+        if(cellType == CellType.STRING) {
+            return row.getCell(col).getStringCellValue();
+        }
+        return String.format("%.0f", row.getCell(col).getNumericCellValue());
     }
 }

@@ -35,6 +35,8 @@ const PO = () => {
   const [selectedOption, setSelectedOption] = useState("50");
   const [startIndex, setStartIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState("");
+  const [currentPageSearch, setCurrentPageSearch] = useState("");
+  const [getPO, setGetPO] = useState("")
 
   // call get all po when load page
   useEffect(() => {
@@ -82,7 +84,7 @@ const PO = () => {
     setStartIndex(newStartIndex);
     if (search) {
       handleSearch(+event.selected);
-      setCurrentPage(selectedPage);
+      setCurrentPageSearch(selectedPage);
     } else {
       getAllPo(+event.selected);
       setCurrentPage(selectedPage);
@@ -120,9 +122,11 @@ const PO = () => {
       if(res && res.statusCode === 200) {
         setListPo(res.data)
         setTotalProducts(res.totalPages);
+        setCurrentPageSearch(page);
       } else {
         if(res && res.statusCode === 204) {
           setListPo(res.data);
+          setCurrentPageSearch(page);
         }
       }
     } else {
@@ -133,9 +137,20 @@ const PO = () => {
   const handleReset = () => {
     getAllPo(0)
     setSearch("")
+    window.location.reload();
   }
 
 
+  const handleGetPoNumber = (item) => {
+    setGetPO(item)
+    window.location.href = `/quanly?item=${JSON.stringify(item)}`;
+  }
+
+  const handlePressEnter = (event) => {
+    if (event && event.key === "Enter") {
+      handleSearch(0);
+    }
+  };
 
   return (
     <div className="po-tables">
@@ -149,6 +164,7 @@ const PO = () => {
                   placeholder="Search..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => handlePressEnter(e)}
                 />
                 <button
                   className="btn2 btn-primary2"
@@ -232,23 +248,27 @@ const PO = () => {
                     <tr
                       key={`po-${currentIndex}`}
                       onDoubleClick={() => handleShowPo(item)}
-                      className="header-table "
                     >
-                      <td>{currentIndex + 1}</td>
-                      <td>{item.contractNumber}</td>
-                      <td>{item.poNumber}</td>
-                      <td>{item.quantity}</td>
-                      <td>{dataBegin}</td>
-                      <td>{datEnd}</td>
-                      <td>{dataTime}</td>
-                      <td>{dataWarranty}</td>
+                      <td className="item-table ">{currentIndex + 1}</td>
+                      <td className="item-table ">{item.contractNumber}</td>
+                      <td
+                        className="col-po"
+                        onClick={() => handleGetPoNumber(item.poNumber)}
+                      >
+                        {item.poNumber}
+                      </td>
+                      <td className="item-table ">{item.quantity}</td>
+                      <td className="item-table ">{dataBegin}</td>
+                      <td className="item-table ">{datEnd}</td>
+                      <td className="item-table ">{dataTime}</td>
+                      <td className="item-table ">{dataWarranty}</td>
                       <td className="col-note">{item.note}</td>
                       <td className="col-action">
                         {localStorage.getItem("role") === "ROLE_MANAGER" ||
                         localStorage.getItem("role") === "ROLE_ADMIN" ? (
                           <>
                             <button
-                              className="btn btn-warning btn-sm"
+                              className="btn btn-warning btn-sm btn-respon"
                               onClick={() => handleUpdatePO(item)}
                             >
                               Edit
@@ -334,6 +354,7 @@ const PO = () => {
         currentPage={currentPage}
         handleSearch={handleSearch}
         search={search}
+        currentPageSearch={currentPageSearch}
       />
 
       <ModalShowPO

@@ -45,6 +45,11 @@ public class RoleService extends BaseServiceImpl<Role, RoleDTO> implements IRole
     }
 
     @Override
+    protected Class<Role> getEntityClass() {
+        return Role.class;
+    }
+
+    @Override
     protected Page<Role> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return null;
     }

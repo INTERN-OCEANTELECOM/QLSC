@@ -45,13 +45,5 @@ public class Po extends BaseModel implements Serializable {
         this.poNumber = poNumber;
     }
 
-    @Override
-    public String toString() {
-        return "Po{" +
-                "poNumber='" + poNumber + '\'' +
-                ", quantity=" + quantity +
-                ", beginAt=" + beginAt +
-                ", endAt=" + endAt +
-                '}';
-    }
+
 }

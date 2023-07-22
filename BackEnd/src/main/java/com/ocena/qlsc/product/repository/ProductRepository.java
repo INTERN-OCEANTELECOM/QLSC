@@ -17,8 +17,7 @@ import java.util.Optional;
 public interface ProductRepository extends BaseRepository<Product> {
     Page<Product> findAll(Pageable pageable);
 
-    @Override
-//    @Cacheable(value = "product")
+    @Cacheable("findAll")
     List<Product> findAll();
 
     boolean existsProductByProductId(String productId);

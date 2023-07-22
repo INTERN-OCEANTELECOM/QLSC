@@ -3,7 +3,7 @@ import { Modal, Button } from "react-bootstrap";
 import "./modalupdatepodetail.scss";
 import DatePicker from "react-datepicker";
 import { FaCalendarAlt } from "react-icons/fa";
-import { updatePoDetail } from "../../../../service/service";
+import { deletePODetail, updatePoDetail } from "../../../../service/service";
 import { toast } from "react-toastify";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
@@ -20,6 +20,19 @@ const ModalUpdatePoDetail = (props) => {
     getProducts,
     currenPage,
     handleSearch,
+    currentPageSearch,
+    productIds,
+    serialNumbers,
+    value1s,
+    bbbgs,
+    selectedDateStarts,
+    repairCategorys,
+    repairStatuss,
+    exportPartners,
+    kcsVts,
+    prioritys,
+    items,
+    searchByPO,
   } = props;
   const [selectedDateStart, setSelectedDateStart] = useState(null);
   const [selectedDateWarrity, setSelectedDateWarrity] = useState(null);
@@ -143,8 +156,25 @@ const ModalUpdatePoDetail = (props) => {
     );
     if (res && res.statusCode === 200) {
       toast.success("Cập nhật thành công !!!");
-      if (handleSearch) {
-        handleSearch(page)
+      if (
+        currentPageSearch ||
+        productIds ||
+        serialNumbers ||
+        value1s ||
+        items ||
+        bbbgs ||
+        selectedDateStarts ||
+        repairCategorys ||
+        repairStatuss ||
+        exportPartners ||
+        kcsVts ||
+        prioritys
+      ) {
+        if(items) {
+          searchByPO(currentPageSearch)
+        }else {
+          handleSearch(currentPageSearch);
+        }
       } else {
         getProducts(page);
       } 
@@ -156,6 +186,31 @@ const ModalUpdatePoDetail = (props) => {
       setNote(null)
     } else {
       toast.error("Cập nhật thất bại !!!");
+    }
+  };
+
+  const confirmDelete = async () => {
+    let page;
+    if (currenPage) {
+      page = currenPage;
+    } else {
+      page = 0;
+    }
+    try {
+      let res = await deletePODetail(dateEditPoDetail.poDetailId);
+      console.log(res);
+      if (res && res.statusCode === 200) {
+        toast.success("Xóa thành công!!!");
+        handleCloses();
+        getProducts(page);
+      } else {
+        toast.error("Xóa không thành công!!");
+        handleCloses();
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Đã xảy ra lỗi khi xóa người dùng!!");
+      handleCloses();
     }
   };
 
@@ -218,16 +273,6 @@ const ModalUpdatePoDetail = (props) => {
                   </Form.Group>
                 </Row>
                 <Row className="mb-3 ">
-                  {/* <Form.Group as={Col} md="4" controlId="validationCustom03">
-                    <Form.Label>Số BBNK</Form.Label>
-                    <Form.Control
-                      required
-                      type="text"
-                      placeholder="Số BBNK"
-                      value={bbbg}
-                      onChange={(e) => setBbbg(e.target.value)}
-                    />
-                  </Form.Group> */}
                   <Form.Group as={Col} md="6" controlId="validationCustom04">
                     <Form.Label>Ngày nhập kho</Form.Label>
                     <DatePicker
@@ -236,7 +281,7 @@ const ModalUpdatePoDetail = (props) => {
                       dateFormat="dd/MM/yyyy"
                       showYearDropdown
                       showMonthDropdown
-                      customInput={<CustomInput />}
+                      customInput={<Form.Control />}
                       disabled={
                         localStorage.getItem("role") !== "ROLE_ADMIN" &&
                         localStorage.getItem("role") !== "ROLE_MANAGER"
@@ -328,7 +373,7 @@ const ModalUpdatePoDetail = (props) => {
                       dateFormat="dd/MM/yyyy"
                       showYearDropdown
                       showMonthDropdown
-                      customInput={<CustomInput />}
+                      customInput={<Form.Control />}
                       disabled={
                         localStorage.getItem("role") !== "ROLE_ADMIN" &&
                         localStorage.getItem("role") !== "ROLE_MANAGER"
@@ -363,7 +408,7 @@ const ModalUpdatePoDetail = (props) => {
                       dateFormat="dd/MM/yyyy"
                       showYearDropdown
                       showMonthDropdown
-                      customInput={<CustomInput />}
+                      customInput={<Form.Control />}
                       disabled={
                         localStorage.getItem("role") !== "ROLE_ADMIN" &&
                         localStorage.getItem("role") !== "ROLE_MANAGER"
@@ -393,6 +438,11 @@ const ModalUpdatePoDetail = (props) => {
           <Button variant="secondary" onClick={handleCloses}>
             Close
           </Button>
+          {localStorage.getItem("role") === "ROLE_ADMIN" ? (
+            <Button variant="danger" onClick={confirmDelete}>
+              Delete
+            </Button>
+          ) : null}
           <Button variant="primary" onClick={handleUpdatePoDetail}>
             Save Changes
           </Button>

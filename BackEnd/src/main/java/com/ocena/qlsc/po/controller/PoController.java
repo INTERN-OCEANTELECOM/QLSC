@@ -28,7 +28,6 @@ import java.util.function.Function;
 
 @RestController
 @RequestMapping(value = "po")
-//@CrossOrigin(value = "*")
 @RequiredArgsConstructor
 public class PoController extends BaseApiImpl<Po, PoDTO> {
 
@@ -52,15 +51,13 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     @Override
     @CacheEvict(value = {"getAllPO", "getAllByPage"}, allEntries = true)
     public DataResponse<PoDTO> add(PoDTO objectDTO) {
-        return (poService.validationPoRequest(objectDTO, false, null) == null) ? super.add(objectDTO) : poService.validationPoRequest(objectDTO, false, null);
+        return (poService.validateAddPO(objectDTO) == null) ? super.add(objectDTO) : poService.validateAddPO(objectDTO);
     }
 
     @Override
     @CacheEvict(value = {"getAllPO", "getAllByPage"}, allEntries = true)
     public DataResponse<PoDTO> update(PoDTO objectDTO, String key) {
-        return (poService.validationPoRequest(objectDTO, true, key) == null) ?
-                super.update(objectDTO, key) :
-                poService.validationPoRequest(objectDTO, true, key);
+        return (poService.validateUpdatePo(objectDTO, key) == null) ? super.update(objectDTO, key) : poService.validateUpdatePo(objectDTO, key);
     }
 
     @GetMapping(value = "/{poNumber}")

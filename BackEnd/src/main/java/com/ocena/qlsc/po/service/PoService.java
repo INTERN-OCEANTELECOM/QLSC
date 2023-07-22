@@ -1,6 +1,6 @@
 package com.ocena.qlsc.po.service;
 
-import com.ocena.qlsc.common.constants.GlobalConstants;
+import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
@@ -17,7 +17,6 @@ import com.ocena.qlsc.podetail.enums.KSCVT;
 import com.ocena.qlsc.podetail.enums.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -54,6 +53,11 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     }
 
     @Override
+    protected Class<Po> getEntityClass() {
+        return Po.class;
+    }
+
+    @Override
     protected Page<Po> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return poRepository.searchPO(
                 searchKeywordDto.getKeyword().get(0),
@@ -70,56 +74,47 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         return super.validationRequest(object);
     }
 
-    /**
-     * Validates the Po request
-     *
-     * @param poDTO The PoDTO object containing the Po data
-     * @param isUpdate A boolean value indicating if it's an update operation
-     * @param key A string representing the key value
-     * @return A DataResponse object containing the validated PoDTO
-     */
-    @Override
-    public DataResponse<PoDTO> validationPoRequest(PoDTO poDTO, boolean isUpdate, String key) {
-        // get list error and Po by PoNumber
+    public DataResponse<PoDTO> validateAddPO(PoDTO poDTO) {
         List<String> result = validationRequest(poDTO);
 
         if (result != null){
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
-        if (poDTO.getBeginAt() != null
-                && poDTO.getEndAt() != null) {
-            if (poDTO.getBeginAt() > poDTO.getEndAt()) {
-                return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
-            }
+        if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
+            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
         }
+
         Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
-        Optional<Po> poOld = poRepository.findByPoNumber(key);
+        if (newPo.isPresent()){
+            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");
+        }
+        return null;
+    }
 
-        // get Current Time User can update within the first 24 hours
-        Long currentTime = System.currentTimeMillis();
 
-        if (poOld.isPresent()) {
-            if (poOld.get().getCreated() + GlobalConstants.updateTimePO < currentTime
-                    && (!poOld.get().getPoNumber().equals(poDTO.getPoNumber())
-                    || !poOld.get().getContractNumber().equals(poDTO.getContractNumber()))) {
-                return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 24 HOURS");
-            }
+    public DataResponse<PoDTO> validateUpdatePo(PoDTO poDTO, String key) {
+        List<String> result = validationRequest(poDTO);
+
+        if (result != null){
+            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
-        // Check Po
-        if (newPo.isPresent()){
-            if (isUpdate){
-                if (!poOld.get().getPoNumber().equals(poDTO.getPoNumber())) {
-                    return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "NEW PO NUMBER ALREADY EXISTS");
-                } else {
-                    return null;
-                }
-            } else if (!poOld.isPresent()){
-                return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-            }
+        if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
+            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
+        }
 
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");
+        Optional<Po> poOld = poRepository.findByPoNumber(key);
+        Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
+
+
+        if (poOld.get().getCreated() + TimeConstants.updateTimePO < System.currentTimeMillis()
+                && (!poOld.get().getPoNumber().equals(poDTO.getPoNumber())
+                || !poOld.get().getContractNumber().equals(poDTO.getContractNumber()))) {
+            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 24 HOURS");
+        }
+        if (newPo.isPresent() && !newPo.get().getPoNumber().equals(key)){
+            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "NEW PO NUMBER ALREADY EXISTS");
         }
         return null;
     }
@@ -162,6 +157,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     public DataResponse<HashMap<String, HashMap<String, Integer>>> getStatisticsByPoNumber(String poNumber) {
         // Check if a Po object with the given poNumber exists in the repository
         Optional<Po> isExistPO = poRepository.findByPoNumber(poNumber);
+        System.out.println(isExistPO.get().getCreated());
 
         // Create a new map to store the results of the statistics
         HashMap<String, Map<String, Long>> resultsMap = new HashMap<>();

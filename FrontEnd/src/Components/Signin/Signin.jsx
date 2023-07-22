@@ -102,6 +102,12 @@ const Signin = () => {
     }
   };
 
+  const handlePressEnter = (event) => {
+    if(event && event.key === "Enter") {
+      handleLogin()
+    }
+  }
+
   return (
     <div>
       <img className="wave" src={wave} />
@@ -140,6 +146,7 @@ const Signin = () => {
                   placeholder="Password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
+                  onKeyDown={(e) => handlePressEnter(e)}
                 />
                 <div onClick={() => setIsShowPassword(!isShowPassword)}>
                   {isShowPassword === true ? (

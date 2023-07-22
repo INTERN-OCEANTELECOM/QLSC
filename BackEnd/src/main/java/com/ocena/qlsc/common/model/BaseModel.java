@@ -1,20 +1,36 @@
 package com.ocena.qlsc.common.model;
 
 import com.ocena.qlsc.common.util.SystemUtil;
+import com.ocena.qlsc.po.model.Po;
+import com.ocena.qlsc.product.model.Product;
+import com.ocena.qlsc.user.model.Role;
+import com.ocena.qlsc.common.util.DateUtil;
+import com.ocena.qlsc.common.util.ReflectionUtil;
+import com.ocena.qlsc.common.util.SystemUtil;
+import com.ocena.qlsc.user_history.enums.Action;
+import com.ocena.qlsc.user_history.model.SpecificationDesc;
 import jakarta.persistence.*;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
-@Data
+@NoArgsConstructor
 @MappedSuperclass
 public class BaseModel {
+
     @Id
     private String id;
 
@@ -56,5 +72,64 @@ public class BaseModel {
                 ", modifier='" + modifier + '\'' +
                 ", removed=" + removed +
                 '}';
+    }
+
+    public String getVietNameseFieldName(String fieldName) {
+        return ReflectionUtil.getFieldValueByReflection(fieldName,
+                "com.ocena.qlsc.common.fields." + this.getClass().getSimpleName() + "Fields");
+    }
+
+    private void setLogsEditRole(Object value1, Object value2, List<String> diffProperties, List<String> oldDatas, List<String> newDatas) {
+        List<Role> listValue1 = (List<Role>) value1;
+        List<Role> listValue2 = (List<Role>) value2;
+        if (!(listValue1.stream().map(Role::getId)
+                .collect(Collectors.toList())
+                .equals(listValue2.stream().map(Role::getId)
+                        .collect(Collectors.toList())))) {
+            System.out.println("Vao day: 1");
+            diffProperties.add("Vai Trò");
+            oldDatas.add(listValue1.get(0).getRoleName());
+            newDatas.add(listValue2.get(0).getRoleName());
+        }
+    }
+
+    public <T extends BaseModel> String compare(T other, Action action, SpecificationDesc specificationDesc) {
+        List<String> diffProperties = new ArrayList<>();
+        List<String> oldDatas = new ArrayList<>();
+        List<String> newDatas = new ArrayList<>();
+        Class<? extends BaseModel> clazz = this.getClass();
+        try {
+            for (Field field : clazz.getDeclaredFields()) {
+                field.setAccessible(true);
+                Object value1 = field.get(this);
+                Object value2 = field.get(other);
+                if (value2 == null) {
+                    continue;
+                }
+
+                if (!value2.equals(value1) && !(value2 instanceof Product) && !(value2 instanceof Po)) {
+                    if (field.getName().equals("roles")) {
+                        setLogsEditRole(value1, value2, diffProperties, oldDatas, newDatas);
+                    } else {
+                        diffProperties.add(getVietNameseFieldName(field.getName()));
+                        oldDatas.add(DateUtil.convertObjectToDateFormat(value1, field.getName()));
+                        newDatas.add(DateUtil.convertObjectToDateFormat(value2, field.getName()));
+                    }
+
+                }
+
+            }
+        } catch (IllegalAccessException e){
+            throw new RuntimeException(e);
+        }
+
+        if (diffProperties.size() > 0) {
+            if (action == Action.EDIT) {
+                return specificationDesc.setDesc(diffProperties, oldDatas, newDatas);
+            } else if (action == Action.CREATE) {
+                return specificationDesc.setDesc(diffProperties, newDatas);
+            }
+        }
+        return "";
     }
 }

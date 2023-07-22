@@ -28,8 +28,6 @@ public class Product extends BaseModel implements Serializable{
 
     @Column(name = "product_name")
     private String productName;
-
-
     public Product(String productId) {
         this.productId = productId;
     }

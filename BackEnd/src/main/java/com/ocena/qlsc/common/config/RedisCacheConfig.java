@@ -1,4 +1,4 @@
-package com.ocena.qlsc.common.util;
+package com.ocena.qlsc.common.config;
 
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
@@ -16,7 +16,7 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
         RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofSeconds(1200)); // Set time-to-live (TTL) to 20 minutes
+                .entryTtl(Duration.ofSeconds(7200)); // Set time-to-live (TTL) to 60 minutes
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(redisCacheConfiguration)
                 .build();

@@ -118,4 +118,9 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     public ListResponse<PoDetail> getAllByKeyword(String keyword) {
         return null;
     }
+    @Hidden
+    @Override
+    public DataResponse<PoDetailResponse> delete(String id) {
+        return null;
+    }
 }

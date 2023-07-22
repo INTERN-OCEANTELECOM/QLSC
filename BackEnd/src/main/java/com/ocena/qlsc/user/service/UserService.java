@@ -8,8 +8,8 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.common.constants.RoleUser;
-import com.ocena.qlsc.common.constants.GlobalConstants;
+import com.ocena.qlsc.user.model.RoleUser;
+import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.user.mapper.RoleMapper;
 import com.ocena.qlsc.user.mapper.UserMapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
@@ -20,6 +20,11 @@ import com.ocena.qlsc.user.model.User;
 import com.ocena.qlsc.user.repository.RoleRepository;
 import com.ocena.qlsc.user.repository.UserRepository;
 import com.ocena.qlsc.user.configs.mail.OTPService;
+import com.ocena.qlsc.user_history.enums.Action;
+import com.ocena.qlsc.user_history.enums.ObjectName;
+import com.ocena.qlsc.user_history.model.History;
+import com.ocena.qlsc.user_history.model.SpecificationDesc;
+import com.ocena.qlsc.user_history.service.HistoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
@@ -53,6 +58,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     RoleMapper roleMapper;
     @Autowired
     private LocalValidatorFactoryBean validator;
+    @Autowired
+    HistoryService historyService;
+    History history;
     @Override
     protected BaseRepository<User> getBaseRepository() {
         return userRepository;
@@ -65,6 +73,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     @Override
     protected Function<String, Optional<User>> getFindByFunction() {
         return userRepository::findByEmail;
+    }
+
+    @Override
+    protected Class<User> getEntityClass() {
+        return User.class;
     }
 
     @Override
@@ -86,13 +99,13 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
     public boolean validateCreate(UserDTO dto) {
         // Get all roles from the database
-        List<Object[]> listRoles = roleRepository.getAllRoles();
-        for(RoleDTO role : dto.getRoles()) {
-            // Check if each roleId exists in the database
-            if(!listRoles.stream().anyMatch(objs -> objs[0].equals(role.getId()))) {
-                return false;
-            }
-        }
+//        List<Object[]> listRoles = roleRepository.getAllRoles();
+//        for(RoleDTO role : dto.getRoles()) {
+//            // Check if each roleId exists in the database
+//            if(!listRoles.stream().anyMatch(objs -> objs[0].equals(role.getId()))) {
+//                return false;
+//            }
+//        }
 
         if(userRepository.existsByEmail(dto.getEmail()).size() > 0) {
             return false;
@@ -144,6 +157,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                         .collect(Collectors.toList());
                 userResponse.setRemoved(user.getRemoved());
                 userResponse.setRoles(roles);
+
+                /*account login success logs*/
+                historyService.saveHistory(Action.LOGIN.getValue(), null, "Đăng Nhập Thành Công", email);
             }
         }
 
@@ -171,9 +187,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         session.setAttribute("loginAttempts", loginAttempts);
 
-        if(loginAttempts >= GlobalConstants.loginAttempts) {
+        if(loginAttempts >= TimeConstants.loginAttempts) {
             // Set time out is 60s
-            lockedTime = System.currentTimeMillis() / 1000 + GlobalConstants.lockTime;
+            lockedTime = System.currentTimeMillis() / 1000 + TimeConstants.lockTime;
             session.setAttribute("lockedTimeLogin", lockedTime);
 
             // Reset false login attempts to 0
@@ -209,16 +225,20 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         Long lockedTime = (Long) session.getAttribute("lockedTimeLogin");
 
         if (lockedTime != null) {
+            /*account lockout log*/
+
+            historyService.saveHistory(Action.LOGIN.getValue(), null, "Tài Khoản Bị Tạm Khóa 60s", loginRequest.getEmail());
+
             return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
                     StatusMessage.LOCK_ACCESS);
         }
         // Authenticate the email and password
-        if (isAuthenticate(loginRequest.getEmail(), loginRequest.getPassword()).getEmail() != null) {
+        UserDTO userDTO = isAuthenticate(loginRequest.getEmail(), loginRequest.getPassword());
+        if (userDTO.getEmail() != null) {
             if (session.getAttribute("loginAttempts") != null) {
                 session.setAttribute("loginAttempts", 0);
             }
-            return ResponseMapper.toDataResponseSuccess(isAuthenticate(loginRequest.getEmail(),
-                    loginRequest.getPassword()));
+            return ResponseMapper.toDataResponseSuccess(userDTO);
         } else {
             // Handle login attempts for wrong login
             return handleLoginAttempts(session, loginRequest);
@@ -251,7 +271,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if (message.equals("OTP Has Been Sent!!!")){
             // Set time out send OTP is 60s
-            lockedTimeOTP = System.currentTimeMillis() / 1000 + GlobalConstants.lockTime;
+            lockedTimeOTP = System.currentTimeMillis() / 1000 + TimeConstants.lockTime;
             session.setAttribute("lockedTimeOTP", lockedTimeOTP);
 
             return ResponseMapper.toDataResponseSuccess(message);
@@ -277,6 +297,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                 user.setPassword(passwordEncoder.encode(newPassword));
                 user.setStatus((short) 1);
                 if (userRepository.save(user) != null) {
+                    /*reset password logs*/
+                    historyService.saveHistory(Action.RESET_PASSWORD.getValue(), ObjectName.User, "", user.getEmail());
+
                     return ResponseMapper.toDataResponseSuccess(StatusMessage.REQUEST_SUCCESS);
                 }
             }
@@ -304,6 +327,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         // If the modifier is an admin user and is not the same as the user to be deleted, return true
         if (isAdmin && !emailModifier.equals(emailUser)){
+            /* delete user logs */
             return true;
         }
 
@@ -330,6 +354,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             user.setPassword(passwordEncoder.encode(newPassword));
             user.setStatus((short) 1);
             if(userRepository.save(user) != null) {
+                /*change password logs*/
+                historyService.saveHistory(Action.RESET_PASSWORD.getValue(), ObjectName.User, "", user.getEmail());
+
                 return ResponseMapper.toDataResponseSuccess("");
             }
         }
@@ -379,20 +406,25 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                 .stream()
                 .anyMatch(role -> role.getRoleName().equals(RoleUser.ROLE_ADMIN.toString()));
 
-        // Check email already exists
-        System.out.println("mail exists " + isUpdatedAdmin);
-
         if (user != null) {
             User userRequest = userMapper.dtoToEntity(userDTO);
-            user.setPhoneNumber(userRequest.getPhoneNumber());
-            user.setFullName(userRequest.getFullName());
 
             // If the logged-in user is an admin user, also update the User object's email and roles
+            SpecificationDesc specificationDesc = new SpecificationDesc();
+            String compare = user.compare(userRequest, Action.EDIT, specificationDesc);
+            if(!compare.equals("")) {
+                specificationDesc.setRecord(userDTO.getEmail());
+                specificationDesc.setDescription(compare);
+            }
+            historyService.saveHistory(Action.EDIT.getValue(), ObjectName.User, specificationDesc.getSpecification(), "");
+
             if (isUpdatedAdmin) {
                 user.setEmail(userRequest.getEmail());
                 user.setRoles(userRequest.getRoles());
             }
-            userRepository.save(user);
+            user.setPhoneNumber(userRequest.getPhoneNumber());
+            user.setFullName(userRequest.getFullName());
+
             return ResponseMapper.toDataResponseSuccess("");
         }
 

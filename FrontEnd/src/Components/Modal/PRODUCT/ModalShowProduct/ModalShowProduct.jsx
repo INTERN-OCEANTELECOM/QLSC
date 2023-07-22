@@ -14,7 +14,8 @@ const ModalShowProduct = (props) => {
     getProducts,
     currentPage,
     handleSearch,
-    search
+    search,
+    currentPageSearch,
   } = props;
   const [productId, setProductId] = useState("");
   const [productName, setProductName] = useState("");
@@ -41,7 +42,7 @@ const ModalShowProduct = (props) => {
       toast.success("Cập nhật thành công!!!");
       
       if(search) {
-        handleSearch(page);
+        handleSearch(currentPageSearch);
       } else {
         getProducts(page);
       }

@@ -446,6 +446,22 @@ const checkBarcode = (serialNumber) => {
   return axioss.get(`/po-detail/serialNumber?serialNumber=${serialNumber}`, config);
 }
 
+const getHistory = (start, end) => {
+  const config = {
+    headers: {
+      email: localStorage.getItem("email"),
+    },
+  };
+  return axioss.get(
+    `/history/get-by-created?start=${start}&end=${end}`,
+    {
+      headers: {
+        email: `${localStorage.getItem("email")}`,
+      },
+    }
+  );
+}
+
 export {
   fecthAll,
   notify,
@@ -480,4 +496,5 @@ export {
   searchPO,
   getAllPO,
   checkBarcode,
+  getHistory,
 };

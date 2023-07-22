@@ -89,6 +89,7 @@ const BarCodeCheck = () => {
       "Mã hàng hóa",
       "Số PO",
       "Hạng mục SC",
+      "Cập nhật SC",
       "Cập nhật BH",
     ];
 
@@ -115,6 +116,15 @@ const BarCodeCheck = () => {
                 return "Hàng SC";
               } else if (item.repairCategory === 1) {
                 return "Hàng BH";
+              }
+            }
+            if (column === "Cập nhật SC") {
+              if (item.repairStatus === 1) {
+                return "Sửa chữa xong";
+              } else if (item.repairStatus === 0) {
+                return "Sửa chữa không được";
+              } else if (item.repairStatus === 2) {
+                return "Cháy nổ";
               }
             }
             if (column === "Cập nhật BH") {
@@ -234,6 +244,7 @@ const BarCodeCheck = () => {
               <th>Mã hàng hóa</th>
               <th>Số PO</th>
               <th>Hạng mục SC</th>
+              <th>Cập nhật SC</th>
               <th>Cập nhật BH</th>
               <th>Action</th>
             </tr>
@@ -276,6 +287,11 @@ const BarCodeCheck = () => {
                   <td>
                     {item.repairCategory === 0 && "Hàng SC"}
                     {item.repairCategory === 1 && "Hàng BH"}
+                  </td>
+                  <td>
+                    {item.repairStatus === 0 && "SC không được"}
+                    {item.repairStatus === 1 && "SC xong"}
+                    {item.repairStatus === 2 && "Cháy nổ"}
                   </td>
                   <td>{dataWarranty}</td>
                   <td className="col-barcode-action">
