@@ -1849,7 +1849,7 @@ export const TableHH = () => {
               <th>Cập nhật BH</th>
               <th>Ghi chú</th>
               {dataBarcode && dataBarcode.length > 0 && (
-                <th className="text-center col-action">Action</th>
+                <th className="text-center">Action</th>
               )}
               {/* <th>Action</th> */}
             </tr>

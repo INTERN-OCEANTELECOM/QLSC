@@ -438,14 +438,14 @@ const ModalUpdatePoDetail = (props) => {
           <Button variant="secondary" onClick={handleCloses}>
             Close
           </Button>
+          <Button variant="primary" onClick={handleUpdatePoDetail}>
+            Save Changes
+          </Button>
           {localStorage.getItem("role") === "ROLE_ADMIN" ? (
             <Button variant="danger" onClick={confirmDelete}>
               Delete
             </Button>
           ) : null}
-          <Button variant="primary" onClick={handleUpdatePoDetail}>
-            Save Changes
-          </Button>
         </Modal.Footer>
       </Modal>
     </div>

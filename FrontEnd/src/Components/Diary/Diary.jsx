@@ -183,7 +183,7 @@ const Diary = () => {
                   const time = item.created;
                   let data;
                   if (time !== null) {
-                    data = moment(time).format("DD/MM/YYYY");
+                    data = moment(time).format("DD/MM/YYYY HH:mm:ss");
                   }
 
                   // Replace both //n and \n globally in the specification text
