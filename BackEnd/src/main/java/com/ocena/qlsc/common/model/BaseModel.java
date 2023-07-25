@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
-public class BaseModel {
+public class BaseModel implements Cloneable {
 
     @Id
     private String id;
@@ -47,6 +47,11 @@ public class BaseModel {
 
     @Column(name = "removed", columnDefinition = "boolean default true")
     private Boolean removed;
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
     @PrePersist
     private void ensureId() {
@@ -82,12 +87,15 @@ public class BaseModel {
     private void setLogsEditRole(Object value1, Object value2, List<String> diffProperties, List<String> oldDatas, List<String> newDatas) {
         List<Role> listValue1 = (List<Role>) value1;
         List<Role> listValue2 = (List<Role>) value2;
-        if (!(listValue1.stream().map(Role::getId)
-                .collect(Collectors.toList())
-                .equals(listValue2.stream().map(Role::getId)
-                        .collect(Collectors.toList())))) {
-            System.out.println("Vao day: 1");
-            diffProperties.add("Vai Trò");
+
+        // Compare on Roles Fields
+        if(listValue1 == null && listValue2 != null) {
+            diffProperties.add("Quyền");
+            oldDatas.add("null");
+            newDatas.add(listValue2.get(0).getRoleName());
+        }
+        else if (!listValue1.get(0).getId().equals(listValue2.get(0).getId())) {
+            diffProperties.add("Quyền");
             oldDatas.add(listValue1.get(0).getRoleName());
             newDatas.add(listValue2.get(0).getRoleName());
         }
@@ -107,7 +115,7 @@ public class BaseModel {
                     continue;
                 }
 
-                if (!value2.equals(value1) && !(value2 instanceof Product) && !(value2 instanceof Po)) {
+                if (!value2.equals(value1) && !(value2 instanceof Product) && !(value2 instanceof Po) && !field.getName().equals("password") && !field.getName().equals("status")) {
                     if (field.getName().equals("roles")) {
                         setLogsEditRole(value1, value2, diffProperties, oldDatas, newDatas);
                     } else {

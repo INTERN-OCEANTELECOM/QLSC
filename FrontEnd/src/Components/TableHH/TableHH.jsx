@@ -23,14 +23,12 @@ import {
   updatePoDetail,
   updateStatusPoDetail,
 } from "../../service/service";
-import DatePicker from "react-datepicker";
 import { FaCalendarAlt } from "react-icons/fa";
 import Spinner from "react-bootstrap/Spinner";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import ModalUpdatePoDetail from "../Modal/PO_DETAIL/ModalUpdate/ModalUpdatePoDetail";
 import ModalShowPoDetail from "../Modal/PO_DETAIL/ModalShow/ModalShowPoDetail";
-import { saveAs } from "file-saver";
 import ModalDeletePODetail from "../Modal/PO_DETAIL/ModalDelete/ModalDeletePODetail";
 import Autosuggest from "react-autosuggest";
 import useScanDetection from "use-scan-detection";
@@ -43,17 +41,12 @@ export const TableHH = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isShowNotify, setIsShowNotify] = useState(false);
-  const [isShowNotifyUpdateSC, setIsShowNotifyUpdateSC] = useState(false);
-  const [isShowNotifyUpdateXK, setIsShowNotifyUpdateXK] = useState(false);
-  const [isShowNotifyUpdateKCS, setIsShowNotifyUpdateKCS] = useState(false);
-  const [isShowNotifyUpdateBH, setIsShowNotifyUpdateBH] = useState(false);
   const [data, setData] = useState([]);
   const [dataBarcode, setDataBarcode] = useState([]);
   const [selectedDateStart, setSelectedDateStart] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [dateEditPoDetail, setDataEditPoDetail] = useState("");
   const [dateShowPoDetail, setDataShowPoDetail] = useState("");
-  const [listAllPoDetail, setListAllPoDetail] = useState("");
   const [isShowEditPoDetail, setisShowEditPoDetail] = useState(false);
   const [startIndex, setStartIndex] = useState(0);
   const [isShowPoDetail, setIsShowPoDetail] = useState(false);
@@ -121,6 +114,7 @@ export const TableHH = () => {
     }
   }, [selectedOption]);
 
+  // search by po
   const searchByPO = async (page) => {
     let time = selectedDateStart;
     let timeExport = exportPartner;
@@ -467,10 +461,6 @@ export const TableHH = () => {
   // handle close modal
   const handleCloses = () => {
     setIsShowNotify(false);
-    setIsShowNotifyUpdateSC(false);
-    setIsShowNotifyUpdateXK(false);
-    setIsShowNotifyUpdateKCS(false);
-    setIsShowNotifyUpdateBH(false);
     setisShowEditPoDetail(false);
     setIsShowPoDetail(false);
     setShowDelete(false);
@@ -479,7 +469,7 @@ export const TableHH = () => {
   // Search
 
   const handleSearch = async (page) => {
-    setListPoDetailSN([])
+    setListPoDetailSN([]);
     setDataBarcode([]);
     localStorage.removeItem("dataBarcode");
     localStorage.removeItem("dataList");
@@ -521,7 +511,6 @@ export const TableHH = () => {
       setTotalProducts(res.totalPages);
       setTotalPages(res.data.number);
       setCurrentPageSearch(page);
-      
     }
     if (res && res.statusCode === 204) {
       localStorage.removeItem("dataBarcode");
@@ -529,7 +518,6 @@ export const TableHH = () => {
       setListPoDetail(res.data);
       setTotalProducts(res.totalPages);
       setCurrentPageSearch(page);
-      
     }
   };
 
@@ -678,6 +666,7 @@ export const TableHH = () => {
     onChange: onChange2,
   };
 
+  //export sn check
   const handleExportSN = () => {
     let selectedColumns = [
       "Mã hàng hóa",
@@ -781,9 +770,10 @@ export const TableHH = () => {
     }
   }, [localStorage.getItem("dataList")]);
 
+  // import sn check
   const handleImportSN = async (event) => {
     try {
-      setListPoDetail("")
+      setListPoDetail("");
       setData([]);
       localStorage.removeItem("dataBarcode");
       const file = event.target.files[0];
@@ -821,9 +811,10 @@ export const TableHH = () => {
     }
   };
 
+  // api barcode scan
   const BarcodeScanner = async () => {
-    setListPoDetail("")
-    setListPoDetailSN("")
+    setListPoDetail("");
+    setListPoDetailSN("");
     localStorage.removeItem("dataList");
     let res = await checkBarcode(barcodeScan);
     if (res && res.statusCode === 200) {
@@ -835,7 +826,7 @@ export const TableHH = () => {
       }
       newDataList.push(newData);
       localStorage.setItem("dataBarcode", JSON.stringify(newDataList));
-      setDataBarcode(newDataList.flat()); 
+      setDataBarcode(newDataList.flat());
     } else {
       const dataList = localStorage.getItem("dataBarcode");
       let newDataList = [];
@@ -855,7 +846,7 @@ export const TableHH = () => {
         warrantyPeriod: null,
       });
       localStorage.setItem("dataBarcode", JSON.stringify(newDataList));
-      setDataBarcode(newDataList.flat()); 
+      setDataBarcode(newDataList.flat());
     }
   };
 
@@ -869,10 +860,10 @@ export const TableHH = () => {
         setDataBarcode([]);
       }
       setBarcodeScan("");
-      }
+    }
   }, []);
 
-  const handleScanComplete = async(scanResult) => {
+  const handleScanComplete = async (scanResult) => {
     const processedScanResult = scanResult
       .replaceAll("Shift", "")
       .replaceAll(/[^A-Za-z0-9]/g, "");
@@ -882,22 +873,21 @@ export const TableHH = () => {
       const isBarcodeFieldFocused =
         focusedElement &&
         focusedElement.tagName === "INPUT" &&
-        focusedElement.id === "validationCustomUsername2806"; 
+        focusedElement.id === "validationCustomUsername2806";
       if (isBarcodeFieldFocused) {
         setBarcodeScan(processedScanResult);
         await BarcodeScanner(); // Gọi BarcodeScanner trực tiếp mà không sử dụng thời gian chờ
         setBarcodeScan(""); // Đặt lại giá trị barcodeScan sau mỗi lần quét
-        
       }
     }
   };
-
 
   useScanDetection({
     onComplete: handleScanComplete,
     minLength: 1,
   });
 
+  //delete barcode
   const handleDelete = (item) => {
     const index = dataBarcode.findIndex(
       (i) => i.poDetailId === item.poDetailId
@@ -910,6 +900,7 @@ export const TableHH = () => {
     }
   };
 
+  // write nhập kho
   const writeNK = async (item) => {
     const now = new Date();
     const timestamp = now.getTime();
@@ -941,6 +932,7 @@ export const TableHH = () => {
     backgroundColor: "#f69697",
   };
 
+  // color write nk and xk
   const rowStyle = (item) => {
     return item.po.poNumber === "SN không tồn tại"
       ? rowStyles
@@ -951,6 +943,7 @@ export const TableHH = () => {
       : { backgroundColor: "#ffffff" };
   };
 
+  // write xuất kho
   const writeXK = async (item) => {
     const now = new Date();
     const timestamp = now.getTime();
@@ -978,7 +971,7 @@ export const TableHH = () => {
     }
   };
 
-
+  // export barcode excel
   const handleExportBarcode = () => {
     let selectedColumns = [
       "Mã hàng hóa",
@@ -1468,6 +1461,7 @@ export const TableHH = () => {
                 </Row>
               ) : null}
             </div>
+            {/* S/n check */}
             <div className="row-sn">
               <Row className="mb-3">
                 <Form.Label className="text-center">
@@ -1512,6 +1506,7 @@ export const TableHH = () => {
                 </Form.Group>
               </Row>
             </div>
+            {/* Barcode */}
             <div className="row-barcode">
               <Row className="mb-1">
                 <Form.Label className="text-center">
@@ -1834,27 +1829,31 @@ export const TableHH = () => {
 
         <table className="table-shadow  table-color  table-bordered table-hover">
           <thead>
-            <tr>
-              <th>Stt</th>
-              <th>Mã hàng hóa</th>
-              <th>Số serial</th>
-              <th>Số PO</th>
-              <th>Ngày nhập kho</th>
-              <th>Hạng mục SC</th>
-              <th>Ưu tiên SC</th>
-              <th>Cập nhật SC</th>
-              <th>Số BBXK</th>
-              <th>Cập nhật XK</th>
-              <th>Cập nhật KCS</th>
-              <th>Cập nhật BH</th>
-              <th>Ghi chú</th>
-              {dataBarcode && dataBarcode.length > 0 && (
-                <th className="text-center">Action</th>
-              )}
-              {/* <th>Action</th> */}
-            </tr>
+            {(listPoDetail && listPoDetail.length > 0) ||
+            (listPoDetailSN && listPoDetailSN.length > 0) ||
+            (dataBarcode && dataBarcode.length > 0) ? (
+              <tr>
+                <th>Stt</th>
+                <th>Mã hàng hóa</th>
+                <th>Số serial</th>
+                <th>Số PO</th>
+                <th>Ngày nhập kho</th>
+                <th>Hạng mục SC</th>
+                <th>Ưu tiên SC</th>
+                <th>Cập nhật SC</th>
+                <th>Số BBXK</th>
+                <th>Cập nhật XK</th>
+                <th>Cập nhật KCS</th>
+                <th>Cập nhật BH</th>
+                <th>Ghi chú</th>
+                {dataBarcode && dataBarcode.length > 0 && (
+                  <th className="text-center">Action</th>
+                )}
+              </tr>
+            ) : null}
           </thead>
           <tbody>
+            {/* search PO detail */}
             {listPoDetail &&
               listPoDetail.length > 0 &&
               listPoDetail.map((item, index) => {
@@ -1922,6 +1921,7 @@ export const TableHH = () => {
                 );
               })}
 
+              {/* S/N check PO Detail */}
             {listPoDetailSN &&
               listPoDetailSN.length > 0 &&
               listPoDetailSN.map((item, index) => {
@@ -1989,6 +1989,7 @@ export const TableHH = () => {
                 );
               })}
 
+              {/* Barcode check */}
             {dataBarcode &&
               dataBarcode.length > 0 &&
               dataBarcode.map((item, index) => {
@@ -2152,6 +2153,7 @@ export const TableHH = () => {
           getProducts={getProducts}
           currenPage={currenPage}
         />
+
         <div
           className="modal show "
           style={{ display: "block", position: "initial" }}

@@ -303,7 +303,9 @@ const ModalUpdatePoDetail = (props) => {
                       value={repairCategory}
                       onChange={(event) => {
                         const value = event.target.value;
-                        setRepairCategory(value === "Tất cả" ? null : value);
+                        setRepairCategory(
+                          value === "Chưa cập nhật" ? null : value
+                        );
                       }}
                     >
                       <option value={null}>Chưa cập nhật</option>
@@ -324,7 +326,7 @@ const ModalUpdatePoDetail = (props) => {
                       value={prioritize}
                       onChange={(event) => {
                         const value = event.target.value;
-                        setPrioritize(value === "Tất cả" ? null : value);
+                        setPrioritize(value === "Chưa cập nhật" ? null : value);
                       }}
                     >
                       <option value={null}>Chưa cập nhật</option>
@@ -339,7 +341,9 @@ const ModalUpdatePoDetail = (props) => {
                       value={repairStatus}
                       onChange={(event) => {
                         const value = event.target.value;
-                        setRepairStatus(value === "Tất cả" ? null : value);
+                        setRepairStatus(
+                          value === "Chưa cập nhật" ? null : value
+                        );
                       }}
                       disabled={
                         localStorage.getItem("role") !== "ROLE_ADMIN" &&
@@ -392,7 +396,7 @@ const ModalUpdatePoDetail = (props) => {
                       value={kcsVT}
                       onChange={(event) => {
                         const value = event.target.value;
-                        setKcsVT(value === "Tất cả" ? null : value);
+                        setKcsVT(value === "Chưa cập nhật" ? null : value);
                       }}
                     >
                       <option value={null}>Chưa cập nhật</option>

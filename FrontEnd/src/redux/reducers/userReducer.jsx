@@ -97,6 +97,7 @@ const userReducer = (state = INITIAL_STATE, action) => {
       localStorage.removeItem("timelock");
       localStorage.removeItem("po");
       localStorage.removeItem("dataList");
+      localStorage.removeItem("dataBarcode");
       return {
         ...state,
         account: {

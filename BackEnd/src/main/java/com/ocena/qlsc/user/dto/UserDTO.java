@@ -18,11 +18,11 @@ public class UserDTO implements Serializable {
     private String fullName;
 
     // must have email format using @Email
-    @Email
+    @Email(message = "Email không đúng định dạng")
     @NotBlank(message = "Email is required")
     private String email;
 
-    @Pattern(regexp = "^0\\d{9}$", message = "Phone number must be in correct format")
+    @Pattern(regexp = "^0\\d{9}$", message = "SĐT không đúng định dạng")
     private String phoneNumber;
 
     /* length must larger than 8 character */

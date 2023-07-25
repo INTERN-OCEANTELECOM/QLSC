@@ -88,6 +88,20 @@ const ModalUpdatePo = (props) => {
     //   setIsValidate("");
     // }
 
+    if(!contractNumber || !po) {
+      setIsValidate("Số hợp đồng, số PO không được bỏ trống")
+      return
+    } else {
+      setIsValidate("")
+    }
+
+    if (quantity <= 0) {
+      setIsValidate("Số lượng phải lớn hơn 0");
+      return;
+    } else {
+      setIsValidate("");
+    } 
+
     let page;
     if (currentPage) {
       page = currentPage;

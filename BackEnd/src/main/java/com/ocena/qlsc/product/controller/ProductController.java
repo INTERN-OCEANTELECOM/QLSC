@@ -12,6 +12,7 @@ import com.ocena.qlsc.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -35,7 +36,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
 
     @Override
     @CacheEvict(value = {"getProducts", "findAll"}, allEntries = true)
-    public DataResponse<ProductDTO> add(ProductDTO objectDTO) {
+    public DataResponse<ProductDTO> add(@Valid ProductDTO objectDTO) {
         return super.add(objectDTO);
     }
 
@@ -64,7 +65,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
 
     @Override
     @CacheEvict(value = {"getProducts", "findAll"}, allEntries = true)
-    public DataResponse<ProductDTO> update(ProductDTO objectDTO, String key) {
+    public DataResponse<ProductDTO> update(@Valid ProductDTO objectDTO, String key) {
         return super.update(objectDTO, key);
     }
 

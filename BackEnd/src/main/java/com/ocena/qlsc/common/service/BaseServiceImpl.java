@@ -2,6 +2,7 @@ package com.ocena.qlsc.common.service;
 
 
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
+import com.ocena.qlsc.common.exception.ApiRequestException;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
@@ -28,6 +29,8 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import javax.swing.text.html.Option;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -53,24 +56,38 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     @Transactional
     @SuppressWarnings("unchecked")
     public DataResponse<D> create(D dto) {
-        List<String> result = validationRequest(dto);
-        if((result != null)) {
-            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-        }
         E entity = getBaseMapper().dtoToEntity(dto);
+        getBaseRepository().save(entity);
         try {
-            E emptyEntity = getEntityClass().getDeclaredConstructor().newInstance();
-            SpecificationDesc specificationDesc = new SpecificationDesc();
-            String specificationHistory = emptyEntity.compare(entity, Action.CREATE, specificationDesc);
-            specificationDesc.setDescription(specificationHistory);
-            String objectName = (String) ReflectionUtil.getFieldValueByReflection(entity.getClass().getSimpleName().toString(), new ObjectName());
-            historyService.saveHistory(Action.CREATE.getValue(), objectName, specificationDesc.getSpecification(), "");
+            saveHistory(Action.CREATE, "", entity, getEntityClass().getDeclaredConstructor().newInstance());
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |InstantiationException e) {
             throw new RuntimeException(e);
         }
-
-        getBaseRepository().save(entity);
         return ResponseMapper.toDataResponseSuccess("");
+    }
+
+    private void saveHistory(Action action, String key, E newEntity, E oldEntity) {
+        SpecificationDesc specificationDesc = new SpecificationDesc();
+        if(action == Action.DELETE) {
+            specificationDesc.setRecord(key);
+        } else {
+            // Compare the values of the attributes in the old entity and the new entity
+            String specificationHistory = oldEntity.compare(newEntity, action, specificationDesc);
+            // Set Description
+            if(!specificationDesc.equals("")) {
+                if(action == Action.CREATE) {
+                    specificationDesc.setDescription(specificationHistory);
+                } else {
+                    // Action is Edit
+                    specificationDesc.setRecord(key);
+                    specificationDesc.setDescription(specificationHistory);
+                }
+            }
+        }
+        // Get Object New
+        String objectName = (String) ReflectionUtil.getFieldValueByReflection(newEntity.getClass().getSimpleName().toString(),
+                new ObjectName());
+        historyService.saveHistory(action.getValue(), objectName, specificationDesc.getSpecification(), "");
     }
 
 
@@ -82,20 +99,18 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         if (optional.isPresent()) {
             E entity = optional.get();
             String id = entity.getId();
+            E oldEntity = null;
 
-            /* Save History */
-            SpecificationDesc specificationDesc = new SpecificationDesc();
-            String specificationHistory = entity.compare(getBaseMapper().dtoToEntity(dto), Action.EDIT, specificationDesc);
-            if(!specificationHistory.equals("")) {
-                specificationDesc.setRecord(key);
-                specificationDesc.setDescription(specificationHistory);
+            try {
+                oldEntity = (E) entity.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
             }
-            String objectName = (String) ReflectionUtil.getFieldValueByReflection(entity.getClass().getSimpleName().toString(), new ObjectName());
-            historyService.saveHistory(Action.EDIT.getValue(), objectName, specificationDesc.getSpecification(), "");
 
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
             getBaseRepository().save(entity);
+            saveHistory(Action.EDIT, key, getBaseMapper().dtoToEntity(dto), oldEntity);
 
             return ResponseMapper.toDataResponseSuccess("");
         }
@@ -110,10 +125,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             E entity = optional.get();
             entity.setRemoved(true);
             if (getBaseRepository().save(entity) != null) {
-                SpecificationDesc specificationDesc = new SpecificationDesc();
-                specificationDesc.setRecord(id);
-                String objectName = (String) ReflectionUtil.getFieldValueByReflection(entity.getClass().getSimpleName().toString(), new ObjectName());
-                historyService.saveHistory(Action.DELETE.getValue(), objectName, specificationDesc.getSpecification(), "");
+                saveHistory(Action.DELETE, id, entity, null);
                 return ResponseMapper.toDataResponseSuccess("");
             }
         }

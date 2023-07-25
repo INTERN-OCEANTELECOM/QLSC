@@ -21,11 +21,19 @@ const ModalUpdateInforUser = (props) => {
       setFullName(dataGetUser.fullName);
       localStorage.setItem("emailEdit", dataGetUser.email);
       setPhone(dataGetUser.phoneNumber);
+      setValidate("")
     }
   }, [dataGetUser]);
 
   // handle update user
   const handleUpdateUser = async () => {
+    const phoneRegex = /^0\d{9}/;
+    if (!phoneRegex.test(phone)) {
+      setValidate("Số điện thoại không đúng định dạng");
+      return;
+    } else {
+      setValidate("");
+    }
     let res = await updateUser(
       localStorage.getItem("emailEdit"),
       fullName,

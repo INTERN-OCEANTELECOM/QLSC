@@ -14,6 +14,7 @@ import com.ocena.qlsc.po.repository.PoRepository;
 import com.ocena.qlsc.po.service.PoService;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -49,14 +50,14 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     }
 
     @Override
-    @CacheEvict(value = {"getAllPO", "getAllByPage"}, allEntries = true)
-    public DataResponse<PoDTO> add(PoDTO objectDTO) {
+    @CacheEvict(value = {"getAllPO", "getPoByPage"}, allEntries = true)
+    public DataResponse<PoDTO> add(@Valid PoDTO objectDTO) {
         return (poService.validateAddPO(objectDTO) == null) ? super.add(objectDTO) : poService.validateAddPO(objectDTO);
     }
 
     @Override
-    @CacheEvict(value = {"getAllPO", "getAllByPage"}, allEntries = true)
-    public DataResponse<PoDTO> update(PoDTO objectDTO, String key) {
+    @CacheEvict(value = {"getAllPO", "getPoByPage"}, allEntries = true)
+    public DataResponse<PoDTO> update(@Valid PoDTO objectDTO, String key) {
         return (poService.validateUpdatePo(objectDTO, key) == null) ? super.update(objectDTO, key) : poService.validateUpdatePo(objectDTO, key);
     }
 
@@ -71,7 +72,7 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     }
 
     @Override
-    @Cacheable(value = "getAllByPage")
+    @Cacheable(value = "getPoByPage")
     public ListResponse<PoDTO> getAllByPage(int page, int size) {
         return super.getAllByPage(page, size);
     }

@@ -17,9 +17,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class PoDTO implements Serializable {
 
-    @Size(min = 1, message = "ContractNumber không được để trống")
+    @Size(min = 1, message = "Số hợp đồng không được để trống")
     private String contractNumber;
-    @Size(min = 1, message = "PoNumber không được để trống")
+    @Size(min = 1, message = "Số PO không được để trống")
     private String poNumber;
 
 //    @NotNull(message = "quantity must not be null")

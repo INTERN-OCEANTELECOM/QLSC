@@ -32,6 +32,8 @@ import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.enums.ObjectName;
 import com.ocena.qlsc.user_history.model.SpecificationDesc;
 import com.ocena.qlsc.user_history.service.HistoryService;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,9 +100,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     @Override
     protected Page<PoDetail> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        return poDetailRepository.searchPoDetail(
+        List<PoDetail> poDetailList = poDetailRepository.searchPoDetail(
                 searchKeywordDto.getKeyword().get(0),
-                searchKeywordDto.getKeyword().get(1),
+//                searchKeywordDto.getKeyword().get(1),
                 searchKeywordDto.getKeyword().get(2),
                 searchKeywordDto.getKeyword().get(3),
                 searchKeywordDto.getKeyword().get(4),
@@ -108,8 +110,34 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 searchKeywordDto.getKeyword().get(6),
                 searchKeywordDto.getKeyword().get(7),
                 searchKeywordDto.getKeyword().get(8),
-                searchKeywordDto.getKeyword().get(9),
-                pageable);
+                searchKeywordDto.getKeyword().get(9));
+
+        String[] arr = Optional.ofNullable(searchKeywordDto.getKeyword().get(1))
+                .filter(str -> !str.isEmpty())
+                .map(str -> str.trim().split("\\s+"))
+                .orElse(new String[0]);
+
+        if (arr.length > 0) {
+            List<String> listSerialNumbers = Arrays.asList(arr);
+            List<PoDetail> listSerialNumber = poDetailRepository.findAllBySerialNumberIn(listSerialNumbers);
+            List<PoDetail> commonList = poDetailList
+                    .stream()
+                    .filter(poDetail1 -> listSerialNumber.stream().anyMatch(poDetail2 -> poDetail2.getPoDetailId().equals(poDetail1.getPoDetailId())))
+                    .collect(Collectors.toList());
+
+            //Create Page with Start End
+            List<PoDetail> pagePoDetailWithSerialNumber= commonList
+                    .subList(pageable.getPageNumber() * pageable.getPageSize(),
+                            Math.min(pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize(), commonList.size()));
+
+            return new PageImpl<>(pagePoDetailWithSerialNumber, pageable, commonList.size());
+        }
+        List<PoDetail> pagePoDetails = poDetailList
+                .subList(pageable.getPageNumber() * pageable.getPageSize(),
+                        Math.min(pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize(), poDetailList.size()));
+
+        return new PageImpl<>(pagePoDetails, pageable, poDetailList.size());
+
     }
 
     @Override
@@ -320,7 +348,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         if (isProductExist) {
             // If the product exists, continue processing the row
-
             Optional<Po> isExistPoByPoNumber = poRepository.findByPoNumber(poDetailResponse.getPo().getPoNumber());
             // // If the PO detail already exists in the database or has already been added to the list of PO details to be inserted, add an error
             Optional<PoDetail> existPODetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());

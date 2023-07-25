@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -63,7 +64,7 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
 
     @Override
     @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
-    public DataResponse<UserDTO> add(UserDTO objectDTO) {
+    public DataResponse<UserDTO> add(@Valid UserDTO objectDTO) {
         objectDTO.setPassword(passwordEncoder.encode(objectDTO.getPassword()));
         return super.add(objectDTO);
     }

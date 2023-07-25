@@ -75,12 +75,6 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     }
 
     public DataResponse<PoDTO> validateAddPO(PoDTO poDTO) {
-        List<String> result = validationRequest(poDTO);
-
-        if (result != null){
-            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-        }
-
         if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
             return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
         }
@@ -94,12 +88,6 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
 
 
     public DataResponse<PoDTO> validateUpdatePo(PoDTO poDTO, String key) {
-        List<String> result = validationRequest(poDTO);
-
-        if (result != null){
-            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-        }
-
         if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
             return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
         }

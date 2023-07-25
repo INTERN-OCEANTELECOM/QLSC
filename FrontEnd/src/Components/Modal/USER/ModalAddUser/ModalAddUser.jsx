@@ -102,13 +102,21 @@ const ModalAddUser = (props) => {
     }
   };
 
+  const handleCloses = () => {
+    handleClose()
+    setValidate("")
+    setValidateEmail("")
+    setValidatePassword("")
+    setValidatePhone("")
+  }
+
   return (
     <>
       <div
         className="modal show"
         style={{ display: "block", position: "initial" }}
       >
-        <Modal show={show} onHide={handleClose} backdrop="static">
+        <Modal show={show} onHide={handleCloses} backdrop="static">
           <Modal.Header closeButton>
             <Modal.Title>Add new User</Modal.Title>
           </Modal.Header>
@@ -211,7 +219,7 @@ const ModalAddUser = (props) => {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
+            <Button variant="secondary" onClick={handleCloses}>
               Close
             </Button>
             <Button variant="primary" onClick={() => handleSubmit()}>

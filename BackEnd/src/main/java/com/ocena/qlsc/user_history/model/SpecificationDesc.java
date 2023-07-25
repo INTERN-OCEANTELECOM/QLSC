@@ -34,7 +34,7 @@ public class SpecificationDesc {
 
     // Set description to import data excel
     public String setDesc(String data) {
-        return data != "" ? "Số S/N: " + data : "";
+        return data != "" ? "- Số S/N: " + data : "";
     }
 
 //    // Set description to update data excel

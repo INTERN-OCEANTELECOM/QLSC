@@ -80,6 +80,8 @@ const Diary = () => {
     
   }
 
+  const sortedListHistory = _.sortBy(listHistory, ["created"]);
+
   return (
     <div className="admin">
       <div className="navbars shadow-sm  bg-white rounded">
@@ -171,13 +173,13 @@ const Diary = () => {
                 <th>Thời gian</th>
                 <th>Đối tượng </th>
                 <th>Hành động</th>
-                <th >Mô tả chi tiết</th>
+                <th>Mô tả chi tiết</th>
               </tr>
             </thead>
             <tbody>
-              {listHistory &&
-                listHistory.length > 0 &&
-                listHistory.map((item, index) => {
+              {sortedListHistory &&
+                sortedListHistory.length > 0 &&
+                sortedListHistory.map((item, index) => {
                   const isExpanded = expandedIndex === index;
                   const truncatedSpec = item.specification.slice(0, 1000);
                   const time = item.created;
@@ -226,7 +228,7 @@ const Diary = () => {
                           </span>
                           {item.specification.length > 1000 && (
                             <button
-                              className="btn btn-link"
+                              className="btn btn-link btn-sm"
                               onClick={() =>
                                 setExpandedIndex(isExpanded ? null : index)
                               }

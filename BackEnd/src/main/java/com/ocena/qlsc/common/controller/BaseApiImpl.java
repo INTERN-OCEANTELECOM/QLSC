@@ -13,13 +13,13 @@ public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
 
     @Override
     @PostMapping(ApiResources.ADD)
-    public DataResponse<D> add(@Valid @RequestBody D objectDTO) {
+    public DataResponse<D> add(@RequestBody D objectDTO) {
         return this.getBaseService().create(objectDTO);
     }
 
     @Override
     @PutMapping(ApiResources.UPDATE)
-    public DataResponse<D> update(@Valid @RequestBody D objectDTO,
+    public DataResponse<D> update(@RequestBody D objectDTO,
                                   @PathVariable("key") String key) {
         return this.getBaseService().update(key, objectDTO);
     }

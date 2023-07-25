@@ -14,6 +14,7 @@ import ModalUpdateInforUser from "../Modal/USER/ModalUpdateUser/ModalUpdateInfoU
 import { getUserByEmail } from "../../service/service";
 import { useDispatch, useSelector } from "react-redux";
 import { handleLogoutRedux } from "../../redux/actions/userAction";
+import moment from "moment";
 
 export const Header = () => {
   const user = useSelector((state) => state.user.account);
@@ -26,7 +27,28 @@ export const Header = () => {
     if (user && user.auth === false && window.location.pathname !== "/signin") {
       navigate("/");
     }
-  }, [user]);
+
+    const autoLogoutAtSpecificTime = () => {
+      const now = moment();
+      const targetTime = moment()
+        .startOf("day")
+        .add(23, "hours")
+        .add(59, "minutes"); 
+      if (now.isAfter(targetTime)) {
+        targetTime.add(1, "day"); // Nếu đã quá thời gian 0 giờ 0 phút hôm nay, chuyển sang ngày tiếp theo
+      }
+      const millisecondsUntilTargetTime = targetTime.diff(now);
+
+      setTimeout(() => {
+        handleLogout();
+        autoLogoutAtSpecificTime(); // Gọi đệ quy để thiết lập logout tiếp theo vào lúc 0 giờ 0 phút của ngày tiếp theo
+      }, millisecondsUntilTargetTime);
+    };
+
+    if (user && user.auth) {
+      autoLogoutAtSpecificTime(); // Kích hoạt tự động logout nếu người dùng đã đăng nhập thành công
+    }
+  }, [user, dispatch]);
 
   // handle logout
   const handleLogout = () => {

@@ -28,6 +28,7 @@ const ModalUpdateUser = (props) => {
       setPhone(dataEditUser.phoneNumber);
       setRoleName(dataEditUser.roles[0].roleName);
       setRoleID(dataEditUser.roles[0]);
+      setValidate("");
     }
   }, [dataEditUser]);
 
@@ -42,7 +43,21 @@ const ModalUpdateUser = (props) => {
 
   // handle update user
   const handleUpdateUser = async () => {
-    let res = await updateUser(email, fullName, phone, [roleID, roleName]);
+    const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}/;
+    if (!emailRegex.test(email)) {
+      setValidate("Email không đúng định dạng");
+      return;
+    } else {
+      setValidate("");
+    }
+    const phoneRegex = /^0\d{9}/;
+    if (!phoneRegex.test(phone)) {
+      setValidate("Số điện thoại không đúng định dạng");
+      return;
+    } else {
+      setValidate("");
+    }
+    let res = await updateUser(email, fullName, phone, [roleID]);
     if (res && res.statusCode === 200) {
       handleClose();
       toast.success("Cập nhật thông tin thành công !!");
