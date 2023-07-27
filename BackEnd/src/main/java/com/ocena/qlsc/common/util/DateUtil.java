@@ -19,7 +19,7 @@ public class DateUtil {
     private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     public static String convertObjectToDateFormat(Object obj, String name){
         if(obj == null)
-            return "null";
+            return "N/A";
         if(obj instanceof Long && (Long) obj > 900000000000L) {
             LocalDate date = Instant.ofEpochMilli((Long) obj).atZone(ZoneId.systemDefault()).toLocalDate();
             return date.format(formatter);

@@ -564,6 +564,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             String compare = poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse), Action.EDIT, description);
             description.setDetails(compare);
 
+
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
             poDetail.get().setKcsVT(poDetailResponse.getKcsVT());

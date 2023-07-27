@@ -234,9 +234,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     public DataResponse<User> validateOTP(String email, Integer OTP, String newPassword) {
         String message = "An error occurred while validating OTP";
 
-        Optional<User> isExistUser = userRepository.findByEmail(email);
-        if (isExistUser.isPresent()) {
-            User user = isExistUser.get();
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
             if (otpService.validateOTP(email, OTP)) {
                 user.setPassword(passwordEncoder.encode(newPassword));
                 user.setStatus((short) 1);
@@ -288,12 +288,12 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     @Override
     public DataResponse<User> resetPassword(String email, String oldPassword, String newPassword) {
         // Check if a User object with the given email exists in the repository
-        Optional<User> isExistUser = userRepository.findByEmail(email);
+        Optional<User> optionalUser = userRepository.findByEmail(email);
 
         // If a User object with the given email exists, and the old password matches the User's current password,
         // update the User's password and status
-        if(isExistUser.isPresent() && passwordEncoder.matches(oldPassword, isExistUser.get().getPassword())) {
-            User user = isExistUser.get();
+        if(optionalUser.isPresent() && passwordEncoder.matches(oldPassword, optionalUser.get().getPassword())) {
+            User user = optionalUser.get();
             user.setPassword(passwordEncoder.encode(newPassword));
             user.setStatus((short) 1);
             if(userRepository.save(user) != null) {

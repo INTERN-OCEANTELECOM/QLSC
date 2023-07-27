@@ -108,11 +108,19 @@ public class BaseModel implements Cloneable {
                 field.setAccessible(true);
                 Object oldFieldValue = field.get(this);
                 Object newFieldValue = field.get(newObject);
-                if (oldFieldValue == null) {
+                if(oldFieldValue == null && newFieldValue == null)
+                    continue;
+
+
+                if(newFieldValue == null && !field.getType().equals(Short.class)) {
                     continue;
                 }
 
-                if (!field.getName().equals("password") && !field.getName().equals("status") && !newFieldValue.equals(oldFieldValue) && !(newFieldValue instanceof Product) && !(newFieldValue instanceof Po)) {
+                if(newFieldValue instanceof Product || newFieldValue instanceof Po || field.getName().equals("status") || field.getName().equals("password"))
+                    continue;
+
+
+                if ((newFieldValue == null && oldFieldValue != null) || !newFieldValue.equals(oldFieldValue)) {
                     if (field.getName().equals("roles")) {
                         setHistoryEditRole(oldFieldValue, newFieldValue, diffProperties, previousObjectAttributeValues, newObjectAttributeValues);
                     } else {
@@ -121,7 +129,6 @@ public class BaseModel implements Cloneable {
                         newObjectAttributeValues.add(DateUtil.convertObjectToDateFormat(newFieldValue, field.getName()));
                     }
                 }
-
             }
         } catch (IllegalAccessException e){
             throw new RuntimeException(e);
