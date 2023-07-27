@@ -31,7 +31,7 @@ public class History {
 
     @Lob
     @Column(columnDefinition = "MEDIUMTEXT")
-    private String specification;
+    private String description;
 
     @PrePersist
     private void createID(){

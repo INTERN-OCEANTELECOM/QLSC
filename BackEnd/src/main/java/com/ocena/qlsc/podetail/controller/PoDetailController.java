@@ -16,6 +16,7 @@ import com.ocena.qlsc.common.response.ErrorResponseImport;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,8 +46,8 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     }
 
     @Override
-    public DataResponse<PoDetailResponse> update(PoDetailResponse objectDTO, String key) {
-        return poDetailService.updatePoDetail(objectDTO, key);
+    public DataResponse<PoDetailResponse> update(@Valid PoDetailResponse poDetailResponse, String key) {
+        return poDetailService.updatePoDetail(poDetailResponse, key);
     }
 
     @PostMapping("/deleteByID")

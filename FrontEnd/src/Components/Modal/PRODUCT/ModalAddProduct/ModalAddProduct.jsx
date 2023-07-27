@@ -58,6 +58,8 @@ const ModalAddProduct = (props) => {
   const handleClose = () => {
     handleCloses()
     setValidate("")
+    setProductId("");
+    setProductName("");
   }
   return (
     <div

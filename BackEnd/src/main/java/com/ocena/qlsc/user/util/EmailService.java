@@ -1,4 +1,4 @@
-package com.ocena.qlsc.user.configs.mail;
+package com.ocena.qlsc.user.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;

@@ -5,10 +5,13 @@ import com.ocena.qlsc.podetail.enums.Priority;
 import com.ocena.qlsc.podetail.enums.RepairCategory;
 import com.ocena.qlsc.podetail.enums.RepairStatus;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,5 +42,22 @@ public class DateUtil {
         }
 
         return obj.toString();
+    }
+
+    public static Long getDateFormatValid(String dateString) {
+        SimpleDateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy");
+        sdf1.setLenient(false);
+
+        try {
+            return sdf1.parse(dateString).getTime();
+        } catch (ParseException e) {
+            SimpleDateFormat sdf2 = new SimpleDateFormat("dd-MM-yyyy");
+            sdf2.setLenient(false);
+            try {
+                return sdf2.parse(dateString).getTime();
+            } catch (ParseException ex) {
+                return -1L;
+            }
+        }
     }
 }

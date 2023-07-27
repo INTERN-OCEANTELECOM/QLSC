@@ -12,7 +12,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class LoginRequest {
     @NotBlank(message = "Email is required")
-    @Email
+    @Email(message = "Email không đúng định dạng")
     private String email;
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must have size larger than 8 character")

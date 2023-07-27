@@ -1,6 +1,8 @@
-package com.ocena.qlsc.user.configs.mail;
+package com.ocena.qlsc.user.util;
 
 import com.ocena.qlsc.user.repository.UserRepository;
+import com.ocena.qlsc.user.util.EmailService;
+import com.ocena.qlsc.user.util.OTPGenerator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

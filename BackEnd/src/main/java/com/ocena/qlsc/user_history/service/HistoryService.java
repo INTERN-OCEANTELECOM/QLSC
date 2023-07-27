@@ -30,14 +30,14 @@ public class HistoryService {
         return ResponseMapper.toListResponseSuccess(historyDTOList);
     }
 
-    public void saveHistory(String action, String object, String specification, String email) {
+    public void save(String action, String object, String description, String email) {
         if(action.equals(Action.DELETE.getValue()) ||
                 action.equals(Action.RESET_PASSWORD.getValue()) ||
-                !specification.equals("") ) {
+                !description.equals("") ) {
             History history = new History();
             history.setAction(action);
             history.setObject(object);
-            history.setSpecification(specification);
+            history.setDescription(description);
             if(email.equals(""))
                 history.setEmail(SystemUtil.getCurrentEmail());
             else {
@@ -47,7 +47,7 @@ public class HistoryService {
         }
     }
 
-    public ListResponse<HistoryDTO> getHistoryByCreatedBetween(Long start, Long end){
+    public ListResponse<HistoryDTO> getByCreatedBetween(Long start, Long end){
         List<History> historyList = historyRepository.getAllByCreatedBetween(start, end);
 
         List<HistoryDTO> historyDTOList = historyList.stream()

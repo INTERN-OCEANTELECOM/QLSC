@@ -148,39 +148,6 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
     }
 
     /**
-     * Get Product By Product Order
-     *
-     * @param PO The Po value is required to retrieve the data
-     * @return ListResponse ProductDTO
-     */
-//    @Override
-//    public ListResponse<ProductDTO> getProductsByPO(String PO) {
-//        List<Object[]> listP = productRepository.getProductsByPO(PO);
-//        List<ProductDTO> listProduct = new ArrayList<>();
-//
-//        try{
-//            listProduct = listP.stream().map(object -> {
-//                        Long productId = (Long) object[0];
-//                        String productName = (String) object[1];
-//                        Long productQuantity= (Long) object[2];
-//                        Long repairStatusSuccessful = (Long) object[3];
-//
-//                        ProductDTO productDTO = ProductDTO.builder()
-//                                .productId(productId)
-//                                .productName(productName)
-//                                .productQuantity(productQuantity)
-//                                .repairStatusSuccessful(repairStatusSuccessful)
-//                                .build();
-//
-//                        return  productDTO;
-//                    }).collect(Collectors.toList());
-//        } catch (Exception ex) {
-//            System.out.println(ex.getMessage());
-//        }
-//        return ResponseMapper.toListResponseSuccess(listProduct);
-//    }
-
-    /**
      * Read Row data from an Excel file
      *
      * @param row

@@ -181,7 +181,7 @@ const Diary = () => {
                 sortedListHistory.length > 0 &&
                 sortedListHistory.map((item, index) => {
                   const isExpanded = expandedIndex === index;
-                  const truncatedSpec = item.specification.slice(0, 1000);
+                  const truncatedSpec = item.description.slice(0, 1000);
                   const time = item.created;
                   let data;
                   if (time !== null) {
@@ -189,10 +189,9 @@ const Diary = () => {
                   }
 
                   // Replace both //n and \n globally in the specification text
-                  const formattedSpecification = item.specification.replace(
-                    /\/\/n|\\n/g,
-                    "\n"
-                  );
+                  const formattedSpecification = (
+                    item.description || ""
+                  ).replace(/\/\/n|\\n/g, "\n");
 
                   // Split the specification text at newline characters (\n)
                   const specificationLines = formattedSpecification.split("\n");
@@ -226,7 +225,7 @@ const Diary = () => {
                               </React.Fragment>
                             )}
                           </span>
-                          {item.specification.length > 1000 && (
+                          {item.description.length > 1000 && (
                             <button
                               className="btn btn-link btn-sm"
                               onClick={() =>

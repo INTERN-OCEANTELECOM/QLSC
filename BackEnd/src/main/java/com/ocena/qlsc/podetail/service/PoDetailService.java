@@ -30,10 +30,10 @@ import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.repository.RoleRepository;
 import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.enums.ObjectName;
-import com.ocena.qlsc.user_history.model.SpecificationDesc;
+import com.ocena.qlsc.user_history.model.HistoryDescription;
 import com.ocena.qlsc.user_history.service.HistoryService;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,43 +100,40 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     @Override
     protected Page<PoDetail> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        List<PoDetail> poDetailList = poDetailRepository.searchPoDetail(
+        List<String> listSerialNumbers = searchKeywordDto.getKeyword().get(1) != null ?
+                Arrays.asList(searchKeywordDto.getKeyword().get(1).split("\\s+")) : new ArrayList<>();
+
+        Pageable page = pageable;
+
+        if (!listSerialNumbers.isEmpty()) {
+            pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        }
+
+        Page<PoDetail> pageSearchPoDetails = poDetailRepository.searchPoDetail(
                 searchKeywordDto.getKeyword().get(0),
-//                searchKeywordDto.getKeyword().get(1),
                 searchKeywordDto.getKeyword().get(2),
                 searchKeywordDto.getKeyword().get(3),
                 searchKeywordDto.getKeyword().get(4),
-                searchKeywordDto.getKeyword().get(5),
+                searchKeywordDto.getKeyword().get(5),   
                 searchKeywordDto.getKeyword().get(6),
                 searchKeywordDto.getKeyword().get(7),
                 searchKeywordDto.getKeyword().get(8),
-                searchKeywordDto.getKeyword().get(9));
+                searchKeywordDto.getKeyword().get(9), pageable);
 
-        String[] arr = Optional.ofNullable(searchKeywordDto.getKeyword().get(1))
-                .filter(str -> !str.isEmpty())
-                .map(str -> str.trim().split("\\s+"))
-                .orElse(new String[0]);
-
-        if (arr.length > 0) {
-            List<String> listSerialNumbers = Arrays.asList(arr);
-            List<PoDetail> listSerialNumber = poDetailRepository.findAllBySerialNumberIn(listSerialNumbers);
-            List<PoDetail> commonList = poDetailList
-                    .stream()
-                    .filter(poDetail1 -> listSerialNumber.stream().anyMatch(poDetail2 -> poDetail2.getPoDetailId().equals(poDetail1.getPoDetailId())))
-                    .collect(Collectors.toList());
-
-            //Create Page with Start End
-            List<PoDetail> pagePoDetailWithSerialNumber= commonList
-                    .subList(pageable.getPageNumber() * pageable.getPageSize(),
-                            Math.min(pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize(), commonList.size()));
-
-            return new PageImpl<>(pagePoDetailWithSerialNumber, pageable, commonList.size());
+        if (listSerialNumbers.isEmpty()) {
+            return pageSearchPoDetails;
         }
-        List<PoDetail> pagePoDetails = poDetailList
-                .subList(pageable.getPageNumber() * pageable.getPageSize(),
-                        Math.min(pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize(), poDetailList.size()));
 
-        return new PageImpl<>(pagePoDetails, pageable, poDetailList.size());
+        List<PoDetail> mergeList = pageSearchPoDetails.getContent()
+                .stream()
+                .filter(poDetail -> listSerialNumbers.contains(poDetail.getSerialNumber()))
+                .collect(Collectors.toList());
+                
+        //Create Page with Start End
+        List<PoDetail> pagePoDetails = mergeList
+                .subList(page.getPageNumber() * page.getPageSize(),
+                        Math.min(page.getPageNumber() * page.getPageSize() + page.getPageSize(), mergeList.size()));
+        return new PageImpl<>(pagePoDetails, page, mergeList.size());
 
     }
 
@@ -156,44 +153,14 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                         .stream().map(poDetail -> getBaseMapper().entityToDto(poDetail)).collect(Collectors.toList()));
     }
 
-//    public ErrorResponseImport validatePoDetailUpdate(PoDetail poDetail, String attribute, Integer rowIndex) {
-//        String errorMessage = "";
-//        if (attribute.equals(UpdateField.EXPORT_PARTNER)) {
-//            if (poDetail.getRepairStatus() == null) {
-//                errorMessage = " phải cập nhật trang thái SC trước khi cập nhật trạng thái xuất kho";
-//            }
-//        }
-//        if (attribute.equals(UpdateField.KCS_VT)) {
-//            if (poDetail.getExportPartner() == null) {
-//                errorMessage = " phải cập nhật trang thái SC và trạng thái xuất kho trước khi cập nhật KCS VT";
-//            }
-////            if (poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
-////                errorMessage = " có trạng thái SC là " + RepairStatus.values()[poDetail.getRepairStatus()].name();
-////            }
-//        }
-//        if (attribute.equals(UpdateField.WARRANTY_PERIOD)) {
-//            if (poDetail.getKcsVT() == null) {
-//                errorMessage = " phải cập nhật trang thái KSC VT trước khi cập nhật thông tin bảo hành";
-//            }
-////            if (poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
-////                errorMessage = " có trạng thái SC là " + RepairStatus.values()[poDetail.getRepairStatus()].name();
-////            }
-//        }
-//        if(errorMessage.equals("")) {
-//            return null;
-//        }
-//        return new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-//                rowIndex, poDetail.getPoDetailId() + errorMessage);
-//    }
-
     public Object setDataFromDTO(PoDetailResponse poDetailResponse, int rowIndex, String attribute) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Optional<PoDetail> isExistPoDetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());
+        Optional<PoDetail> optionalPoDetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());
         // If the PO Detail does not exist, add an error to the list of errors and continue to the next row
-        if (isExistPoDetail.isEmpty()) {
+        if (optionalPoDetail.isEmpty()) {
             return new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
                     rowIndex, poDetailResponse.getPoDetailId() + " không tồn tại");
         }
-        PoDetail poDetail = isExistPoDetail.get();
+        PoDetail poDetail = optionalPoDetail.get();
 
         try {
             Field field = PoDetailResponse.class.getDeclaredField(attribute);
@@ -348,15 +315,15 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         if (isProductExist) {
             // If the product exists, continue processing the row
-            Optional<Po> isExistPoByPoNumber = poRepository.findByPoNumber(poDetailResponse.getPo().getPoNumber());
+            Optional<Po> optionalPo = poRepository.findByPoNumber(poDetailResponse.getPo().getPoNumber());
             // // If the PO detail already exists in the database or has already been added to the list of PO details to be inserted, add an error
-            Optional<PoDetail> existPODetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());
-            if (existPODetail.isPresent() || listInsert.stream()
+            Optional<PoDetail> optionalPoDetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());
+            if (optionalPoDetail.isPresent() || listInsert.stream()
                     .anyMatch(value -> value.getPoDetailId().equals(poDetailResponse.getPoDetailId()))) {
                 return new ErrorResponseImport(ErrorType.RECORD_EXISTED,
                         rowIndex, poDetailResponse.getPoDetailId() + " đã tồn tại nên không thể import");
             }
-            if (isExistPoByPoNumber.isEmpty()) {
+            if (optionalPo.isEmpty()) {
                 // If the PO for the PO detail does not exist in the database, add an error
                 return new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
                         rowIndex, poDetailResponse.getPoDetailId() + " có PO không tồn tại");
@@ -364,7 +331,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
             // If the number of PO details for the PO has reached the PO quantity, add an error
             // and stop processing the file
-            Integer quantity = isExistPoByPoNumber.get().getQuantity();
+            Integer quantity = optionalPo.get().getQuantity();
             Long countPoDetailByPoNumber = poDetailRepository.countByPoNumber(poDetailResponse.getPo().getPoNumber());
             if (countPoDetailByPoNumber + listInsert.size() > quantity) {
                 return new ErrorResponseImport(poDetailResponse.getPo().getPoNumber(),
@@ -377,26 +344,26 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         return null;
     }
 
-    public void saveHistoryImportDataExcel(String action, List<PoDetail> listInsertPoDetail, String attribute) {
+    public void saveHistoryImportDataExcel(String action, List<PoDetail> listPoDetail, String attribute) {
         // Get List PoNumber distinct
-        List<String> distinctPoNumber = listInsertPoDetail.stream()
+        List<String> distinctPoNumber = listPoDetail.stream()
                 .map(poDetail -> poDetail.getPo().getPoNumber())
                 .distinct()
                 .collect(Collectors.toList());
 
-        SpecificationDesc specificationDesc = new SpecificationDesc();
-        specificationDesc.setRecord(String.join(", ", distinctPoNumber));
-        specificationDesc.setAmount(((Integer) listInsertPoDetail.size()).toString());
+        HistoryDescription description = new HistoryDescription();
+        description.setKey(String.join(", ", distinctPoNumber));
+        description.setImportAmount(((Integer) listPoDetail.size()).toString());
         if(!attribute.equals("")) {
             String fields = (String) ReflectionUtil.getFieldValueByReflection(attribute, new UpdateFieldsVN());
-            specificationDesc.setFields(fields);
+            description.setFields(fields);
         }
         String descriptionHistory = "";
-        for (PoDetail poDetail : listInsertPoDetail) {
+        for (PoDetail poDetail : listPoDetail) {
             descriptionHistory += "<" + poDetail.getSerialNumber().toString() + "> ";
         }
-        specificationDesc.setDescription(specificationDesc.setDesc(descriptionHistory));
-        historyService.saveHistory(action, ObjectName.PoDetail, specificationDesc.getSpecification(), "");
+        description.setDetails(description.setDescription(descriptionHistory));
+        historyService.save(action, ObjectName.PoDetail, description.getDescription(), "");
     }
 
     /**
@@ -520,16 +487,22 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      */
     private Object readExcelRowUpdate(Row row, int rowIndex, String attribute) {
         // Validate the numeric columns
+
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
-                processExcelFile.validateNumbericColumns(row, rowIndex, 3);
-        if (errorResponseImport != null) {
-            return errorResponseImport;
-        }
-        errorResponseImport = (ErrorResponseImport)
                 processExcelFile.validateTextColumns(row, rowIndex, 2);
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
+
+        if(!attribute.equals(UpdateField.IMPORT_DATE) && !attribute.equals(UpdateField.WARRANTY_PERIOD) &&
+                !attribute.equals(UpdateField.EXPORT_PARTNER)) {
+            errorResponseImport = (ErrorResponseImport)
+                    processExcelFile.validateNumbericColumns(row, rowIndex, 3);
+            if (errorResponseImport != null) {
+                return errorResponseImport;
+            }
+        }
+
 
         String productId = processExcelFile.getCellValueIsNumberOrString(row, 0);
         String serialNumber = processExcelFile.getCellValueIsNumberOrString(row, 1);
@@ -548,20 +521,14 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 + attribute.substring(1);
         Method setter = null;
         try {
-
-//            else if(row.getCell(3).getCellType() == CellType.STRING){
-//                setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), String.class);
-//                setter.invoke(poDetailResponse, row.getCell(3).getStringCellValue());
-//            }
             // If cell type is Date, read data with getDateCellValue
             if(attribute.equals(UpdateField.EXPORT_PARTNER)) {
-                poDetailResponse.setExportPartner(row.getCell(3).getDateCellValue().getTime());
+                poDetailResponse.setExportPartner(processExcelFile.getCellValueIsTextDateFormat(row, 3));
                 poDetailResponse.setBbbgNumberExport(row.getCell(4).getStringCellValue());
-            } else if(row.getCell(3).getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(row.getCell(3))) {
+            } else if(attribute.equals(UpdateField.IMPORT_DATE) || attribute.equals(UpdateField.WARRANTY_PERIOD)) {
                 setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Long.class);
-                setter.invoke(poDetailResponse, row.getCell(3).getDateCellValue().getTime());
-            }
-            else {
+                setter.invoke(poDetailResponse, processExcelFile.getCellValueIsTextDateFormat(row, 3));
+            } else {
                 setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Short.class);
                 setter.invoke(poDetailResponse, (short) row.getCell(3).getNumericCellValue());
             }
@@ -574,7 +541,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         // If the PoDetailResponse object is valid, return it; otherwise, return an error response
         if (resultError == null) {
-//            return mapper.convertTo(poDetailRequest, PoDetail.class);
             return poDetailResponse;
         } else {
             return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex, resultError.get(0));
@@ -590,20 +556,13 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      */
     @Transactional
     public DataResponse<PoDetailResponse> updatePoDetail(PoDetailResponse poDetailResponse, String key) {
-        List<String> result = validationRequest(poDetailResponse);
-
-        // Validate the request data
-        if ((result != null)) {
-            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-        }
-
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(key);
         // Update the PO detail record with the new data
         if (poDetail.isPresent()) {
-            SpecificationDesc specificationDesc = new SpecificationDesc();
-            specificationDesc.setRecord(poDetailResponse.getPoDetailId());
-            String compare = poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse), Action.EDIT, specificationDesc);
-            specificationDesc.setDescription(compare);
+            HistoryDescription description = new HistoryDescription();
+            description.setKey(poDetailResponse.getPoDetailId());
+            String compare = poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse), Action.EDIT, description);
+            description.setDetails(compare);
 
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
@@ -616,7 +575,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             poDetail.get().setPriority(poDetailResponse.getPriority());
 
             poDetailRepository.save(poDetail.get());
-            historyService.saveHistory(Action.EDIT.getValue(), ObjectName.PoDetail, specificationDesc.getSpecification(), "");
+            historyService.save(Action.EDIT.getValue(), ObjectName.PoDetail, description.getDescription(), "");
 
             return ResponseMapper.toDataResponse("", StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
         }
@@ -629,11 +588,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(id);
         if (poDetail.isPresent()) {
             /* Save History */
-            SpecificationDesc specificationDesc = new SpecificationDesc();
-            specificationDesc.setRecord(poDetail.get().getPoDetailId());
+            HistoryDescription description = new HistoryDescription();
+            description.setKey(poDetail.get().getPoDetailId());
 
             poDetailRepository.delete(poDetail.get());
-            historyService.saveHistory(Action.DELETE.getValue(), ObjectName.PoDetail, specificationDesc.getSpecification(), "");
+            historyService.save(Action.DELETE.getValue(), ObjectName.PoDetail, description.getDescription(), "");
             return ResponseMapper.toDataResponseSuccess("Success");
         }
         return ResponseMapper.toDataResponseSuccess(null);

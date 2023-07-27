@@ -2,20 +2,19 @@ package com.ocena.qlsc.user_history.model;
 
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor
-public class SpecificationDesc {
+public class HistoryDescription {
     private String fields = "";
-    private String amount = "";
-    private String record = "";
-    private String description = "";
+    private String importAmount = "";
+    private String key = "";
+    private String details = "";
 
 
     // Set Description to edit data
-    public String setDesc(List<String> fields, List<String> oldDatas, List<String> newDatas) {
+    public String setDescription(List<String> fields, List<String> oldDatas, List<String> newDatas) {
         String result = fields.size() > 0 ? "- " : "";
         for(int i = 0; i < fields.size(); i++) {
             result += fields.get(i) + ": từ <" + oldDatas.get(i) + "> thành <" + newDatas.get(i) + ">; ";
@@ -24,7 +23,7 @@ public class SpecificationDesc {
     }
 
     // Set description to add data
-    public String setDesc(List<String> fields, List<String> newDatas) {
+    public String setDescription(List<String> fields, List<String> newDatas) {
         String result = fields.size() > 0 ? "- " : "";
         for(int i = 0; i < fields.size(); i++) {
             result += fields.get(i) + ": <" + newDatas.get(i) + ">; ";
@@ -33,7 +32,7 @@ public class SpecificationDesc {
     }
 
     // Set description to import data excel
-    public String setDesc(String data) {
+    public String setDescription(String data) {
         return data != "" ? "- Số S/N: " + data : "";
     }
 
@@ -46,23 +45,23 @@ public class SpecificationDesc {
 //        this.description = result;
 //    }
 
-    public String getSpecification() {
-        return amount + record + fields + description ;
+    public String getDescription() {
+        return importAmount + key + fields + details;
     }
 
-    public void setAmount(String amount) {
-        this.amount = "Số lượng: " + amount + "//n";
+    public void setImportAmount(String importAmount) {
+        this.importAmount = "Số lượng: " + importAmount + "//n";
     }
 
-    public void setRecord(String record) {
-        this.record = "Key: " + record + "//n";
+    public void setKey(String key) {
+        this.key = "Key: " + key + "//n";
     }
 
     public void setFields(String fields) {
         this.fields = "Trường cập nhật: " + fields + "//n";
     }
 
-    public void setDescription(String description) {
-        this.description = "Mô tả chi tiết: //n" + description;
+    public void setDetails(String details) {
+        this.details = "Mô tả chi tiết: //n" + details;
     }
 }

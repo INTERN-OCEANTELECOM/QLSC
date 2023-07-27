@@ -19,7 +19,6 @@ import {
   handleRefresh,
 } from "../../redux/actions/userAction";
 import logo from "../../assets/logo_28-06-2017_LogoOceanTelecomtailieupng-removebg-preview.png";
-import { toast } from "react-toastify";
 
 const Admin = () => {
   
@@ -253,13 +252,17 @@ const Admin = () => {
                   if (item.removed === true) {
                     return null;
                   }
+                  const roleName =
+                    item.roles && item.roles.length > 0
+                      ? item.roles[0].roleName
+                      : "";
                   return (
                     <tr key={`sc-${index}`}>
                       <td>{index + 1}</td>
                       <td>{item.fullName}</td>
                       <td>{item.email}</td>
                       <td>{item.phoneNumber}</td>
-                      <td>{item.roles[0].roleName}</td>
+                      <td>{roleName}</td>
                       <td>
                         {item.status === 0 && "Mới"}
                         {item.status === 1 && "Đã đổi mật khẩu"}

@@ -2,7 +2,6 @@ package com.ocena.qlsc.common.service;
 
 
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
-import com.ocena.qlsc.common.exception.ApiRequestException;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
@@ -12,10 +11,9 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.util.ReflectionUtil;
-import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.enums.ObjectName;
-import com.ocena.qlsc.user_history.model.SpecificationDesc;
+import com.ocena.qlsc.user_history.model.HistoryDescription;
 import com.ocena.qlsc.user_history.service.HistoryService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +25,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-import javax.swing.text.html.Option;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -67,27 +62,27 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     }
 
     private void saveHistory(Action action, String key, E newEntity, E oldEntity) {
-        SpecificationDesc specificationDesc = new SpecificationDesc();
+        HistoryDescription historyDescription = new HistoryDescription();
         if(action == Action.DELETE) {
-            specificationDesc.setRecord(key);
+            historyDescription.setKey(key);
         } else {
             // Compare the values of the attributes in the old entity and the new entity
-            String specificationHistory = oldEntity.compare(newEntity, action, specificationDesc);
+            String descriptionDetails = oldEntity.compare(newEntity, action, historyDescription);
             // Set Description
-            if(!specificationDesc.equals("")) {
+            if(!descriptionDetails.equals("")) {
                 if(action == Action.CREATE) {
-                    specificationDesc.setDescription(specificationHistory);
+                    historyDescription.setDetails(descriptionDetails);
                 } else {
                     // Action is Edit
-                    specificationDesc.setRecord(key);
-                    specificationDesc.setDescription(specificationHistory);
+                    historyDescription.setKey(key);
+                    historyDescription.setDetails(descriptionDetails);
                 }
             }
         }
         // Get Object New
         String objectName = (String) ReflectionUtil.getFieldValueByReflection(newEntity.getClass().getSimpleName().toString(),
                 new ObjectName());
-        historyService.saveHistory(action.getValue(), objectName, specificationDesc.getSpecification(), "");
+        historyService.save(action.getValue(), objectName, historyDescription.getDescription(), "");
     }
 
 

@@ -28,7 +28,7 @@ public interface PoDetailRepository extends BaseRepository<PoDetail> {
             "AND (DATE_FORMAT(FROM_UNIXTIME(po.exportPartner/1000),'%d/%m/%Y')  LIKE %:keyword8% OR :keyword8 IS NULL)" +
             "AND (CAST(po.kcsVT AS string) LIKE %:keyword9% OR :keyword9 IS NULL)" +
             "AND (CAST(po.priority AS string) LIKE %:keyword10% OR :keyword10 IS NULL)")
-    List<PoDetail> searchPoDetail(@Param("keyword1") String keyword1,
+    Page<PoDetail> searchPoDetail(@Param("keyword1") String keyword1,
 //                                  @Param("keyword2") String keyword2,
                                   @Param("keyword3") String keyword3,
                                   @Param("keyword4") String keyword4,
@@ -37,7 +37,8 @@ public interface PoDetailRepository extends BaseRepository<PoDetail> {
                                   @Param("keyword7") String keyword7,
                                   @Param("keyword8") String keyword8,
                                   @Param("keyword9") String keyword9,
-                                  @Param("keyword10") String keyword10);
+                                  @Param("keyword10") String keyword10,
+                                  Pageable pageable);
 
 //    @Cacheable(value = "po-detail")
     @Override
@@ -49,6 +50,4 @@ public interface PoDetailRepository extends BaseRepository<PoDetail> {
     List<PoDetail> findBySerialNumberIn(List<String> serialNumbers);
 
     List<PoDetail> getPoDetailsBySerialNumber(String serialNumbers);
-
-    List<PoDetail> findAllBySerialNumberIn(List<String> serialNumber);
 }

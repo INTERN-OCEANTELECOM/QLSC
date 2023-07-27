@@ -43,22 +43,21 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     }
 
     @PostMapping ("/login")
-    public DataResponse<User> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        return userService.validateLogin(loginRequest, request);
+    public DataResponse<User> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        return userService.login(loginRequest, request);
     }
 
     @PutMapping ("/update")
     @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     public DataResponse<User> updateUser(@RequestParam String email,
-                                         @RequestBody UserDTO userDTO) {
+                                         @Valid @RequestBody UserDTO userDTO) {
         return userService.updateUser(email, userDTO);
     }
 
     @Override
     @Cacheable(value = "getAllUser")
     public ListResponse<UserDTO> getAll() {
-        System.out.println("Save entry");
         return super.getAll();
     }
 
@@ -100,7 +99,7 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         String emailHeader = request.getHeader("email");
-        return userService.validateDeleteUser(email, emailHeader) ? super.delete(email) :
+        return userService.hasDeleteUserPermission(email, emailHeader) ? super.delete(email) :
                 ResponseMapper.toDataResponse("", StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
     }
 

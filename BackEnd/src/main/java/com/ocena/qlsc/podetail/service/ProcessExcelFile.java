@@ -4,6 +4,7 @@ import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.common.response.ResponseMapper;
+import com.ocena.qlsc.common.util.DateUtil;
 import com.ocena.qlsc.podetail.status.ErrorType;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -25,7 +26,7 @@ public class ProcessExcelFile {
      * @param regex the regular expression to be matched against the cell value
      * @return true if the cell value matches the regular expression, false otherwise
      */
-    public boolean isValidHeader(String cellValue, String regex) {
+    public boolean isHeaderValid(String cellValue, String regex) {
         return cellValue != null && cellValue.toLowerCase().matches(regex);
     }
 
@@ -41,9 +42,9 @@ public class ProcessExcelFile {
                 Row row = rowIterator.next();
 
                 for (Integer key : map.keySet()) {
-                    System.out.println(row.getCell(key).getStringCellValue());
-                    System.out.println(map.get(key));
-                    if (!isValidHeader(row.getCell(key).getStringCellValue(), map.get(key))) {
+//                    System.out.println(row.getCell(key).getStringCellValue());
+//                    System.out.println(map.get(key));
+                    if (!isHeaderValid(row.getCell(key).getStringCellValue(), map.get(key))) {
                         return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (key + 1) + " sai");
                     }
                 }
@@ -148,4 +149,15 @@ public class ProcessExcelFile {
         }
         return String.format("%.0f", row.getCell(col).getNumericCellValue());
     }
+
+
+    public Long getCellValueIsTextDateFormat(Row row, int col) {
+        CellType cellType = row.getCell(col).getCellType();
+        if(cellType == CellType.STRING) {
+            return DateUtil.getDateFormatValid(row.getCell(col).getStringCellValue());
+        } else {
+            return row.getCell(col).getDateCellValue().getTime();
+        }
+    }
 }
+

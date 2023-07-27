@@ -63,8 +63,12 @@ const ModalUpdateUser = (props) => {
       toast.success("Cập nhật thông tin thành công !!");
       localStorage.removeItem("emailEdit");
     } else {
-      handleClose();
-      toast.error("Cập nhật thông tin không thành công !!");
+      if (res && res.data.statusCode === 501) {
+        setValidate("Email đã tồn tại!!")
+      }else {
+        handleClose();
+        toast.error("Cập nhật thông tin không thành công !!");
+      } 
     }
   };
 

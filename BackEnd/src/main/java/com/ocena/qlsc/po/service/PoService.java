@@ -1,6 +1,6 @@
 package com.ocena.qlsc.po.service;
 
-import com.ocena.qlsc.common.constants.TimeConstants;
+import com.ocena.qlsc.user.util.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
@@ -78,11 +78,6 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
             return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
         }
-
-        Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
-        if (newPo.isPresent()){
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");
-        }
         return null;
     }
 
@@ -92,17 +87,18 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
             return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
         }
 
-        Optional<Po> poOld = poRepository.findByPoNumber(key);
-        Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
+        Optional<Po> optionalOldPo = poRepository.findByPoNumber(key);
+        Optional<Po> optionalNewPo = poRepository.findByPoNumber(poDTO.getPoNumber());
 
 
-        if (poOld.get().getCreated() + TimeConstants.updateTimePO < System.currentTimeMillis()
-                && (!poOld.get().getPoNumber().equals(poDTO.getPoNumber())
-                || !poOld.get().getContractNumber().equals(poDTO.getContractNumber()))) {
+        if (optionalOldPo.get().getCreated() + TimeConstants.PO_UPDATE_TIME < System.currentTimeMillis()
+                && (!optionalOldPo.get().getPoNumber().equals(poDTO.getPoNumber())
+                || !optionalOldPo.get().getContractNumber().equals(poDTO.getContractNumber()))) {
             return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 24 HOURS");
         }
-        if (newPo.isPresent() && !newPo.get().getPoNumber().equals(key)){
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "NEW PO NUMBER ALREADY EXISTS");
+
+        if (optionalNewPo.isPresent() && !optionalNewPo.get().getPoNumber().equals(key)){
+            return ResponseMapper.toDataResponse(null, StatusCode.BAD_REQUEST, "NEW PO NUMBER ALREADY EXISTS");
         }
         return null;
     }
@@ -144,14 +140,13 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
      */
     public DataResponse<HashMap<String, HashMap<String, Integer>>> getStatisticsByPoNumber(String poNumber) {
         // Check if a Po object with the given poNumber exists in the repository
-        Optional<Po> isExistPO = poRepository.findByPoNumber(poNumber);
-        System.out.println(isExistPO.get().getCreated());
+        Optional<Po> optionalPO = poRepository.findByPoNumber(poNumber);
 
         // Create a new map to store the results of the statistics
         HashMap<String, Map<String, Long>> resultsMap = new HashMap<>();
         List<PoDetail> listPoDetail = poRepository.getPoDetailsByPoNumber(poNumber);
-        if(isExistPO.isPresent()) {
-            Po po = isExistPO.get();
+        if(optionalPO.isPresent()) {
+            Po po = optionalPO.get();
             // Add the total quantity of the Po and the number of PoDetail objects associated with it to the results map
             resultsMap.put("TONG_SO_LUONG", new HashMap<>(){{
                 put("TONG", (long) po.getQuantity());
@@ -167,28 +162,27 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
             resultsMap.put("KSC_VT", getCountsByProperty(listPoDetail, PoDetail::getKcsVT, kscvt, (short) 0, (short) 1, (short) -1));
 
             // Get the count of PoDetail objects with a non-null WarrantyPeriod property, and add it to the results map
-            long count = listPoDetail
+            long countUpdatedWarrantyPeriod = listPoDetail
                     .stream()
                     .filter(poDetail -> poDetail.getWarrantyPeriod() != null)
                     .count();
 
             resultsMap.put("BAO_HANH", new HashMap<>() {{
-                put("DA_CAP_NHAT", count);
-                put("CHUA_CAP_NHAT", listPoDetail.size() - count);
+                put("DA_CAP_NHAT", countUpdatedWarrantyPeriod);
+                put("CHUA_CAP_NHAT", listPoDetail.size() - countUpdatedWarrantyPeriod);
             }});
 
             // Get the count of PoDetail objects with a non-null exportPartner property, and add it to the results map
-            long countExportPartner = listPoDetail
+            long countUpdatedExportPartner = listPoDetail
                     .stream()
                     .filter(poDetail -> poDetail.getExportPartner() != null)
                     .count();
             resultsMap.put("XUAT_KHO", new HashMap<>() {{
-                put("DA_CAP_NHAT", countExportPartner);
-                put("CHUA_CAP_NHAT", listPoDetail.size() - countExportPartner);
+                put("DA_CAP_NHAT", countUpdatedExportPartner);
+                put("CHUA_CAP_NHAT", listPoDetail.size() - countUpdatedExportPartner);
             }});
             return ResponseMapper.toDataResponse(resultsMap, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
-
         }
-        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
     }
 }

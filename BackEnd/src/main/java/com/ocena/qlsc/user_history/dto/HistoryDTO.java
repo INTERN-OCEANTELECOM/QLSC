@@ -19,5 +19,5 @@ public class HistoryDTO{
 
     private String action;
 
-    private String specification;
+    private String description;
 }

@@ -93,8 +93,8 @@ const ModalAddUser = (props) => {
       toast.success("Thêm thành công");
     } else if (
       res &&
-      res.statusCode === 205 &&
-      res.statusMessage === "REQUEST FAILURE! DATA NOT MAPPING"
+      res.data.statusCode === 501 &&
+      res.data.statusMessage === "CANNOT ACCEPT THE REQUIRED ACTION"
     ) {
       setValidate("Email đã tồn tại!!!");
     } else {
@@ -108,6 +108,12 @@ const ModalAddUser = (props) => {
     setValidateEmail("")
     setValidatePassword("")
     setValidatePhone("")
+    setFullName("");
+    setEmail("");
+    setPhone("");
+    setCreator("");
+    setPassword("");
+    setRoleName("Chose Role")
   }
 
   return (

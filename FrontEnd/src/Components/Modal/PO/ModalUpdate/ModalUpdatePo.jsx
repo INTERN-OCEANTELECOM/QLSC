@@ -168,12 +168,16 @@ const ModalUpdatePo = (props) => {
             setIsValidate(
               "Bạn chỉ được phép chỉnh PO và số Hợp đồng trong 24h!!"
             );
-          } else if (res.statusMessage === "NEW PO NUMBER ALREADY EXISTS") {
-            setIsValidate("Số PO đã tồn tại");
-            setPo(dataPo.poNumber);
           } else {
             setIsValidate("");
           }
+        } else if (
+          res &&
+          res.statusCode === 400 &&
+          res.statusMessage === "NEW PO NUMBER ALREADY EXISTS"
+        ) {
+          setIsValidate("Số PO đã tồn tại");
+          setPo(dataPo.poNumber);
         } else if (res && res.data.statusCode === 501) {
           setIsValidate("");
           handleClose();

@@ -125,7 +125,7 @@ const ModelAddPO = (props) => {
     } else {
       if (
         res &&
-        res.statusCode === 205
+        res.data.statusCode === 501
       ) {
         setIsValidate("PO đã tồn tại");
         
