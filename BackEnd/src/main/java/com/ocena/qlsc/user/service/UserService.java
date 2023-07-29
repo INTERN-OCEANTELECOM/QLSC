@@ -342,7 +342,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if (user != null) {
             User userRequest = getBaseMapper().dtoToEntity(userDTO);
-            System.out.println("User: " + userRequest.getEmail());
+
             // If the logged-in user is an admin user, also update the User object's email and roles
             HistoryDescription description = new HistoryDescription();
             String descriptionDetails = user.compare(userRequest, Action.EDIT, description);

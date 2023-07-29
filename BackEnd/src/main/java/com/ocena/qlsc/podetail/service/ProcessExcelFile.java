@@ -42,8 +42,6 @@ public class ProcessExcelFile {
                 Row row = rowIterator.next();
 
                 for (Integer key : map.keySet()) {
-//                    System.out.println(row.getCell(key).getStringCellValue());
-//                    System.out.println(map.get(key));
                     if (!isHeaderValid(row.getCell(key).getStringCellValue(), map.get(key))) {
                         return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (key + 1) + " sai");
                     }

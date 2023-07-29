@@ -285,6 +285,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
+
         List<String> listSearchSerialNumber = new ArrayList<>();
         while (rowIterator.hasNext()) {
 
@@ -294,15 +295,18 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             if (row.getCell(0).getCellType() == CellType.BLANK) {
                 // Stop reading data when an empty line is encountered
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex, "Dữ liệu không được để trống"));
+                continue;
             }
 
-            String serialNumber = row.getCell(0).getStringCellValue();
+            String serialNumber = processExcelFile.getCellValueIsNumberOrString(row, 0);
             listSearchSerialNumber.add(serialNumber);
         }
         if(!listError.isEmpty()) {
             return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
+        listSearchSerialNumber.forEach(System.out::println);
         List<PoDetail> listResults = poDetailRepository.findBySerialNumberIn(listSearchSerialNumber);
+        listResults.forEach(System.out::println);
         return ResponseMapper.toListResponseSuccess(listResults.stream()
                 .map(value -> getBaseMapper().entityToDto(value))
                 .collect(Collectors.toList()));
