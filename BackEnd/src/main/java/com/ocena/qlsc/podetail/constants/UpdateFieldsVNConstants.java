@@ -1,6 +1,6 @@
-package com.ocena.qlsc.podetail.status;
+package com.ocena.qlsc.podetail.constants;
 
-public class UpdateFieldsVN {
+public class UpdateFieldsVNConstants {
     public static final String importDate = "Ngày Nhập Kho";
     public static final String repairCategory = "Hạng Mục SC";
     public static final String priority = "Ưu Tiên SC";

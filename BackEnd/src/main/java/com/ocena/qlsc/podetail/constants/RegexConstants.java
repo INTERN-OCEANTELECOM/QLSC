@@ -1,4 +1,6 @@
-package com.ocena.qlsc.podetail.status;
+package com.ocena.qlsc.podetail.constants;
+
+import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 
 import java.util.*;
 
@@ -11,7 +13,7 @@ public final class RegexConstants {
 
     public static final String regexPo = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*PO\\s*";
 
-    public static final String regexBbbgNumberImport = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*BBNK\\s*";
+//    public static final String regexBbbgNumberImport = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*BBNK\\s*";
 
     public static final String regexImportDate = "(?i)\\s*NG(?:[ÀA]|\\p{L})Y\\s*NH(?:[ÂAẬ]|\\p{L})P\\s*KH(?:[OÔ]|\\p{L})\\s*";
 
@@ -28,6 +30,41 @@ public final class RegexConstants {
     public static final String regexPriority = "(?i)\\s*(?:ƯU]|\\p{L})U\\s*TI(?:[EÊ]|\\p{L})N\\s*SC\\s*";
 
     public static final String regexBbbgNumberExport = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*BBXK\\s*";
+
+    public static final Map<String, CellExcelOperation> functionGetDateFromCellExcel = new HashMap<>() {{
+        put("productId", (row, colIndex) -> FileExcelUtil.getCellValueToString(row, colIndex));
+        put("poNumber", (row, colIndex) -> FileExcelUtil.getCellValueToString(row, colIndex));
+        put("serialNumber", (row, colIndex) -> FileExcelUtil.getCellValueToString(row, colIndex));
+        put("repairCategory", (row, colIndex) -> FileExcelUtil.getCellValueToShort(row, colIndex) == null ? null : FileExcelUtil.getCellValueToShort(row, colIndex));
+        put("importDate", (row, colIndex) -> FileExcelUtil.getCellValueToDate(row, colIndex));
+        put("repairStatus", (row, colIndex) -> FileExcelUtil.getCellValueToShort(row, colIndex) == null ? null : FileExcelUtil.getCellValueToShort(row, colIndex));
+        put("exportPartner", (row, colIndex) -> FileExcelUtil.getCellValueToDate(row, colIndex));
+        put("kcsVT", (row, colIndex) -> FileExcelUtil.getCellValueToShort(row, colIndex) == null ? null : FileExcelUtil.getCellValueToShort(row, colIndex));
+        put("warrantyPeriod", (row, colIndex) -> FileExcelUtil.getCellValueToDate(row, colIndex));
+        put("priority", (row, colIndex) -> FileExcelUtil.getCellValueToShort(row, colIndex) == null ? null : FileExcelUtil.getCellValueToShort(row, colIndex));
+        put("bbbgNumberExport", (row, colIndex) -> FileExcelUtil.getCellValueToString(row, colIndex));
+    }};
+
+    public static final Map<String, String> fieldsRegexMap = new HashMap<>() {{
+        put(regexProduct, "productId");
+        put(regexPo, "poNumber");
+        put(regexSerialNumber, "serialNumber");
+        put(regexRepairCategory, "repairCategory");
+        put(regexImportDate, "importDate");
+        put(regexRepairStatus, "repairStatus");
+        put(regexExportPartner, "exportPartner");
+        put(regexKcsVT, "kcsVT");
+        put(regexWarrantyPeriod, "warrantyPeriod");
+        put(regexPriority, "priority");
+        put(regexBbbgNumberExport, "bbbgNumberExport");
+        put(regexProductName, "productName");
+    }};
+
+    public static final List<String> requiredFeilds = new ArrayList<>() {{
+        add("productId");
+        add("poNumber");
+        add("serialNumber");
+    }};
 
     public static final HashMap<Integer, String> importPOHeader = new HashMap<>() {
         {

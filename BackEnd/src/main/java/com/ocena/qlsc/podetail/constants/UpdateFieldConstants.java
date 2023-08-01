@@ -1,6 +1,6 @@
-package com.ocena.qlsc.podetail.status;
+package com.ocena.qlsc.podetail.constants;
 
-public interface UpdateField {
+public interface UpdateFieldConstants {
     public static final String EXPORT_PARTNER = "exportPartner";
     public static final String KCS_VT = "kcsVT";
     public static final String REPAIR_STATUS = "repairStatus";
