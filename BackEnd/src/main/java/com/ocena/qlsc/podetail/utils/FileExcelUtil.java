@@ -1,11 +1,12 @@
-package com.ocena.qlsc.podetail.service;
+package com.ocena.qlsc.podetail.utils;
 
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.util.DateUtil;
-import com.ocena.qlsc.podetail.status.ErrorType;
+import com.ocena.qlsc.podetail.constants.ImportErrorType;
+import com.ocena.qlsc.podetail.constants.RegexConstants;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 
 @Service
-public class ProcessExcelFile {
+public class FileExcelUtil {
+
 
     /**
      * Checks whether a given cell value matches a specified regular expression.
@@ -26,7 +28,7 @@ public class ProcessExcelFile {
      * @param regex the regular expression to be matched against the cell value
      * @return true if the cell value matches the regular expression, false otherwise
      */
-    public boolean isHeaderValid(String cellValue, String regex) {
+    public static boolean isHeaderValid(String cellValue, String regex) {
         return cellValue != null && cellValue.toLowerCase().matches(regex);
     }
 
@@ -43,18 +45,54 @@ public class ProcessExcelFile {
 
                 for (Integer key : map.keySet()) {
                     if (!isHeaderValid(row.getCell(key).getStringCellValue(), map.get(key))) {
-                        return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (key + 1) + " sai");
+                        return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (key + 1) + " sai");
                     }
                 }
 
                 if (row.getLastCellNum() > map.size()){
-                    return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Header không đúng! Hãy kiểm tra lại");
+                    return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Header không đúng! Hãy kiểm tra lại");
                 }
             }
         } catch (Exception e) {
-            return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Header không đúng! Hãy kiểm tra lại");
+            return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Header không đúng! Hãy kiểm tra lại");
         }
         return null;
+    }
+
+    public static Object getFieldsNameInHeader(Iterator<Row> rowIterator) {
+        List<String> fieldList = new ArrayList<>();
+        if (rowIterator.hasNext()) {
+            Row row = rowIterator.next();
+            List<String> validFields = new ArrayList<>(RegexConstants.fieldsRegexMap.keySet());
+
+
+            for (int i = 0; i < row.getLastCellNum(); i++) {
+                String fieldsName = row.getCell(i).getStringCellValue();
+                if (fieldList.stream().anyMatch(field -> field.equals(fieldsName))) {
+                    return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (i + 1) + " bị trùng với cột khác");
+                }
+
+                if(fieldsName.toLowerCase().matches(RegexConstants.regexProductName))
+                    continue;
+
+                boolean isHeaderValid = false;
+                for(String fieldRegex : validFields) {
+                    if(isHeaderValid(fieldsName, fieldRegex)) {
+                        isHeaderValid = true;
+                        fieldList.add(RegexConstants.fieldsRegexMap.get(fieldRegex));
+                    }
+                }
+
+                if(!isHeaderValid)
+                    return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (i + 1) + " không đúng");
+            }
+
+            fieldList.forEach(System.out::println);
+            if (!fieldList.containsAll(RegexConstants.requiredFeilds)) {
+                return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Header bắt buộc phải có Mã HH - Số PO - Số Serial");
+            }
+        }
+        return fieldList;
     }
 
     /**
@@ -82,7 +120,7 @@ public class ProcessExcelFile {
         for (int columnIndex : columnIndexes) {
             Cell cell = row.getCell(columnIndex);
             if (!isNumericCell(cell)) {
-                return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex,
+                return new ErrorResponseImport(ImportErrorType.DATA_NOT_MAP, rowIndex,
                         "Hàng " + rowIndex + " Cột " + (columnIndex + 1) + " không phải dạng Numberic");
             }
         }
@@ -94,7 +132,7 @@ public class ProcessExcelFile {
         for (int columnIndex : columnIndexes) {
             Cell cell = row.getCell(columnIndex);
             if (!isTextCell(cell)) {
-                return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex,
+                return new ErrorResponseImport(ImportErrorType.DATA_NOT_MAP, rowIndex,
                         "Hàng " + rowIndex + " Cột " + (columnIndex + 1) + " không phải dạng Text");
             }
         }
@@ -112,7 +150,7 @@ public class ProcessExcelFile {
 
         // Check whether the file has the correct format
         if (!file.getOriginalFilename().endsWith(".xlsx")) {
-            listError.add(new ErrorResponseImport(ErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
+            listError.add(new ErrorResponseImport(ImportErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
             return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
@@ -126,7 +164,7 @@ public class ProcessExcelFile {
             return rowIterator;
         } catch (IOException e) {
             // Handle any exceptions that occur while reading the file
-            listError.add(new ErrorResponseImport(ErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
+            listError.add(new ErrorResponseImport(ImportErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
             return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
     }
@@ -140,7 +178,9 @@ public class ProcessExcelFile {
         return false;
     }
 
-    public String getCellValueIsNumberOrString(Row row, int col) {
+    public static String getCellValueToString(Object rowCell, Object colIndex) {
+        Row row = (Row) rowCell;
+        int col = (int) colIndex;
         CellType cellType = row.getCell(col).getCellType();
         if(cellType == CellType.STRING) {
             return row.getCell(col).getStringCellValue();
@@ -148,8 +188,9 @@ public class ProcessExcelFile {
         return String.format("%.0f", row.getCell(col).getNumericCellValue());
     }
 
-
-    public Long getCellValueIsTextDateFormat(Row row, int col) {
+    public static Long getCellValueToDate(Object rowCell, Object colIndex) {
+        Row row = (Row) rowCell;
+        int col = (int) colIndex;
         CellType cellType = row.getCell(col).getCellType();
         if(cellType == CellType.STRING) {
             return DateUtil.getDateFormatValid(row.getCell(col).getStringCellValue());
@@ -157,5 +198,21 @@ public class ProcessExcelFile {
             return row.getCell(col).getDateCellValue().getTime();
         }
     }
+
+    public static Short getCellValueToShort(Object rowCell, Object colIndex) {
+        Row row = (Row) rowCell;
+        int col = (int) colIndex;
+        CellType cellType = row.getCell(col).getCellType();
+        if(cellType == CellType.NUMERIC) {
+            return (short) row.getCell(col).getNumericCellValue();
+        } else {
+            try {
+                return Short.parseShort(row.getCell(col).getStringCellValue());
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+    }
+
 }
 

@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 //@CrossOrigin(value = "*")
@@ -62,16 +60,14 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/update")
-    public ListResponse<ErrorResponseImport> updateStatus(@RequestParam("file") MultipartFile file,
-                                                          @RequestParam("attribute") String attribute) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        return poDetailService.validateRoleUpdatePO(attribute)
-                ? poDetailService.processFileUpdatePoDetail(file, attribute)
+    public ListResponse<ErrorResponseImport> updateStatus(@RequestParam("file") MultipartFile file) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return 1 == 1? poDetailService.updatePoDetailFromExcel(file)
                 : ResponseMapper.toListResponse(null, 0, 0, StatusCode.LOCK_ACCESS, StatusMessage.NOT_PERMISSION);
     }
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/import")
     public ListResponse<ErrorResponseImport> importPODetail(@RequestParam("file") MultipartFile file) {
-        return poDetailService.importPODetail(file);
+        return poDetailService.importPODetailFromExcel(file);
     }
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
@@ -87,7 +83,9 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
 
     @Override
     public ListResponse<PoDetail> searchByKeyword(SearchKeywordDto searchKeywordDto) {
-        return super.searchByKeyword(searchKeywordDto);
+        return searchKeywordDto.getProperty().equals("ALL")
+        ? poDetailService.getAllByListKeyword(searchKeywordDto)
+        : super.searchByKeyword(searchKeywordDto);
     }
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")

@@ -9,9 +9,9 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
-import com.ocena.qlsc.podetail.service.ProcessExcelFile;
-import com.ocena.qlsc.podetail.status.ErrorType;
-import com.ocena.qlsc.podetail.status.RegexConstants;
+import com.ocena.qlsc.podetail.utils.FileExcelUtil;
+import com.ocena.qlsc.podetail.constants.ImportErrorType;
+import com.ocena.qlsc.podetail.constants.RegexConstants;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.mapper.ProductMapper;
 import com.ocena.qlsc.product.model.Product;
@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -44,7 +43,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
     ProductMapper productMapper;
 
     @Autowired
-    ProcessExcelFile processExcelFile;
+    FileExcelUtil processExcelFile;
 
     @Autowired
     ModelMapper mapper;
@@ -132,15 +131,15 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
                             !listInsert.stream().anyMatch(products -> products.getProductId().equals(product.getProductId()))) {
                         listInsert.add(product);
                     } else {
-                        listError.add(new ErrorResponseImport(ErrorType.RECORD_EXISTED, rowIndex,
+                        listError.add(new ErrorResponseImport(ImportErrorType.RECORD_EXISTED, rowIndex,
                                 "Mã hàng hóa " + product.getProductId() + " đã tồn tại"));
                     }
                 }
             }
             productRepository.saveAll(listInsert);
-            listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsert.size() + " hàng Insert thành công"));
+            listError.add(0, new ErrorResponseImport(ImportErrorType.DATA_SUCCESS, listInsert.size() + " hàng Insert thành công"));
         } catch (Exception ex) {
-            listError.add(new ErrorResponseImport(ErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
+            listError.add(new ErrorResponseImport(ImportErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
             return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
@@ -173,7 +172,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         if(resultError == null) {
             return getBaseMapper().dtoToEntity(productDTO);
         } else {
-            return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex, resultError.get(0));
+            return new ErrorResponseImport(ImportErrorType.DATA_NOT_MAP, rowIndex, resultError.get(0));
         }
     }
 }
