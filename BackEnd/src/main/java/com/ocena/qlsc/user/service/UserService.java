@@ -112,7 +112,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                 userResponse.setRoles(roles);
 
                 /*account login success logs*/
-                historyService.save(Action.LOGIN.getValue(), null, "Đăng Nhập Thành Công", email);
+                historyService.save(Action.LOGIN.getValue(), null, "Đăng Nhập Thành Công", email, null);
             }
         }
 
@@ -171,7 +171,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if (lockedTime != null) {
             /*account lockout log*/
-            historyService.save(Action.LOGIN.getValue(), null, "Tài Khoản Bị Tạm Khóa 60s", loginRequest.getEmail());
+            historyService.save(Action.LOGIN.getValue(), null, "Tài Khoản Bị Tạm Khóa 60s", loginRequest.getEmail(), null);
 
             return ResponseMapper.toDataResponse(lockedTime, StatusCode.LOCK_ACCESS,
                     StatusMessage.LOCK_ACCESS);
@@ -242,7 +242,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                 user.setStatus((short) 1);
                 if (userRepository.save(user) != null) {
                     /*reset password logs*/
-                    historyService.save(Action.RESET_PASSWORD.getValue(), ObjectName.User, "", user.getEmail());
+                    historyService.save(Action.RESET_PASSWORD.getValue(), ObjectName.User, "", user.getEmail(), null);
 
                     return ResponseMapper.toDataResponseSuccess(StatusMessage.REQUEST_SUCCESS);
                 }
@@ -298,7 +298,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             user.setStatus((short) 1);
             if(userRepository.save(user) != null) {
                 /*change password logs*/
-                historyService.save(Action.RESET_PASSWORD.getValue(), ObjectName.User, "", user.getEmail());
+                historyService.save(Action.RESET_PASSWORD.getValue(), ObjectName.User, "", user.getEmail(), null);
 
                 return ResponseMapper.toDataResponseSuccess("");
             }
@@ -350,7 +350,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                 description.setKey(userDTO.getEmail());
                 description.setDetails(descriptionDetails);
             }
-            historyService.save(Action.EDIT.getValue(), ObjectName.User, description.getDescription(), "");
+            historyService.save(Action.EDIT.getValue(), ObjectName.User, description.getDescription(), "", null);
 
             if (isUpdatedAdmin) {
                 user.setEmail(userRequest.getEmail());

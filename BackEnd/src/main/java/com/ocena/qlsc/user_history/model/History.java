@@ -3,6 +3,7 @@ package com.ocena.qlsc.user_history.model;
 import com.ocena.qlsc.common.util.SystemUtil;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 
 import java.util.UUID;
 
@@ -32,6 +33,9 @@ public class History {
     @Lob
     @Column(columnDefinition = "MEDIUMTEXT")
     private String description;
+
+    @Column(name = "file_path", length = 400)
+    private String filePath;
 
     @PrePersist
     private void createID(){

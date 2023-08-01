@@ -82,7 +82,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         // Get Object New
         String objectName = (String) ReflectionUtil.getFieldValueByReflection(newEntity.getClass().getSimpleName().toString(),
                 new ObjectName());
-        historyService.save(action.getValue(), objectName, historyDescription.getDescription(), "");
+        historyService.save(action.getValue(), objectName, historyDescription.getDescription(), "", null);
     }
 
 

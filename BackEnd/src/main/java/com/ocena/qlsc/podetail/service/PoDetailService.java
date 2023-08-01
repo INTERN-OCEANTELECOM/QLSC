@@ -1,9 +1,7 @@
 package com.ocena.qlsc.podetail.service;
 
 import com.ocena.qlsc.common.util.ReflectionUtil;
-import com.ocena.qlsc.podetail.constants.UpdateFieldsVNConstants;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
-import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.user.model.RoleUser;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
@@ -34,6 +32,7 @@ import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.enums.ObjectName;
 import com.ocena.qlsc.user_history.model.HistoryDescription;
 import com.ocena.qlsc.user_history.service.HistoryService;
+import com.ocena.qlsc.user_history.utils.FileUtil;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +44,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -53,7 +51,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse> implements IPoDetail {
+public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse> implements IPoDetailService {
     @Autowired
     PoDetailMapper poDetailMapper;
 
@@ -245,7 +243,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         if (listErrorResponse.isEmpty() && listUpdatePoDetail.size() > 0) {
             poDetailRepository.saveAll(listUpdatePoDetail);
-            saveHistoryImportDataExcel(Action.UPDATE.getValue(), listUpdatePoDetail, "priority");
+            saveHistoryImportDataExcel(Action.UPDATE.getValue(), listUpdatePoDetail, file);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ImportErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " dòng update thành công")));
         }
@@ -330,7 +328,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         return null;
     }
 
-    public void saveHistoryImportDataExcel(String action, List<PoDetail> listPoDetail, String attribute) {
+    public void saveHistoryImportDataExcel(String action, List<PoDetail> listPoDetail, MultipartFile file) {
         // Get List PoNumber distinct
         List<String> distinctPoNumber = listPoDetail.stream()
                 .map(poDetail -> poDetail.getPo().getPoNumber())
@@ -345,7 +343,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             descriptionHistory += "<" + poDetail.getSerialNumber().toString() + "> ";
         }
         description.setDetails(description.setDescription(descriptionHistory));
-        historyService.save(action, ObjectName.PoDetail, description.getDescription(), "");
+
+        // Save File to History
+        String filePath = FileUtil.saveUploadedFile(file, action);
+        //
+        historyService.save(action, ObjectName.PoDetail, description.getDescription(), "", filePath);
     }
 
     /**
@@ -417,7 +419,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         if (listErrorResponse.isEmpty() && listInsertPoDetail.size() > 0) {
             poDetailRepository.saveAll(listInsertPoDetail);
-            saveHistoryImportDataExcel(Action.IMPORT.getValue(), listInsertPoDetail, "");
+            saveHistoryImportDataExcel(Action.IMPORT.getValue(), listInsertPoDetail, file);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ImportErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " dòng import thành công")));
         }
@@ -455,13 +457,13 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             try {
                 if(value instanceof Long) {
                     Method method = ReflectionUtil.setterMethod(PoDetailResponse.class, field, Long.class);
-                    method.invoke(poDetailResponse, (Long) value);
+                    method.invoke(poDetailResponse, value);
                 } else if(value instanceof String) {
                     Method method = ReflectionUtil.setterMethod(PoDetailResponse.class, field, String.class);
-                    method.invoke(poDetailResponse, (String) value);
+                    method.invoke(poDetailResponse, value);
                 } else if(value instanceof Short) {
                     Method method = ReflectionUtil.setterMethod(PoDetailResponse.class, field, Short.class);
-                    method.invoke(poDetailResponse, (Short) value);
+                    method.invoke(poDetailResponse, value);
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
@@ -512,7 +514,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             poDetail.get().setPriority(poDetailResponse.getPriority());
 
             poDetailRepository.save(poDetail.get());
-            historyService.save(Action.EDIT.getValue(), ObjectName.PoDetail, description.getDescription(), "");
+            historyService.save(Action.EDIT.getValue(), ObjectName.PoDetail, description.getDescription(), "", null);
 
             return ResponseMapper.toDataResponse("", StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
         }
@@ -529,7 +531,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             description.setKey(poDetail.get().getPoDetailId());
 
             poDetailRepository.delete(poDetail.get());
-            historyService.save(Action.DELETE.getValue(), ObjectName.PoDetail, description.getDescription(), "");
+            historyService.save(Action.DELETE.getValue(), ObjectName.PoDetail, description.getDescription(), "", null);
             return ResponseMapper.toDataResponseSuccess("Success");
         }
         return ResponseMapper.toDataResponseSuccess(null);

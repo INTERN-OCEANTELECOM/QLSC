@@ -80,6 +80,7 @@ public class FileExcelUtil {
                     if(isHeaderValid(fieldsName, fieldRegex)) {
                         isHeaderValid = true;
                         fieldList.add(RegexConstants.fieldsRegexMap.get(fieldRegex));
+                        break;
                     }
                 }
 
