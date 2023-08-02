@@ -8,7 +8,4 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface IProductService extends BaseService<Product, ProductDTO>{
-    ListResponse importProducts(@RequestParam("file") MultipartFile file);
-
-//    ListResponse<ProductDTO> getProductsByPO(String PO);
 }

@@ -53,6 +53,7 @@ const ModalUpdatePoDetail = (props) => {
   const [poDetailId, setPoDetailId] = useState("");
   const [prioritize, setPrioritize] = useState("")
   const [note, setNote] = useState("")
+  const [productName, setProductName] = useState("")
 
   // check if show then get data po detail
   useEffect(() => {
@@ -64,6 +65,7 @@ const ModalUpdatePoDetail = (props) => {
     if (show) {
       setPoDetailId(dateEditPoDetail.poDetailId);
       setProductId(dateEditPoDetail.product.productId);
+      setProductName(dateEditPoDetail.product.productName);
       setSerialNumber(dateEditPoDetail.serialNumber);
       setPo(dateEditPoDetail.po.poNumber);
       setBbbg(dateEditPoDetail.bbbgNumber);
@@ -179,6 +181,7 @@ const ModalUpdatePoDetail = (props) => {
         getProducts(page);
       } 
       handleCloses();
+      setBbbgPartner(null)
       setRepairCategory(null)
       setPrioritize(null)
       setRepairStatus(null)
@@ -228,7 +231,7 @@ const ModalUpdatePoDetail = (props) => {
             <div>
               <div className="validate-add-po">{isValidate}</div>
               <form className="input-po-detail">
-                <Row className="mb-3 ">
+                <Row className="mb-2 ">
                   <Form.Group as={Col} md="4" controlId="validationCustom01">
                     <Form.Label>Mã hàng hóa</Form.Label>
                     <Form.Control
@@ -272,7 +275,23 @@ const ModalUpdatePoDetail = (props) => {
                     </InputGroup>
                   </Form.Group>
                 </Row>
-                <Row className="mb-3 ">
+                <Row className=" mb-2">
+                  <Form.Group
+                    as={Col}
+                    controlId="exampleForm.ControlTextarea1"
+                  >
+                    <Form.Label>Tên thiết bị</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      value={productName}
+                      readOnly
+                      disabled
+                      // onChange={(event) => setProductName(event.target.value)}
+                    />
+                  </Form.Group>
+                </Row>
+                <Row className="mb-2 ">
                   <Form.Group as={Col} md="6" controlId="validationCustom04">
                     <Form.Label>Ngày nhập kho</Form.Label>
                     <DatePicker
@@ -314,7 +333,7 @@ const ModalUpdatePoDetail = (props) => {
                     </Form.Select>
                   </Form.Group>
                 </Row>
-                <Row className="mb-3 ">
+                <Row className="mb-2 ">
                   <Form.Group as={Col} md="4" controlId="validationCustom099">
                     <Form.Label>Ưu tiên SC</Form.Label>
                     <Form.Select
@@ -368,7 +387,7 @@ const ModalUpdatePoDetail = (props) => {
                     />
                   </Form.Group>
                 </Row>
-                <Row className="mb-3 ">
+                <Row className="mb-2 ">
                   <Form.Group as={Col} md="4" controlId="validationCustom06">
                     <Form.Label>Cập nhật XK</Form.Label>
                     <DatePicker
@@ -420,7 +439,7 @@ const ModalUpdatePoDetail = (props) => {
                     />
                   </Form.Group>
                 </Row>
-                <Row className="mb-3 ">
+                <Row className="mb-2 ">
                   <Form.Group
                     className="mb-3"
                     controlId="exampleForm.ControlTextarea1"
@@ -437,20 +456,24 @@ const ModalUpdatePoDetail = (props) => {
               </form>
             </div>
           </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloses}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleUpdatePoDetail}>
-            Save Changes
-          </Button>
-          {localStorage.getItem("role") === "ROLE_ADMIN" ? (
-            <Button variant="danger" onClick={confirmDelete}>
-              Delete
+          <div className="d-flex justify-content-end ">
+            <Button variant="secondary" onClick={handleCloses}>
+              Close
             </Button>
-          ) : null}
-        </Modal.Footer>
+            <Button
+              variant="primary"
+              className="mx-2"
+              onClick={handleUpdatePoDetail}
+            >
+              Save Changes
+            </Button>
+            {localStorage.getItem("role") === "ROLE_ADMIN" ? (
+              <Button variant="danger" onClick={confirmDelete}>
+                Delete
+              </Button>
+            ) : null}
+          </div>
+        </Modal.Body>
       </Modal>
     </div>
   );

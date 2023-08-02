@@ -1,7 +1,7 @@
 .add-new {
   .group-btn {
     .import {
-      margin-right: 5px;
+      margin-right: 4px;
 
       .label-import {
         display: flex;
@@ -29,7 +29,7 @@
     }
 
     .search {
-      margin-right: 5px;
+      margin-right: 4px;
 
       .label-search {
         display: flex;
@@ -37,7 +37,7 @@
         justify-content: center;
 
         .icon-search {
-          margin-right: 3px;
+          margin-right: 2px;
         }
       }
     }
@@ -53,7 +53,7 @@
     padding: 10px;
     border-radius: 5px;
     box-shadow: 0 0px 2px rgba(0, 0, 0, 0.2);
-    height: 400px;
+    height: 260px;
   }
 }
 
@@ -77,15 +77,6 @@
   .highlighted-row {
     background-color: #fbdb7a; /* Màu nền sáng */
     color: #fbdb7a;
-  }
-}
-
-.update-btn {
-  .nav-drop {
-    .update-state {
-      .label-state {
-      }
-    }
   }
 }
 
@@ -154,7 +145,7 @@
     thead {
       tr {
         th {
-          padding: 10px;
+          padding: 5px;
           background-color: #ffff;
         }
       }
@@ -163,7 +154,7 @@
     tbody {
       tr {
         td {
-          padding: 5px 5px 5px 10px;
+          padding: 3px 3px 3px 5px;
         }
       }
     }
@@ -281,7 +272,7 @@
   padding-left: 10px;
   border-right: 1px solid #26262624;
   border-bottom: 1px solid #26262624;
-  width: 40%;
+  width: 65%;
 }
 
 .row-export {
@@ -309,6 +300,37 @@
 
 .col-barcode-action {
   text-align: center;
-  width: 195px;
+  width: 175px;
 }
 
+.col-name-product {
+  max-width: 220px;
+}
+
+.productid {
+  margin-left: 10px;
+}
+
+.poNumber {
+  margin-left: 10px;
+}
+
+.repariStatus {
+  margin-left: 15px;
+}
+
+.bbxk {
+  margin-left: 35px;
+}
+
+.w-product {
+  width: 35%;
+}
+
+.w-serial {
+  width: 35%;
+}
+
+.w-po {
+  width: 30%;
+}

@@ -1,5 +1,4 @@
 import React from "react";
-import Alert from "react-bootstrap/Alert";
 import "./privateroute.scss";
 import { useSelector } from "react-redux";
 
@@ -9,8 +8,6 @@ const NotFound = (props) => {
   if (user && !user.auth) {
     return (
       <>
-        {/* <Alert variant="success"> */}
-        {/* <Alert.Heading>Not Found</Alert.Heading> */}
         <div className="d-flex align-items-center justify-content-center vh-100" >
           <div className="text-center">
             <h1 className="display-1 fw-bold">404</h1>
@@ -24,7 +21,6 @@ const NotFound = (props) => {
             </a>
           </div>
         </div>
-        {/* </Alert> */}
       </>
     );
   }

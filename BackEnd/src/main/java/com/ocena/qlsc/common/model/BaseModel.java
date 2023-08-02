@@ -112,7 +112,9 @@ public class BaseModel implements Cloneable {
                     continue;
 
 
-                if(newFieldValue == null && !field.getType().equals(Short.class)) {
+                if(newFieldValue == null
+                        && !field.getType().equals(Short.class)
+                        && !field.getType().equals(Long.class)) {
                     continue;
                 }
 

@@ -11,6 +11,7 @@ import com.ocena.qlsc.user_history.repository.HistoryRepository;
 import com.ocena.qlsc.user_history.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -66,7 +67,7 @@ public class HistoryService {
     public ResponseEntity<byte[]> downloadExcelFile(String filePath) {
         byte[] excelBytes = FileUtil.getBytesDataFromFilePath(filePath);
         if(excelBytes == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("NOT FOUND".getBytes());
         }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);

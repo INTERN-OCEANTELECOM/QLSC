@@ -8,6 +8,4 @@ public interface UpdateFieldConstants {
     public static final String PRIORITY = "priority";
     public static final String REPAIR_CATEGORY = "repairCategory";
     public static final String IMPORT_DATE = "importDate";
-//    public static final String BBBG_NUMBER = "bbbgNumber";
-//    public static final String BBBG_NUMBER_PARTNER = "bbbgNumberExport";
 }

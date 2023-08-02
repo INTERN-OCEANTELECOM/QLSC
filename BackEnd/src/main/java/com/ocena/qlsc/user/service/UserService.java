@@ -22,7 +22,6 @@ import com.ocena.qlsc.user.repository.UserRepository;
 import com.ocena.qlsc.user.util.OTPService;
 import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.enums.ObjectName;
-import com.ocena.qlsc.user_history.model.History;
 import com.ocena.qlsc.user_history.model.HistoryDescription;
 import com.ocena.qlsc.user_history.service.HistoryService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,7 +32,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -58,7 +56,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     RoleMapper roleMapper;
     @Autowired
     HistoryService historyService;
-    History history;
     @Override
     protected BaseRepository<User> getBaseRepository() {
         return userRepository;

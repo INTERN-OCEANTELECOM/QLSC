@@ -112,7 +112,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
      * @param values the Short values to use for mapping the counts to Enum values or a special value
      * @return a map of the counts of objects in each group, mapped to their corresponding Enum values or special value
      */
-    private <E extends Enum<E>> Map<String, Long> getCountsByProperty(List<PoDetail> list, Function<PoDetail, Short> propertyGetter, E enums, Short... values) {
+    private static <E extends Enum<E>> Map<String, Long> getCountsByProperty(List<PoDetail> list, Function<PoDetail, Short> propertyGetter, E enums, Short... values) {
         // Group the PoDetail objects by the Short property extracted by the given function
         Map<Short, Long> countsByProperty = list.stream()
                 .collect(Collectors.groupingBy(detail -> propertyGetter.apply(detail) == null
@@ -132,6 +132,30 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         return result;
     }
 
+    public static Map<String, Long> getCountsByRepairStatus(List<PoDetail> list, RepairStatus repairStatus) {
+        return getCountsByProperty(list, PoDetail::getRepairStatus, repairStatus, (short) 0, (short) 1, (short) 2, (short) -1);
+    }
+    public static Map<String, Long> getCountsByKSCVT(List<PoDetail> list, KSCVT kscvt) {
+        return getCountsByProperty(list, PoDetail::getKcsVT, kscvt, (short) 0, (short) 1, (short) -1);
+    }
+
+    public static Map<String, Long> getCountsByWarrantyPeriod(List<PoDetail> list) {
+        long countUpdatedWarrantyPeriod = list.stream().filter(poDetail -> poDetail.getWarrantyPeriod() != null).count();
+
+        Map<String, Long> result = new HashMap<>();
+        result.put("DA_CAP_NHAT", countUpdatedWarrantyPeriod);
+        result.put("CHUA_CAP_NHAT", (long) list.size() - countUpdatedWarrantyPeriod);
+        return result;
+    }
+
+    public static Map<String, Long> getCountsByExportPartner(List<PoDetail> list) {
+        long countUpdatedExportPartner = list.stream().filter(poDetail -> poDetail.getExportPartner() != null).count();
+
+        Map<String, Long> result = new HashMap<>();
+        result.put("DA_CAP_NHAT", countUpdatedExportPartner);
+        result.put("CHUA_CAP_NHAT", (long) list.size() - countUpdatedExportPartner);
+        return result;
+    }
 
     /**
      * Gets various statistics on the PoDetail objects associated with the Po with the given poNumber,
@@ -147,45 +171,16 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         List<PoDetail> listPoDetail = poRepository.getPoDetailsByPoNumber(poNumber);
         if(optionalPO.isPresent()) {
             Po po = optionalPO.get();
-            // Add the total quantity of the Po and the number of PoDetail objects associated with it to the results map
-//            resultsMap.put("TONG_SO_LUONG", new HashMap<>(){{
-//                put("TONG", (long) po.getQuantity());
-//                put("SO_LUONG_IMPORT", (long) listPoDetail.size());
-//            }});
-            Map<String, Long> tongSoLuong = new HashMap<>();
-            tongSoLuong.put("TONG", (long) po.getQuantity());
-            tongSoLuong.put("SO_LUONG_IMPORT", (long) listPoDetail.size());
+            Map<String, Long> totalMap = new HashMap<>();
+            totalMap.put("TONG", (long) po.getQuantity());
+            totalMap.put("SO_LUONG_IMPORT", (long) listPoDetail.size());
+            resultsMap.put("TONG_SO_LUONG", totalMap);
 
-            resultsMap.put("TONG_SO_LUONG", tongSoLuong);
 
-            // Get the counts of PoDetail objects with a certain RepairStatus property, and add it to the results map
-            RepairStatus repairStatus = RepairStatus.SC_XONG;
-            resultsMap.put("TRANG_THAI_SC", getCountsByProperty(listPoDetail, PoDetail::getRepairStatus, repairStatus, (short) 0, (short) 1, (short) 2, (short) -1));
-
-            // Get the counts of PoDetail objects with a certain KSCVT property, and add it to the results map
-            KSCVT kscvt = KSCVT.PASS;
-            resultsMap.put("KSC_VT", getCountsByProperty(listPoDetail, PoDetail::getKcsVT, kscvt, (short) 0, (short) 1, (short) -1));
-
-            // Get the count of PoDetail objects with a non-null WarrantyPeriod property, and add it to the results map
-            long countUpdatedWarrantyPeriod = listPoDetail
-                    .stream()
-                    .filter(poDetail -> poDetail.getWarrantyPeriod() != null)
-                    .count();
-
-            resultsMap.put("BAO_HANH", new HashMap<>() {{
-                put("DA_CAP_NHAT", countUpdatedWarrantyPeriod);
-                put("CHUA_CAP_NHAT", listPoDetail.size() - countUpdatedWarrantyPeriod);
-            }});
-
-            // Get the count of PoDetail objects with a non-null exportPartner property, and add it to the results map
-            long countUpdatedExportPartner = listPoDetail
-                    .stream()
-                    .filter(poDetail -> poDetail.getExportPartner() != null)
-                    .count();
-            resultsMap.put("XUAT_KHO", new HashMap<>() {{
-                put("DA_CAP_NHAT", countUpdatedExportPartner);
-                put("CHUA_CAP_NHAT", listPoDetail.size() - countUpdatedExportPartner);
-            }});
+            resultsMap.put("TRANG_THAI_SC", getCountsByRepairStatus(listPoDetail, RepairStatus.SC_XONG));
+            resultsMap.put("KSC_VT", getCountsByKSCVT(listPoDetail, KSCVT.PASS));
+            resultsMap.put("BAO_HANH", getCountsByWarrantyPeriod(listPoDetail));
+            resultsMap.put("XUAT_KHO", getCountsByExportPartner(listPoDetail));
             return ResponseMapper.toDataResponse(resultsMap, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
         }
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);

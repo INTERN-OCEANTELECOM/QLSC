@@ -35,7 +35,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @Override
-    @CacheEvict(value = {"getProducts", "findAll"}, allEntries = true)
+    @CacheEvict(value = {"getProducts", "findAllProduct"}, allEntries = true)
     public DataResponse<ProductDTO> add(@Valid ProductDTO objectDTO) {
         return super.add(objectDTO);
     }
@@ -51,20 +51,13 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
         return super.getAllByPage(page, size);
     }
 
-    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
-    @PostMapping("/import")
-    @CacheEvict(value = {"getProducts", "findAll"}, allEntries = true)
-    public ListResponse<ErrorResponseImport> importProducts(@RequestParam("file") MultipartFile file) throws IOException {
-        return productService.importProducts(file);
-    }
-
     @Override
     public ListResponse<Product> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return super.searchByKeyword(searchKeywordDto);
     }
 
     @Override
-    @CacheEvict(value = {"getProducts", "findAll"}, allEntries = true)
+    @CacheEvict(value = {"getProducts", "findAllProduct"}, allEntries = true)
     public DataResponse<ProductDTO> update(@Valid ProductDTO objectDTO, String key) {
         return super.update(objectDTO, key);
     }

@@ -35,7 +35,7 @@ const ModalAddProduct = (props) => {
     } else {
       page = 0;
     }
-    validate 
+    
     if (!productId || !productName) {
       setValidate("Cần điền đầy đủ thông tin");
       return
