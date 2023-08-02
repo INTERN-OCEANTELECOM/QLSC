@@ -30,7 +30,7 @@ public class ResponseMapper {
     }
 
     public static ListResponse toPagingResponse(Page page, int statusCode, String statusMessage) {
-        if (!page.isEmpty()) {
+        if (page != null && !page.isEmpty()) {
             long totalRecords = page.getTotalElements();
             int totalPages = page.getTotalPages();
             List list = page.getContent();
