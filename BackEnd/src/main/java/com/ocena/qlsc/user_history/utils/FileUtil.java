@@ -23,7 +23,6 @@ public class FileUtil {
 
     public static byte[] getBytesDataFromFilePath(String filePath) {
         Path excelFilePath = Paths.get(EXCEL_DIRECTORY, filePath);
-        System.out.println(excelFilePath.toString());
         try {
             InputStream excelFileStream = new FileInputStream(excelFilePath.toFile());
             Workbook workbook = new XSSFWorkbook(excelFileStream);

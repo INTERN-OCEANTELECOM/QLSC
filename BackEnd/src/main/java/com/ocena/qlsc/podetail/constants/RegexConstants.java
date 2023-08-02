@@ -7,11 +7,11 @@ import java.util.*;
 public final class RegexConstants {
     public static final String regexRepairCategory = "(?i)\\s*H(?:[ẠA]|\\p{L})NG\\s*M(?:[ỤU]|\\p{L})C\\s*SC\\s*";
 
-    public static final String regexSerialNumber = "(?i)\\s*S(?:[ỐÔÔ]|\\p{L})\\s*SERIAL\\s.*";
+    public static final String regexSerialNumber = "(?i)\\s*S(?:[ỐÔÔ]|\\p{L})\\s*SERIAL\\s*.*";
 
-    public static final String regexProduct = "(?i)\\s*M(?:[ÃA]|\\p{L})\\s*H(?:[ÀA]|\\p{L})NG\\s*H(?:[Ó]|\\p{L})A\\s.*";
+    public static final String regexProduct = "(?i)\\s*M(?:[ÃA]|\\p{L})\\s*H(?:[ÀA]|\\p{L})NG\\s*H(?:[Ó]|\\p{L})A\\s*.*";
 
-    public static final String regexPo = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*PO\\s.*";
+    public static final String regexPo = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*PO\\s*.*";
 
 //    public static final String regexBbbgNumberImport = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*BBNK\\s*";
 
@@ -37,13 +37,13 @@ public final class RegexConstants {
         put("productId", (row, colIndex) -> FileExcelUtil.getCellValueToString(row, colIndex));
         put("poNumber", (row, colIndex) -> FileExcelUtil.getCellValueToString(row, colIndex));
         put("serialNumber", (row, colIndex) -> FileExcelUtil.getCellValueToString(row, colIndex));
-        put("repairCategory", (row, colIndex) -> FileExcelUtil.getCellValueToShort(row, colIndex) == null ? null : FileExcelUtil.getCellValueToShort(row, colIndex));
+        put("repairCategory", (row, colIndex) -> FileExcelUtil.getCellValueToShort(row, colIndex));
         put("importDate", (row, colIndex) -> FileExcelUtil.getCellValueToDate(row, colIndex));
-        put("repairStatus", (row, colIndex) -> FileExcelUtil.getCellValueToShort(row, colIndex) == null ? null : FileExcelUtil.getCellValueToShort(row, colIndex));
+        put("repairStatus", (row, colIndex) -> FileExcelUtil.getCellValueToShort(row, colIndex));
         put("exportPartner", (row, colIndex) -> FileExcelUtil.getCellValueToDate(row, colIndex));
-        put("kcsVT", (row, colIndex) -> FileExcelUtil.getCellValueToShort(row, colIndex) == null ? null : FileExcelUtil.getCellValueToShort(row, colIndex));
+        put("kcsVT", (row, colIndex) -> FileExcelUtil.getCellValueToShort(row, colIndex));
         put("warrantyPeriod", (row, colIndex) -> FileExcelUtil.getCellValueToDate(row, colIndex));
-        put("priority", (row, colIndex) -> FileExcelUtil.getCellValueToShort(row, colIndex) == null ? null : FileExcelUtil.getCellValueToShort(row, colIndex));
+        put("priority", (row, colIndex) -> FileExcelUtil.getCellValueToShort(row, colIndex));
         put("bbbgNumberExport", (row, colIndex) -> FileExcelUtil.getCellValueToString(row, colIndex));
         put("note", (row, colIndex) -> FileExcelUtil.getCellValueToString(row, colIndex));
     }};

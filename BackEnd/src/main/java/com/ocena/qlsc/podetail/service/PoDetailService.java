@@ -73,6 +73,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     @Autowired
     HistoryService historyService;
 
+    @Autowired
+    FileExcelUtil fileExcelUtil;
+
     @Override
     public List<String> validationRequest(Object object) {
         return super.validationRequest(object);
@@ -171,7 +174,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
-
         return poDetail;
 
     }
@@ -200,7 +202,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
 
         // Validate the header row
-        Object dataInHeader = FileExcelUtil.getFieldsNameInHeader(rowIterator);
+        Object dataInHeader = fileExcelUtil.getFieldsNameInHeader(rowIterator);
         if(dataInHeader instanceof ErrorResponseImport) {
             listErrorResponse.add((ErrorResponseImport) dataInHeader);
             return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
@@ -236,6 +238,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 if(value instanceof ErrorResponseImport) {
                     listErrorResponse.add((ErrorResponseImport) value);
                 } else {
+                    System.out.println("value" + value);
                     listUpdatePoDetail.add((PoDetail) value);
                 }
             }
@@ -375,7 +378,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         // Validate header value
         ErrorResponseImport errorResponse;
-        Object dataInHeader = FileExcelUtil.getFieldsNameInHeader(rowIterator);
+        Object dataInHeader = fileExcelUtil.getFieldsNameInHeader(rowIterator);
         if(dataInHeader instanceof ErrorResponseImport) {
             listErrorResponse.add((ErrorResponseImport) dataInHeader);
             return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
@@ -438,9 +441,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         PoDetailResponse poDetailResponse = new PoDetailResponse();
         int colIndex = 0;
         for(String field: fieldsImport) {
+            if(fieldsImport.get(colIndex).equals("productName")) {
+                colIndex++;
+                continue;
+            }
             Object value = RegexConstants.functionGetDateFromCellExcel.get(field).apply(row, colIndex);
             colIndex++;
-
             if(field.equals("productId")) {
                 poDetailResponse.setProduct(new ProductDTO((String) value));
                 continue;
@@ -450,9 +456,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 poDetailResponse.setPo(new PoDTO((String) value));
                 continue;
             }
-
-            if(value == null)
-                return new ErrorResponseImport(ImportErrorType.DATA_NOT_MAP, rowIndex, "Hàng " + rowIndex + " cột " + (colIndex + 1) + " không phải number");
 
             try {
                 if(value instanceof Long) {
@@ -537,18 +540,41 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         return ResponseMapper.toDataResponseSuccess(null);
     }
 
-    public Boolean validateRoleUpdatePO(String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
+    public Boolean validateRoleUpdatePO(List<String> attribute) {
         String email = SystemUtil.getCurrentEmail();
         List<Role> allRoles = roleRepository.getRoleByEmail(email);
+        List<String> fieldsKSCUpdate = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber","kcsVT"));
+        List<String> fieldsRepairStatusUpdate = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber","repairStatus"));
 
         for (Role role : allRoles) {
             if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
-                    || (attribute.equals(UpdateFieldConstants.REPAIR_STATUS) && !role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()))
-                    || (attribute.equals(UpdateFieldConstants.KCS_VT) && !role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()))) {
+                    || (role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()) && attribute.equals(fieldsKSCUpdate)
+                    || (role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()) && attribute.equals(fieldsRepairStatusUpdate)))){
                 return true;
             }
         }
         return false;
+    }
+
+    public List<String> validateRoleUpdatePO1(List<String> attribute) {
+        String email = SystemUtil.getCurrentEmail();
+        List<Role> allRoles = roleRepository.getRoleByEmail(email);
+        List<String> fields = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber"));
+
+        for (Role role : allRoles) {
+            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))){
+                fields = attribute;
+            }
+
+            if(role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()) && attribute.stream().anyMatch(field -> field.equals(UpdateFieldConstants.KCS_VT))){
+                fields.add("kcsVT");
+            }
+
+            if(role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()) && attribute.stream().anyMatch(field -> field.equals(UpdateFieldConstants.REPAIR_STATUS))){
+                fields.add("repairStatus");
+            }
+        }
+        return fields;
     }
 
     public ListResponse<PoDetailResponse> getBySerialNumber(String serialNumber){

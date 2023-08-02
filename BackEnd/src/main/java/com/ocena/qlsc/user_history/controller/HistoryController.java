@@ -29,7 +29,6 @@ public class HistoryController {
 
     @GetMapping("/download")
     public ResponseEntity<byte[]> downloadExcelFile(@RequestParam("filePath") String filePath) {
-        System.out.println("filepath: " + filePath);
         return historyService.downloadExcelFile(filePath);
     }
 }

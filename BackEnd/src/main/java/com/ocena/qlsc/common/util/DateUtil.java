@@ -68,7 +68,7 @@ public class DateUtil {
         LocalDate currentDate = LocalDate.now();
 
         // Định dạng ngày giờ thành chuỗi "dd/MM/yyyy hh:mm:ss"
-        String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("MM-yyyy"));
+        String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("yyyy/MM"));
         return formattedDate;
     }
 
