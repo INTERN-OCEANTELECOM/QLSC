@@ -51,7 +51,7 @@ export const TableHH = () => {
   const [startIndex, setStartIndex] = useState(0);
   const [isShowPoDetail, setIsShowPoDetail] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("5000");
+  const [selectedOption, setSelectedOption] = useState("1000");
   const [checkboxes, setCheckboxes] = useState({
     defaultCheck1: false,
     defaultCheck2: false,
@@ -67,25 +67,25 @@ export const TableHH = () => {
   const [repairStatus, setRepairStatus] = useState(null);
   const [exportPartner, setExportPartner] = useState(null);
   const [kcsVt, setKcsVt] = useState(null);
-  const [po, setPo] = useState("getAll");
   const [listPo, setListPo] = useState("");
   const [priority, setPriority] = useState(null);
   const [currenPage, setCurrentPage] = useState("");
   const [showDelete, setShowDelete] = useState(false);
   const [dataDeletePODetail, setDataDeletePoDetail] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const [value1, setValue1] = useState(""); // State cho ô tìm kiếm thứ nhất
-  const [value2, setValue2] = useState("");
+  const [value1, setValue1] = useState(""); 
   const [debounceTimeout, setDebounceTimeout] = useState(null);
   const [currentPageSearch, setCurrentPageSearch] = useState("");
   const [barcodeScan, setBarcodeScan] = useState("");
-  let timeout;
-
+  const [selectedSuggestion, setSelectedSuggestion] = useState(null);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const item = JSON.parse(queryParams.get("item"));
   const [successfulGhiNKRows, setSuccessfulGhiNKRows] = useState([]);
   const [successfulGhiXKRows, setSuccessfulGhiXKRows] = useState([]);
+  const [isExportButtonEnabled, setIsExportButtonEnabled] = useState(false);
+  const [isExportButtonEnabledSN, setIsExportButtonEnabledSN] = useState(false);
+  const [isExportButtonEnabledBC, setIsExportButtonEnabledBC] = useState(false);
 
   // call api when load page
   useEffect(() => {
@@ -109,7 +109,6 @@ export const TableHH = () => {
         handleSearch(0);
       }
     } else {
-      // getProducts(0);
       getAllPO();
     }
   }, [selectedOption]);
@@ -137,7 +136,7 @@ export const TableHH = () => {
         kcsVt,
         priority,
       ],
-      "ALL",
+      "getAll",
       page,
       selectedOption
     );
@@ -146,38 +145,15 @@ export const TableHH = () => {
       setTotalProducts(res.totalPages);
       setTotalPages(res.data.number);
       setCurrentPageSearch(page);
+      setIsExportButtonEnabled(true)
     }
     if (res && res.statusCode === 204) {
       setListPoDetail(res.data);
       setTotalProducts(res.totalPages);
-      // setTotalPages(res.data.number);
+      setIsExportButtonEnabled(false);
     }
   };
 
-  // handle change date start
-  const handleDateChangeStart = (date) => {
-    setSelectedDateStart(date);
-  };
-  const handleDateChangeExportPartner = (date) => {
-    setExportPartner(date);
-  };
-
-  // custom input icon calendar
-  const CustomInput = React.forwardRef(({ value, onClick }, ref) => (
-    <div className="custom-input">
-      <input
-        type="text"
-        className="form-control"
-        value={value}
-        onClick={onClick}
-        ref={ref}
-        readOnly
-      />
-      <div className="icon-container" onClick={onClick}>
-        <FaCalendarAlt className="calendar-icon" />
-      </div>
-    </div>
-  ));
 
   // call api get product by page
   const getProducts = async (page) => {
@@ -217,9 +193,8 @@ export const TableHH = () => {
       let response = await importPODetail(formData);
       if (response && response.statusCode === 200) {
         toast.success("Dữ liệu đã được tải thành công!!");
-        setIsShowNotify(true);
-        setData(response.data);
-        getProducts(0);
+        setListPoDetail(response.data);
+        setTotalProducts(response.totalPages);
       } else {
         toast.error("Dữ liệu đã được tải không thành công!");
         setData(response.data);
@@ -236,29 +211,6 @@ export const TableHH = () => {
   // handle import status po detail
   const handleUploadSC = async (event) => {
     try {
-      const selectedState = event.target.id;
-      let selectUpdateValue = "";
-
-      if (selectedState === "test1") {
-        selectUpdateValue = "repairStatus";
-      } else if (selectedState === "test2") {
-        selectUpdateValue = "exportPartner";
-      } else if (selectedState === "test3") {
-        selectUpdateValue = "kcsVT";
-      } else if (selectedState === "test4") {
-        selectUpdateValue = "warrantyPeriod";
-      } else if (selectedState === "test5") {
-        selectUpdateValue = "repairCategory";
-      } else if (selectedState === "test6") {
-        selectUpdateValue = "priority";
-      } else if (selectedState === "test7") {
-        selectUpdateValue = "importDate";
-      } else if (selectedState === "test8") {
-        selectUpdateValue = "bbbgNumber";
-      } else if (selectedState === "test9") {
-        selectUpdateValue = "bbbgNumberExport";
-      }
-
       const file = event.target.files[0];
 
       if (
@@ -271,14 +223,12 @@ export const TableHH = () => {
 
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("attribute", selectUpdateValue);
       setIsLoading(true);
       let response = await updateStatusPoDetail(formData);
       if (response && response.statusCode === 200) {
         toast.success("Dữ liệu đã được tải thành công!");
-        setIsShowNotify(true);
-        setData(response.data);
-        getProducts(0);
+        setListPoDetail(response.data);
+        setTotalProducts(response.totalPages);
       } else {
         toast.error("Dữ liệu đã được tải không thành công!");
         setData(response.data);
@@ -324,128 +274,6 @@ export const TableHH = () => {
     }
   };
 
-  // Export
-
-  const handleExport = async () => {
-    let selectedData = [];
-    let selectedColumns = [
-      "Tên sản phẩm",
-      "Mã hàng hóa",
-      "Số serial",
-      "Số PO",
-      "Ngày nhập kho",
-      "Hạng mục SC",
-      "Ưu Tiên SC",
-    ];
-
-    if (checkboxes.defaultCheck1) {
-      selectedColumns.push("Cập nhật SC");
-    }
-
-    if (checkboxes.defaultCheck2) {
-      selectedColumns.push("Số BBXK", "Cập nhật XK");
-    }
-
-    if (checkboxes.defaultCheck3) {
-      selectedColumns.push("Cập nhật KCS");
-    }
-
-    if (checkboxes.defaultCheck4) {
-      selectedColumns.push("Cập nhật BH");
-    }
-
-    selectedColumns.unshift("STT");
-
-    if (
-      checkboxes.defaultCheck1 ||
-      checkboxes.defaultCheck2 ||
-      checkboxes.defaultCheck3 ||
-      checkboxes.defaultCheck4
-    ) {
-      let res = await exportByPO(value2);
-      if (res && res.statusCode === 200) {
-        selectedData = res.data;
-      }
-
-      // selectedData = data.filter((item) => item.serialNumber);
-      const exportData = [
-        selectedColumns,
-        ...selectedData.map((item, index) => {
-          return [
-            index + 1,
-            ...selectedColumns.slice(1).map((column) => {
-              if (column === "Tên sản phẩm") {
-                return item.product.productName;
-              }
-              if (column === "Mã hàng hóa") {
-                return item.product.productId;
-              }
-              if (column === "Số serial") {
-                return item.serialNumber;
-              }
-              if (column === "Số PO") {
-                return item.po.poNumber;
-              }
-              if (column === "Ngày nhập kho") {
-                if (item.importDate) {
-                  return moment(item.importDate).format("DD/MM/YYYY");
-                }
-              }
-              if (column === "Hạng mục SC") {
-                if (item.repairCategory === 0) {
-                  return "Hàng SC";
-                } else if (item.repairCategory === 1) {
-                  return "Hàng BH";
-                }
-              }
-              if (column === "Ưu Tiên SC") {
-                if (item.priority === 0) {
-                  return;
-                } else if (item.priority === 1) {
-                  return "Ưu tiên";
-                }
-              }
-              if (column === "Cập nhật SC") {
-                if (item.repairStatus === 1) {
-                  return "Sửa chữa xong";
-                } else if (item.repairStatus === 0) {
-                  return "Sửa chữa không được";
-                } else if (item.repairStatus === 2) {
-                  return "Cháy nổ";
-                }
-              }
-              if (column === "Số BBXK") {
-                return item.bbbgNumberExport;
-              }
-              if (column === "Cập nhật XK") {
-                if (item.exportPartner) {
-                  return moment(item.exportPartner).format("DD/MM/YYYY");
-                }
-              }
-              if (column === "Cập nhật KCS") {
-                if (item.kcsVT === 0) {
-                  return "FAIL";
-                } else if (item.kcsVT === 1) {
-                  return "PASS";
-                }
-              }
-              if (column === "Cập nhật BH") {
-                if (item.warrantyPeriod) {
-                  return moment(item.warrantyPeriod).format("DD/MM/YYYY");
-                }
-              }
-            }),
-          ];
-        }),
-      ];
-
-      const workbook = utils.book_new();
-      const worksheet = utils.aoa_to_sheet(exportData);
-      utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-      writeFile(workbook, "po_detail.xlsx");
-    }
-  };
 
   // export notify error when import
   const handleExportNotify = () => {
@@ -485,7 +313,11 @@ export const TableHH = () => {
     if (item) {
       poItem = item;
     } else {
-      poItem = value1;
+      if(value1 === "") {
+        poItem = null
+      } else {
+        poItem = value1;
+      }
     }
     let res = await searchPODetail(
       [
@@ -500,7 +332,7 @@ export const TableHH = () => {
         kcsVt,
         priority,
       ],
-      "ALL",
+      "All",
       page,
       selectedOption
     );
@@ -511,6 +343,7 @@ export const TableHH = () => {
       setTotalProducts(res.totalPages);
       setTotalPages(res.data.number);
       setCurrentPageSearch(page);
+      setIsExportButtonEnabled(true);
     }
     if (res && res.statusCode === 204) {
       localStorage.removeItem("dataBarcode");
@@ -518,6 +351,7 @@ export const TableHH = () => {
       setListPoDetail(res.data);
       setTotalProducts(res.totalPages);
       setCurrentPageSearch(page);
+      setIsExportButtonEnabled(false);
     }
   };
 
@@ -532,55 +366,31 @@ export const TableHH = () => {
     console.log("tui check", item);
   };
 
-  // handle show po detail
-  const handleShowPoDetail = (item) => {
-    setIsShowPoDetail(true);
-    setDataShowPoDetail(item);
-  };
-
   // handle download file sample
-  const handleDownloadSampleFileImport = () => {
-    const columnHeader = ["Mã hàng hóa", "Số serial", "Số PO"];
-    const dataArray = [columnHeader];
-    const workbook = utils.book_new();
-    const worksheet = utils.aoa_to_sheet(dataArray);
-    utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
-    writeFile(workbook, "importHH.xlsx");
-  };
-
-  const handleDownloadSampleFile = (index) => {
-    let namefile;
-    const columnHeader = ["Mã hàng hóa", "Số serial", "Số PO"];
-    if (index === 1) {
-      columnHeader.push("Cập nhật SC");
-      namefile = "Cap-nhat-SC.xlsx";
-    } else if (index === 2) {
-      columnHeader.push("Cập nhật XK", "Số BBXK");
-      namefile = "Cap-nhat-XK.xlsx";
-    } else if (index === 3) {
-      columnHeader.push("Cập nhật KCS");
-      namefile = "Cap-nhat-KCS.xlsx";
-    } else if (index === 4) {
-      columnHeader.push("Cập nhật BH");
-      namefile = "Cap-nhat-BH.xlsx";
-    } else if (index === 5) {
-      columnHeader.push("Ưu Tiên SC");
-      namefile = "uu-tien-SC.xlsx";
-    } else if (index === 6) {
-      columnHeader.push("Ngày nhập kho");
-      namefile = "ngay-nhap-kho.xlsx";
-    } else if (index === 7) {
-      columnHeader.push("Hạng mục SC");
-      namefile = "hang-muc-sc.xlsx";
-    }
+  const handleDownloadSampleFile = () => {
+    const columnHeader = [
+      "Mã hàng hóa (*)",
+      "Tên thiết bị",
+      "Số serial (*)",
+      "Số PO (*)",
+      "Ngày nhập kho",
+      "Hạng mục SC",
+      "Ưu Tiên SC",
+      "Cập nhật SC",
+      "Số BBXK",
+      "Cập nhật XK",
+      "Cập nhật KCS",
+      "Cập nhật BH",
+      "Ghi chú",
+    ];
     const dataArray = [columnHeader];
 
     const workbook = utils.book_new();
     const worksheet = utils.aoa_to_sheet(dataArray);
     utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
-    writeFile(workbook, namefile);
+    writeFile(workbook, "sample_file.xlsx");
   };
 
   // handle reset
@@ -592,28 +402,9 @@ export const TableHH = () => {
     localStorage.removeItem("dataBarcode");
   };
 
-  // handle delete Po detail
-  const handleDeletePoDetail = (item) => {
-    setShowDelete(true);
-    setDataDeletePoDetail(item);
-  };
-
   const onChange1 = (event, { newValue }) => {
     setValue1(newValue);
-  };
-
-  const onChange2 = (event, { newValue }) => {
-    // Kiểm tra nếu người dùng nhập "Tất cả" hoặc "All", đặt giá trị của value2 thành "getAll"
-    const updatedValue =
-      newValue.toLowerCase() === "tất cả" ||
-      newValue.toLowerCase() === "all" ||
-      newValue.toLowerCase() === "Tất cả" ||
-      newValue.toLowerCase() === "All" ||
-      newValue.toLowerCase() === "ALL" ||
-      newValue.toLowerCase() === "TẤT CẢ"
-        ? "getAll"
-        : newValue;
-    setValue2(updatedValue);
+    setSelectedSuggestion(null); // Reset selected suggestion when the input changes
   };
 
   const getSuggestions = (inputValue) => {
@@ -640,13 +431,10 @@ export const TableHH = () => {
     if (debounceTimeout) {
       clearTimeout(debounceTimeout);
     }
-
     // Tạo timeout mới
     const timeout = setTimeout(() => {
       setSuggestions(getSuggestions(value));
     }, 1000); // Khoảng thời gian trễ (1 giây)
-
-    // Lưu trữ timeout để có thể xóa nó trong lần gọi tiếp theo
     setDebounceTimeout(timeout);
   };
 
@@ -654,24 +442,32 @@ export const TableHH = () => {
     setSuggestions([]);
   };
 
+  const onSuggestionSelected = (event, { suggestion }) => {
+    setSelectedSuggestion(suggestion);
+  };
+
+  const onKeyDown = (event) => {
+    if (event.key === "Enter") {
+      if (!selectedSuggestion) {
+        handleSearch();
+      }
+    }
+  };
+
   const inputProps1 = {
     placeholder: "Nhập PO",
     value: value1,
     onChange: onChange1,
-  };
-
-  const inputProps2 = {
-    placeholder: "Nhập PO",
-    value: value2 === "getAll" ? "Tất cả" : value2,
-    onChange: onChange2,
+    onKeyDown: onKeyDown, // Thêm xử lý sự kiện onKeyDown
   };
 
   //export sn check
   const handleExportSN = () => {
     let selectedColumns = [
-      "Mã hàng hóa",
-      "Số serial",
-      "Số PO",
+      "Mã hàng hóa (*)",
+      "Tên thiết bị",
+      "Số serial (*)",
+      "Số PO (*)",
       "Ngày nhập kho",
       "Hạng mục SC",
       "Ưu Tiên SC",
@@ -688,16 +484,16 @@ export const TableHH = () => {
         return [
           // index + 1,
           ...selectedColumns.slice(0).map((column) => {
-            // if (column === "Tên sản phẩm") {
-            //   return item.product.productName;
-            // }
-            if (column === "Mã hàng hóa") {
+            if (column === "Tên thiết bị") {
+              return item.product.productName;
+            }
+            if (column === "Mã hàng hóa (*)") {
               return item.product.productId;
             }
-            if (column === "Số serial") {
+            if (column === "Số serial (*)") {
               return item.serialNumber;
             }
-            if (column === "Số PO") {
+            if (column === "Số PO (*)") {
               return item.po.poNumber;
             }
             if (column === "Ngày nhập kho") {
@@ -790,18 +586,15 @@ export const TableHH = () => {
       let response = await searchSerialNumber(formData);
       if (response && response.statusCode === 200) {
         toast.success("Dữ liệu đã được tải thành công!!");
-        // setData(response.data);
         localStorage.setItem("dataList", JSON.stringify(response.data));
+        setIsExportButtonEnabledSN(true);
 
-        // globalData = response.data;
       } else {
         if (response && response.statusCode === 205) {
           setIsShowNotify(true);
           setData(response.data);
           toast.error("Dữ liệu được tải không thành công!!");
         }
-        // toast.error("Dữ liệu đã được tải không thành công!");
-        // setData(response.data);
       }
     } catch (error) {
       toast.error("Dữ liệu đã được tải không thành công!");
@@ -827,6 +620,7 @@ export const TableHH = () => {
       newDataList.push(newData);
       localStorage.setItem("dataBarcode", JSON.stringify(newDataList));
       setDataBarcode(newDataList.flat());
+      setIsExportButtonEnabledBC(true);
     } else {
       const dataList = localStorage.getItem("dataBarcode");
       let newDataList = [];
@@ -847,6 +641,7 @@ export const TableHH = () => {
       });
       localStorage.setItem("dataBarcode", JSON.stringify(newDataList));
       setDataBarcode(newDataList.flat());
+      setIsExportButtonEnabledBC(true);
     }
   };
 
@@ -904,7 +699,6 @@ export const TableHH = () => {
   const writeNK = async (item) => {
     const now = new Date();
     const timestamp = now.getTime();
-    //  const longValue = timestamp >> 0;
 
     let res = await updatePoDetail(
       item.poDetailId,
@@ -947,7 +741,6 @@ export const TableHH = () => {
   const writeXK = async (item) => {
     const now = new Date();
     const timestamp = now.getTime();
-    //  const longValue = timestamp >> 0;
 
     let res = await updatePoDetail(
       item.poDetailId,
@@ -974,15 +767,16 @@ export const TableHH = () => {
   // export barcode excel
   const handleExportBarcode = () => {
     let selectedColumns = [
-      "Mã hàng hóa",
-      "Tên sản phẩm",
-      "Số serial",
-      "Số PO",
+      "Mã hàng hóa (*)",
+      "Tên thiết bị",
+      "Số serial (*)",
+      "Số PO (*)",
       "Ngày nhập kho",
       "Hạng mục SC",
       "Ưu Tiên SC",
       "Cập nhật SC",
       "Số BBXK",
+      "Cập nhật XK",
       "Cập nhật KCS",
       "Cập nhật BH",
       "Ghi chú",
@@ -994,16 +788,16 @@ export const TableHH = () => {
         return [
           // index + 1,
           ...selectedColumns.slice(0).map((column) => {
-            if (column === "Tên sản phẩm") {
+            if (column === "Tên thiết bị") {
               return item.product.productName;
             }
-            if (column === "Mã hàng hóa") {
+            if (column === "Mã hàng hóa (*)") {
               return item.product.productId;
             }
-            if (column === "Số serial") {
+            if (column === "Số serial (*)") {
               return item.serialNumber;
             }
-            if (column === "Số PO") {
+            if (column === "Số PO (*)") {
               return item.po.poNumber;
             }
             if (column === "Ngày nhập kho") {
@@ -1069,6 +863,150 @@ export const TableHH = () => {
     writeFile(workbook, "barcode_check.xlsx");
   };
 
+  const handleExportSearch = async () => {
+    let selectedColumns = [
+      "Mã hàng hóa (*)",
+      "Tên thiết bị",
+      "Số serial (*)",
+      "Số PO (*)",
+      "Ngày nhập kho",
+      "Hạng mục SC",
+      "Ưu Tiên SC",
+      "Cập nhật SC",
+      "Số BBXK",
+      "Cập nhật XK",
+      "Cập nhật KCS",
+      "Cập nhật BH",
+      "Ghi chú",
+    ];
+
+    let time = selectedDateStart;
+    let timeExport = exportPartner;
+    if (selectedDateStart !== null) {
+      time = moment(selectedDateStart).format("DD/MM/YYYY");
+    }
+    if (exportPartner !== null) {
+      timeExport = moment(exportPartner).format("DD/MM/YYYY");
+    }
+    let poItem;
+    if (item) {
+      poItem = item;
+    } else {
+      poItem = value1;
+    }
+    let listPoDetailSearch = []
+
+    let res = await searchPODetail(
+      [
+        productId,
+        serialNumber,
+        poItem,
+        bbbg,
+        time,
+        repairCategory,
+        repairStatus,
+        timeExport,
+        kcsVt,
+        priority,
+      ],
+      "ALL",
+      0,
+      selectedOption
+    );
+    if (res && res.statusCode === 200) {
+      listPoDetailSearch = res.data;
+    }
+    if (res && res.statusCode === 204) {
+      listPoDetailSearch = res.data;
+    }
+
+    const exportData = [
+      selectedColumns,
+      ...listPoDetailSearch.map((item, index) => {
+        return [
+          // index + 1,
+          ...selectedColumns.slice(0).map((column) => {
+            if (column === "Tên thiết bị") {
+              return item.product.productName;
+            }
+            if (column === "Mã hàng hóa (*)") {
+              return item.product.productId;
+            }
+            if (column === "Số serial (*)") {
+              return item.serialNumber;
+            }
+            if (column === "Số PO (*)") {
+              return item.po.poNumber;
+            }
+            if (column === "Ngày nhập kho") {
+              if (item.importDate) {
+                return moment(item.importDate).format("DD/MM/YYYY");
+              }
+            }
+            if (column === "Hạng mục SC") {
+              if (item.repairCategory === 0) {
+                return "Hàng SC";
+              } else if (item.repairCategory === 1) {
+                return "Hàng BH";
+              }
+            }
+            if (column === "Ưu Tiên SC") {
+              if (item.priority === 0) {
+                return;
+              } else if (item.priority === 1) {
+                return "Ưu tiên";
+              }
+            }
+            if (column === "Cập nhật SC") {
+              if (item.repairStatus === 1) {
+                return "Sửa chữa xong";
+              } else if (item.repairStatus === 0) {
+                return "Sửa chữa không được";
+              } else if (item.repairStatus === 2) {
+                return "Cháy nổ";
+              }
+            }
+            if (column === "Số BBXK") {
+              return item.bbbgNumberExport;
+            }
+            if (column === "Cập nhật XK") {
+              if (item.exportPartner) {
+                return moment(item.exportPartner).format("DD/MM/YYYY");
+              }
+            }
+            if (column === "Cập nhật KCS") {
+              if (item.kcsVT === 0) {
+                return "FAIL";
+              } else if (item.kcsVT === 1) {
+                return "PASS";
+              }
+            }
+            if (column === "Cập nhật BH") {
+              if (item.warrantyPeriod) {
+                return moment(item.warrantyPeriod).format("DD/MM/YYYY");
+              }
+            }
+            if (column === "Ghi chú") {
+              return item.note;
+            }
+          }),
+        ];
+      }),
+    ];
+
+    const workbook = utils.book_new();
+    const worksheet = utils.aoa_to_sheet(exportData);
+    utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+    writeFile(workbook, "po-detail.xlsx");
+  };
+
+  const handlePressEnter = (event) => {
+    if (event && event.key === "Enter") {
+      handleSearch(0);
+    }
+  };
+
   return (
     <>
       <div className="tables">
@@ -1081,391 +1019,191 @@ export const TableHH = () => {
                   <b>Tìm kiếm</b>
                 </Form.Label>
               </Row>
-              <Row className="mb-2">
-                <Form.Group as={Col} controlId="validationCustom01">
-                  <Form.Label>Mã hàng hóa</Form.Label>
-                  <Form.Control
-                    required
-                    type="text"
-                    value={productId !== null ? productId : ""}
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setProductId(value !== "" ? value : null);
-                    }}
-                    placeholder="Mã hàng hóa"
-                  />
-                </Form.Group>
-                <Form.Group as={Col} controlId="validationCustom01">
-                  <Form.Label>Số serial</Form.Label>
-                  <Form.Control
-                    required
-                    type="text"
-                    value={serialNumber !== null ? serialNumber : ""}
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setSerialNumber(value !== "" ? value : null);
-                    }}
-                    placeholder="Số serial"
-                  />
-                </Form.Group>
-              </Row>
-              <Row className="mb-2">
-                <Form.Group as={Col} controlId="validationCustom01">
-                  <Form.Label>Số PO</Form.Label>
-                  <Autosuggest
-                    suggestions={suggestions}
-                    onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-                    onSuggestionsClearRequested={onSuggestionsClearRequested}
-                    getSuggestionValue={getSuggestionValue}
-                    renderSuggestion={renderSuggestion}
-                    inputProps={{
-                      ...inputProps1,
-                      className: "form-control second-autosuggest", // Thêm lớp CSS cho ô tìm kiếm thứ hai
-                    }}
-                  />
-                </Form.Group>
-                <Form.Group as={Col} controlId="validationCustom01">
-                  <Form.Label>Số BBXK</Form.Label>
-                  <InputGroup hasValidation>
-                    <Form.Control
-                      type="text"
-                      placeholder="Số BBXK"
-                      value={bbbg !== null ? bbbg : ""}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        setBbbg(value !== "" ? value : null);
-                      }}
-                      aria-describedby="inputGroupPrepend"
-                      required
-                    />
-                  </InputGroup>
-                </Form.Group>
-              </Row>
-              <Row className="mb-2">
-                <Form.Group as={Col} controlId="validationCustom03">
-                  <Form.Label>Cập nhật SC</Form.Label>
-                  <Form.Select
-                    aria-label="Default select example"
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setRepairStatus(value === "Tất cả" ? null : value);
-                    }}
-                  >
-                    <option>Tất cả</option>
-                    <option value="0">Sửa chữa không được</option>
-                    <option value="1">Sửa chữa xong</option>
-                    <option value="2">Cháy nổ</option>
-                  </Form.Select>
-                </Form.Group>
-                <Form.Group as={Col} controlId="validationCustom03">
-                  <Form.Label>Cập nhật KCS</Form.Label>
-                  <Form.Select
-                    aria-label="Default select example"
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setKcsVt(value === "Tất cả" ? null : value);
-                    }}
-                  >
-                    <option>Tất cả</option>
-                    <option value="0">FAIL</option>
-                    <option value="1">PASS</option>
-                  </Form.Select>
-                </Form.Group>
+              <Row className="mb-3">
+                <div className="d-flex ">
+                  <div className="d-flex justify-content-center align-items-center w-product">
+                    <Form.Label className="me-2">Mã hàng hóa</Form.Label>
+
+                    <Form.Group
+                      as={Col}
+                      controlId="validationCustom01"
+                      className="productid"
+                    >
+                      <Form.Control
+                        required
+                        type="text"
+                        value={productId !== null ? productId : ""}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setProductId(value !== "" ? value : null);
+                        }}
+                        onKeyDown={(e) => handlePressEnter(e)}
+                        placeholder="Mã hàng hóa"
+                      />
+                    </Form.Group>
+                  </div>
+                  <div className="d-flex justify-content-center align-items-center w-serial ">
+                    <Form.Label className="me-2 ms-4">Số serial</Form.Label>
+                    <Form.Group
+                      as={Col}
+                      controlId="validationCustom01"
+                      className="poNumber"
+                    >
+                      <Form.Control
+                        required
+                        type="text"
+                        value={serialNumber !== null ? serialNumber : ""}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setSerialNumber(value !== "" ? value : null);
+                        }}
+                        onKeyDown={(e) => handlePressEnter(e)}
+                        placeholder="Số serial"
+                      />
+                    </Form.Group>
+                  </div>
+                  <div className="d-flex justify-content-center align-items-center w-po">
+                    <Form.Label className="me-2 ms-4">Số PO</Form.Label>
+                    <Form.Group
+                      as={Col}
+                      controlId="validationCustom01"
+                      className="poNumber"
+                    >
+                      <Autosuggest
+                        suggestions={suggestions}
+                        onSuggestionsFetchRequested={
+                          onSuggestionsFetchRequested
+                        }
+                        onSuggestionsClearRequested={
+                          onSuggestionsClearRequested
+                        }
+                        getSuggestionValue={getSuggestionValue}
+                        renderSuggestion={renderSuggestion}
+                        inputProps={{
+                          ...inputProps1,
+                          className: "form-control second-autosuggest", // Thêm lớp CSS cho ô tìm kiếm thứ hai
+                        }}
+                      />
+                    </Form.Group>
+                  </div>
+                </div>
               </Row>
               <Row className="mb-3">
-                <Form.Group as={Col} controlId="validationCustom05">
-                  <Form.Label>Ưu tiên SC</Form.Label>
-                  <Form.Select
-                    aria-label="Default select example"
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setPriority(value === "Tất cả" ? null : value);
-                    }}
-                  >
-                    <option>Tất cả</option>
-                    <option value="1">Ưu tiên</option>
-                  </Form.Select>
-                </Form.Group>
-                <Form.Group
-                  as={Col}
-                  controlId="validationCustom05"
-                  className="d-flex justify-content-end"
-                >
-                  <div>
-                    <Form.Label></Form.Label>
-                    <div className="search">
-                      <button
-                        className="btn btn-primary label-search"
-                        onClick={() => handleSearch()}
-                      >
-                        <AiOutlineSearch className="icon-search" />
-                        Search
-                      </button>
-                    </div>
-                  </div>
-                </Form.Group>
-              </Row>
-            </div>
-            {/* Export */}
-            <div className="row-export">
-              <Row className="mb-1">
-                <Form.Label className="text-center">
-                  <b>Xuất dữ liệu PO</b>
-                </Form.Label>
-              </Row>
-              {localStorage.getItem("role") === "ROLE_REPAIRMAN" ? (
-                <>
-                  <Row className="mb-4">
-                    <Form.Group as={Col} controlId="validationCustomUsername99">
-                      <Form.Label>Số PO</Form.Label>
-                      <Autosuggest
-                        suggestions={suggestions}
-                        onSuggestionsFetchRequested={
-                          onSuggestionsFetchRequested
-                        }
-                        onSuggestionsClearRequested={
-                          onSuggestionsClearRequested
-                        }
-                        getSuggestionValue={getSuggestionValue}
-                        renderSuggestion={renderSuggestion}
-                        inputProps={{
-                          ...inputProps2,
-                          className: "form-control", // Áp dụng class form-control của React Bootstrap
-                        }}
-                      />
-                    </Form.Group>
-                  </Row>
-                  <Row className="mb-4">
-                    <Form.Group as={Col} controlId="validationCustomUsername8">
-                      <div className="form-check   label">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          checked={checkboxes.defaultCheck1 || selectAll}
-                          onChange={() =>
-                            setCheckboxes({
-                              ...checkboxes,
-                              defaultCheck1: !checkboxes.defaultCheck1,
-                            })
-                          }
-                          id="defaultCheck1"
-                        />
-                        <label
-                          className="form-check-label font-size"
-                          htmlFor="defaultCheck1"
-                        >
-                          Cập nhật SC
-                        </label>
-                      </div>
-                    </Form.Group>
-                  </Row>
-                  <Row className="mb-5"></Row>
-                </>
-              ) : null}
-              {localStorage.getItem("role") === "ROLE_KCSANALYST" ? (
-                <>
-                  <Row className="mb-4">
-                    <Form.Group as={Col} controlId="validationCustomUsername99">
-                      <Form.Label>Số PO</Form.Label>
-                      <Autosuggest
-                        suggestions={suggestions}
-                        onSuggestionsFetchRequested={
-                          onSuggestionsFetchRequested
-                        }
-                        onSuggestionsClearRequested={
-                          onSuggestionsClearRequested
-                        }
-                        getSuggestionValue={getSuggestionValue}
-                        renderSuggestion={renderSuggestion}
-                        inputProps={{
-                          ...inputProps2,
-                          className: "form-control", // Áp dụng class form-control của React Bootstrap
-                        }}
-                      />
-                    </Form.Group>
-                  </Row>
-                  <Row className="mb-4">
-                    <Form.Group as={Col} controlId="validationCustomUsername8">
-                      <div className="form-check label">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          checked={checkboxes.defaultCheck3 || selectAll}
-                          onChange={() =>
-                            setCheckboxes({
-                              ...checkboxes,
-                              defaultCheck3: !checkboxes.defaultCheck3,
-                            })
-                          }
-                          id="defaultCheck3"
-                        />
-                        <label
-                          className="form-check-label font-size"
-                          htmlFor="defaultCheck3"
-                        >
-                          Cập nhật KCS
-                        </label>
-                      </div>
-                    </Form.Group>
-                  </Row>
-                  <Row className="mb-5"></Row>
-                </>
-              ) : null}
-              {localStorage.getItem("role") === "ROLE_MANAGER" ||
-              localStorage.getItem("role") === "ROLE_ADMIN" ? (
-                <>
-                  <Row className="mb-4">
-                    <Form.Group as={Col} controlId="validationCustomUsername99">
-                      <Form.Label>Số PO</Form.Label>
-                      <Autosuggest
-                        suggestions={suggestions}
-                        onSuggestionsFetchRequested={
-                          onSuggestionsFetchRequested
-                        }
-                        onSuggestionsClearRequested={
-                          onSuggestionsClearRequested
-                        }
-                        getSuggestionValue={getSuggestionValue}
-                        renderSuggestion={renderSuggestion}
-                        inputProps={{
-                          ...inputProps2,
-                          className: "form-control", // Áp dụng class form-control của React Bootstrap
-                        }}
-                      />
-                    </Form.Group>
-                  </Row>
-                  <Row className="mb-4">
-                    <Form.Group as={Col} controlId="validationCustomUsername8">
-                      <div className="form-check   label">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          checked={checkboxes.defaultCheck1 || selectAll}
-                          onChange={() =>
-                            setCheckboxes({
-                              ...checkboxes,
-                              defaultCheck1: !checkboxes.defaultCheck1,
-                            })
-                          }
-                          id="defaultCheck1"
-                        />
-                        <label
-                          className="form-check-label font-size"
-                          htmlFor="defaultCheck1"
-                        >
-                          Cập nhật SC
-                        </label>
-                      </div>
-                    </Form.Group>
-                    <Form.Group as={Col} controlId="validationCustomUsername8">
-                      <div className="form-check label ">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          checked={checkboxes.defaultCheck2 || selectAll}
-                          onChange={() =>
-                            setCheckboxes({
-                              ...checkboxes,
-                              defaultCheck2: !checkboxes.defaultCheck2,
-                            })
-                          }
-                          id="defaultCheck2"
-                        />
-                        <label
-                          className="form-check-label font-size"
-                          htmlFor="defaultCheck2"
-                        >
-                          Cập nhật XK
-                        </label>
-                      </div>
-                    </Form.Group>
-                  </Row>
-                  <Row className="mb-4">
-                    <Form.Group as={Col} controlId="validationCustomUsername8">
-                      <div className="form-check label">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          checked={checkboxes.defaultCheck3 || selectAll}
-                          onChange={() =>
-                            setCheckboxes({
-                              ...checkboxes,
-                              defaultCheck3: !checkboxes.defaultCheck3,
-                            })
-                          }
-                          id="defaultCheck3"
-                        />
-                        <label
-                          className="form-check-label font-size"
-                          htmlFor="defaultCheck3"
-                        >
-                          Cập nhật KCS
-                        </label>
-                      </div>
-                    </Form.Group>
-                    <Form.Group as={Col} controlId="validationCustomUsername8">
-                      <div className="form-check label">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          checked={selectAll}
-                          onChange={() => {
-                            setSelectAll(!selectAll);
-                            setCheckboxes({
-                              defaultCheck1: !selectAll,
-                              defaultCheck2: !selectAll,
-                              defaultCheck3: !selectAll,
-                              defaultCheck4: !selectAll,
-                            });
+                <div className="d-flex">
+                  <div className="d-flex justify-content-center align-items-center w-product">
+                    <Form.Label className="me-2 ">Số BBXK</Form.Label>
+
+                    <Form.Group
+                      as={Col}
+                      controlId="validationCustom01"
+                      className="bbxk"
+                    >
+                      <InputGroup hasValidation>
+                        <Form.Control
+                          type="text"
+                          placeholder="Số BBXK"
+                          value={bbbg !== null ? bbbg : ""}
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            setBbbg(value !== "" ? value : null);
                           }}
-                          id="selectAllCheckbox"
+                          aria-describedby="inputGroupPrepend"
+                          onKeyDown={(e) => handlePressEnter(e)}
                         />
-                        <label
-                          className="form-check-label font-size"
-                          htmlFor="selectAllCheckbox"
-                        >
-                          Tất cả
-                        </label>
-                      </div>
+                      </InputGroup>
                     </Form.Group>
-                  </Row>
-                </>
-              ) : null}
-              <Row className="mb-5"></Row>
-              {localStorage.getItem("role") === "ROLE_MANAGER" ||
-              localStorage.getItem("role") === "ROLE_ADMIN" ||
-              localStorage.getItem("role") === "ROLE_REPAIRMAN" ||
-              localStorage.getItem("role") === "ROLE_KCSANALYST" ? (
-                <Row className="mb-3">
+                  </div>
+                  <div className="d-flex justify-content-center align-items-center ">
+                    <Form.Label className="me-2 ms-4">Cập nhật SC</Form.Label>
+                    <Form.Group
+                      as={Col}
+                      controlId="validationCustom03"
+                      className="repariStatus"
+                    >
+                      <Form.Select
+                        aria-label="Default select example"
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setRepairStatus(value === "Tất cả" ? null : value);
+                        }}
+                      >
+                        <option>Tất cả</option>
+                        <option value="0">SC không được</option>
+                        <option value="1">SC xong</option>
+                        <option value="2">Cháy nổ</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </div>
+                  <div className="d-flex justify-content-center align-items-center ">
+                    <Form.Label className="me-1 ms-4">KCS</Form.Label>
+
+                    <Form.Group
+                      as={Col}
+                      controlId="validationCustom03"
+                      className="repariStatus"
+                    >
+                      <Form.Select
+                        aria-label="Default select example"
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setKcsVt(value === "Tất cả" ? null : value);
+                        }}
+                      >
+                        <option>Tất cả</option>
+                        <option value="0">FAIL</option>
+                        <option value="1">PASS</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </div>
+                  <div className="d-flex justify-content-center align-items-center ">
+                    <Form.Label className="me-1 ms-4">Ưu tiên</Form.Label>
+
+                    <Form.Group
+                      as={Col}
+                      controlId="validationCustom05"
+                      className="repariStatus"
+                    >
+                      <Form.Select
+                        aria-label="Default select example"
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setPriority(value === "Tất cả" ? null : value);
+                        }}
+                      >
+                        <option>Tất cả</option>
+                        <option value="1">Ưu tiên</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </div>
+                </div>
+              </Row>
+              <Row className="mb-2">
+                <div className="f-flex">
                   <Form.Group
                     as={Col}
-                    controlId="validationCustomUsername13"
+                    controlId="validationCustom05"
                     className="d-flex justify-content-end"
                   >
-                    <div className="update">
-                      <button
-                        className="btn btn-success label-export"
-                        onClick={handleExport}
-                        disabled={
-                          !checkboxes.defaultCheck1 &&
-                          !checkboxes.defaultCheck2 &&
-                          !checkboxes.defaultCheck3 &&
-                          !checkboxes.defaultCheck4
-                        }
-                      >
-                        <AiOutlineDownload className="icon-export" />
-                        Export
-                      </button>
+                    <div>
+                      <div className="search">
+                        <button
+                          className="btn btn-primary label-search"
+                          onClick={() => handleSearch()}
+                        >
+                          <AiOutlineSearch className="icon-search" />
+                          Search
+                        </button>
+                      </div>
                     </div>
                   </Form.Group>
-                </Row>
-              ) : null}
+                </div>
+              </Row>
             </div>
             {/* S/n check */}
             <div className="row-sn">
               <Row className="mb-3">
                 <Form.Label className="text-center">
-                  <b>S/N Check</b>
+                  <b>Serial Check</b>
                 </Form.Label>
               </Row>
               <Row className="mb-3">
@@ -1498,6 +1236,7 @@ export const TableHH = () => {
                     <button
                       className="btn btn-success btn-reset "
                       onClick={() => handleExportSN()}
+                      disabled={!isExportButtonEnabledSN}
                     >
                       <AiOutlineDownload className="reset-icon" />
                       Export S/N
@@ -1513,7 +1252,7 @@ export const TableHH = () => {
                   <b>Barcode Check</b>
                 </Form.Label>
               </Row>
-              <Row className="mb-3">
+              <Row className="mb-4">
                 <Form.Group as={Col} controlId="validationCustomUsername2806">
                   <Form.Label>Barcode</Form.Label>
                   <Form.Control
@@ -1524,16 +1263,17 @@ export const TableHH = () => {
                   />
                 </Form.Group>
               </Row>
-              <Row className="mb-3">
+              <Row className="mb-1 ">
                 <Form.Group
                   as={Col}
                   controlId="validationCustomUsername8"
-                  className="d-flex justify-content-end"
+                  className="d-flex justify-content-end mt-3"
                 >
                   <div className="update">
                     <button
                       className="btn btn-success label-export"
                       onClick={handleExportBarcode}
+                      disabled={!isExportButtonEnabledBC}
                     >
                       <AiOutlineDownload className="icon-export" />
                       Export Barcode
@@ -1550,7 +1290,6 @@ export const TableHH = () => {
             <div className="col-3"></div>
             <div className="group-btn d-flex">
               {/* button search */}
-
               <div className="search">
                 <button
                   className="btn btn-primary label-search"
@@ -1559,81 +1298,15 @@ export const TableHH = () => {
                   Reset
                 </button>
               </div>
-              {/* admin and manager permission to display button */}
-              {localStorage.getItem("role") === "ROLE_MANAGER" ||
-              localStorage.getItem("role") === "ROLE_ADMIN" ? (
+              {localStorage.getItem("role") !== "ROLE_USER" && (
                 <>
                   <div className="update update-btn">
-                    <NavDropdown
-                      title="Sample files"
-                      id="basic-nav-dropdown"
-                      className="btn btn-success nav-drop"
+                    <button
+                      className="btn btn-success"
+                      onClick={handleDownloadSampleFile}
                     >
-                      <div className="update-state">
-                        <button
-                          className="dropdown-item label-state"
-                          onClick={() => handleDownloadSampleFileImport()}
-                        >
-                          Import HH
-                        </button>
-                      </div>
-                      <div className="update-state">
-                        <button
-                          className="dropdown-item label-state"
-                          onClick={() => handleDownloadSampleFile(6)}
-                        >
-                          Ngày nhập kho
-                        </button>
-                      </div>
-                      <div className="update-state">
-                        <button
-                          className="dropdown-item label-state"
-                          onClick={() => handleDownloadSampleFile(7)}
-                        >
-                          Hạng mục SC
-                        </button>
-                      </div>
-                      <div className="update-state">
-                        <button
-                          className="dropdown-item label-state"
-                          onClick={() => handleDownloadSampleFile(5)}
-                        >
-                          Ưu tiên SC
-                        </button>
-                      </div>
-                      <div className="update-state">
-                        <button
-                          className="dropdown-item label-state"
-                          onClick={() => handleDownloadSampleFile(1)}
-                        >
-                          Cập nhật SC
-                        </button>
-                      </div>
-                      <div className="update-state">
-                        <button
-                          className="dropdown-item label-state"
-                          onClick={() => handleDownloadSampleFile(2)}
-                        >
-                          Cập nhật XK
-                        </button>
-                      </div>
-                      <div className="update-state">
-                        <button
-                          className="dropdown-item label-state"
-                          onClick={() => handleDownloadSampleFile(3)}
-                        >
-                          Cập nhật KCS
-                        </button>
-                      </div>
-                      <div className="update-state">
-                        <button
-                          className="dropdown-item label-state"
-                          onClick={() => handleDownloadSampleFile(4)}
-                        >
-                          Cập nhật BH
-                        </button>
-                      </div>
-                    </NavDropdown>
+                      Sample File
+                    </button>
                   </div>
 
                   <div className="import">
@@ -1651,176 +1324,33 @@ export const TableHH = () => {
                       hidden
                     />
                   </div>
+                  <div className="import">
+                    <label
+                      htmlFor="test99"
+                      className="btn btn-warning label-import"
+                    >
+                      <FaFileImport className="icon-import" />
+                      Update
+                    </label>
+                    <input
+                      type="file"
+                      onChange={handleUploadSC}
+                      id="test99"
+                      hidden
+                    />
+                  </div>
+                  <div className="update">
+                    <button
+                      className="btn btn-success label-export"
+                      onClick={handleExportSearch}
+                      disabled={!isExportButtonEnabled}
+                    >
+                      <AiOutlineDownload className="icon-export" />
+                      Export
+                    </button>
+                  </div>
                 </>
-              ) : null}
-              {/* repairman permission to display the update button */}
-              {localStorage.getItem("role") === "ROLE_REPAIRMAN" ? (
-                <div className="update update-btn">
-                  <NavDropdown
-                    title="Update"
-                    id="basic-nav-dropdown"
-                    className="btn btn-warning nav-drop"
-                  >
-                    <div className="update-state">
-                      <label
-                        htmlFor="test1"
-                        className="dropdown-item label-state"
-                      >
-                        Cập nhật SC
-                      </label>
-                      <input
-                        type="file"
-                        id="test1"
-                        hidden
-                        onChange={handleUploadSC}
-                      />
-                    </div>
-                  </NavDropdown>
-                </div>
-              ) : null}
-              {/* kcsanalyst permission to display the update button */}
-              {localStorage.getItem("role") === "ROLE_KCSANALYST" ? (
-                <div className="update update-btn">
-                  <NavDropdown
-                    title="Update"
-                    id="basic-nav-dropdown"
-                    className="btn btn-warning nav-drop"
-                  >
-                    <div className="update-state">
-                      <label
-                        htmlFor="test3"
-                        className="dropdown-item label-state"
-                      >
-                        Cập nhật KCS
-                      </label>
-                      <input
-                        type="file"
-                        id="test3"
-                        hidden
-                        onChange={handleUploadSC}
-                      />
-                    </div>
-                  </NavDropdown>
-                </div>
-              ) : null}
-              {/* admin and manager permission to display the update button */}
-              {localStorage.getItem("role") === "ROLE_MANAGER" ||
-              localStorage.getItem("role") === "ROLE_ADMIN" ? (
-                <div className="update update-btn">
-                  <NavDropdown
-                    title="Update"
-                    id="basic-nav-dropdown"
-                    className="btn btn-warning nav-drop"
-                  >
-                    <div className="update-state">
-                      <label
-                        htmlFor="test7"
-                        className="dropdown-item label-state"
-                      >
-                        Ngày nhập kho
-                      </label>
-                      <input
-                        type="file"
-                        id="test7"
-                        hidden
-                        onChange={handleUploadSC}
-                      />
-                    </div>
-                    <div className="update-state">
-                      <label
-                        htmlFor="test5"
-                        className="dropdown-item label-state"
-                      >
-                        Hạng mục SC
-                      </label>
-                      <input
-                        type="file"
-                        id="test5"
-                        hidden
-                        onChange={handleUploadSC}
-                      />
-                    </div>
-                    <div className="update-state">
-                      <label
-                        htmlFor="test6"
-                        className="dropdown-item label-state"
-                      >
-                        Ưu tiên SC
-                      </label>
-                      <input
-                        type="file"
-                        id="test6"
-                        hidden
-                        onChange={handleUploadSC}
-                      />
-                    </div>
-                    <div className="update-state">
-                      <label
-                        htmlFor="test1"
-                        className="dropdown-item label-state"
-                      >
-                        Cập nhật SC
-                      </label>
-                      <input
-                        type="file"
-                        id="test1"
-                        hidden
-                        onChange={handleUploadSC}
-                      />
-                    </div>
-                    <div className="update-state">
-                      <label
-                        htmlFor="test2"
-                        className="dropdown-item label-state"
-                      >
-                        Cập nhật XK
-                      </label>
-                      <input
-                        type="file"
-                        id="test2"
-                        hidden
-                        onChange={handleUploadSC}
-                      />
-                    </div>
-                    <div className="update-state">
-                      <label
-                        htmlFor="test3"
-                        className="dropdown-item label-state"
-                      >
-                        Cập nhật KCS
-                      </label>
-                      <input
-                        type="file"
-                        id="test3"
-                        hidden
-                        onChange={handleUploadSC}
-                      />
-                    </div>
-                    <div className="update-state">
-                      <label
-                        htmlFor="test4"
-                        className="dropdown-item label-state"
-                      >
-                        Cập nhật BH
-                      </label>
-                      <input
-                        type="file"
-                        id="test4"
-                        hidden
-                        onChange={handleUploadSC}
-                      />
-                    </div>
-                  </NavDropdown>
-                </div>
-              ) : null}
-
-              {/*permission to display the export button */}
-              {localStorage.getItem("role") === "ROLE_MANAGER" ||
-              localStorage.getItem("role") === "ROLE_ADMIN" ||
-              localStorage.getItem("role") === "ROLE_REPAIRMAN" ||
-              localStorage.getItem("role") === "ROLE_KCSANALYST" ? (
-                <></>
-              ) : null}
+              )}
             </div>
           </div>
         </div>
@@ -1834,16 +1364,17 @@ export const TableHH = () => {
             (dataBarcode && dataBarcode.length > 0) ? (
               <tr>
                 <th>Stt</th>
-                <th>Mã hàng hóa</th>
+                <th>Mã HH</th>
+                <th>Tên thiết bị</th>
                 <th>Số serial</th>
                 <th>Số PO</th>
-                <th>Ngày nhập kho</th>
+                <th>Ngày NK</th>
                 <th>Hạng mục SC</th>
-                <th>Ưu tiên SC</th>
+                <th>Ưu tiên</th>
                 <th>Cập nhật SC</th>
                 <th>Số BBXK</th>
                 <th>Cập nhật XK</th>
-                <th>Cập nhật KCS</th>
+                <th>KCS</th>
                 <th>Cập nhật BH</th>
                 <th>Ghi chú</th>
                 {dataBarcode && dataBarcode.length > 0 && (
@@ -1892,18 +1423,17 @@ export const TableHH = () => {
                   >
                     <td>{currentIndex + 1}</td>
                     <td>{item.product.productId}</td>
+                    <td className="col-name-product">
+                      {item.product.productName}
+                    </td>
                     <td>{item.serialNumber}</td>
                     <td>{item.po.poNumber}</td>
-                    {/* <td>{item.bbbgNumber}</td> */}
                     <td>{data}</td>
                     <td>
                       {item.repairCategory === 0 && "Hàng SC"}
                       {item.repairCategory === 1 && "Hàng BH"}
                     </td>
-                    <td>
-                      {/* {item.priority === 0 && "Không UT"} */}
-                      {item.priority === 1 && "Ưu tiên"}
-                    </td>
+                    <td>{item.priority === 1 && "Ưu tiên"}</td>
                     <td>
                       {item.repairStatus === 0 && "SC không được"}
                       {item.repairStatus === 1 && "SC xong"}
@@ -1921,7 +1451,7 @@ export const TableHH = () => {
                 );
               })}
 
-              {/* S/N check PO Detail */}
+            {/* S/N check PO Detail */}
             {listPoDetailSN &&
               listPoDetailSN.length > 0 &&
               listPoDetailSN.map((item, index) => {
@@ -1960,18 +1490,17 @@ export const TableHH = () => {
                   >
                     <td>{currentIndex + 1}</td>
                     <td>{item.product.productId}</td>
+                    <td className="col-name-product">
+                      {item.product.productName}
+                    </td>
                     <td>{item.serialNumber}</td>
                     <td>{item.po.poNumber}</td>
-                    {/* <td>{item.bbbgNumber}</td> */}
                     <td>{data}</td>
                     <td>
                       {item.repairCategory === 0 && "Hàng SC"}
                       {item.repairCategory === 1 && "Hàng BH"}
                     </td>
-                    <td>
-                      {/* {item.priority === 0 && "Không UT"} */}
-                      {item.priority === 1 && "Ưu tiên"}
-                    </td>
+                    <td>{item.priority === 1 && "Ưu tiên"}</td>
                     <td>
                       {item.repairStatus === 0 && "SC không được"}
                       {item.repairStatus === 1 && "SC xong"}
@@ -1989,7 +1518,7 @@ export const TableHH = () => {
                 );
               })}
 
-              {/* Barcode check */}
+            {/* Barcode check */}
             {dataBarcode &&
               dataBarcode.length > 0 &&
               dataBarcode.map((item, index) => {
@@ -2017,6 +1546,9 @@ export const TableHH = () => {
                   >
                     <td>{index + 1}</td>
                     <td>{item.product.productId}</td>
+                    <td className="col-name-product">
+                      {item.product.productName}
+                    </td>
                     <td>{item.serialNumber}</td>
                     <td>{item.po.poNumber}</td>
                     <td>{data}</td>
@@ -2049,7 +1581,7 @@ export const TableHH = () => {
                             Ghi NK
                           </button>
                           <button
-                            className="btn btn-warning mx-2 btn-sm"
+                            className="btn btn-warning mx-1 btn-sm"
                             onClick={() => writeXK(item)}
                           >
                             Ghi XK
@@ -2111,8 +1643,8 @@ export const TableHH = () => {
               onChange={(event) => setSelectedOption(event.target.value)}
               value={selectedOption}
             >
-              <option value="500">5000 / Trang</option>
-              <option value="2000">10000 / Trang</option>
+              <option value="500">1000 / Trang</option>
+              <option value="2000">5000 / Trang</option>
             </Form.Select>
           </div>
         )}

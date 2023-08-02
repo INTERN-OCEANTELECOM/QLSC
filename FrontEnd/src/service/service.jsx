@@ -447,11 +447,6 @@ const checkBarcode = (serialNumber) => {
 }
 
 const getHistory = (start, end) => {
-  const config = {
-    headers: {
-      email: localStorage.getItem("email"),
-    },
-  };
   return axioss.get(
     `/history/get-by-created?start=${start}&end=${end}`,
     {
@@ -460,6 +455,15 @@ const getHistory = (start, end) => {
       },
     }
   );
+}
+
+const downloadHistory = (filePath) => {
+  return axioss.get(`/history/download?filePath=${filePath}`, {
+    responseType: "arraybuffer",
+    headers: {
+      email: localStorage.getItem("email"),
+    },
+  });
 }
 
 export {
@@ -497,4 +501,5 @@ export {
   getAllPO,
   checkBarcode,
   getHistory,
+  downloadHistory,
 };

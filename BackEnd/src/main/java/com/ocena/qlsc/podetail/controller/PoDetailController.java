@@ -8,7 +8,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseService;
-import com.ocena.qlsc.podetail.dto.PoDetailResponse;
+import com.ocena.qlsc.podetail.dto.PoDetailDTO;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.service.PoDetailService;
@@ -26,7 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 @RestController
 //@CrossOrigin(value = "*")
 @RequestMapping("/po-detail")
-public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> {
+public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailDTO> {
     @Autowired
     PoDetailService poDetailService;
 
@@ -39,12 +39,12 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     }
     
     @Override
-    public ListResponse<PoDetailResponse> getAllByPage(int page, int size) {
+    public ListResponse<PoDetailDTO> getAllByPage(int page, int size) {
         return super.getAllByPage(page, size);
     }
 
     @Override
-    public DataResponse<PoDetailResponse> update(@Valid PoDetailResponse poDetailResponse, String key) {
+    public DataResponse<PoDetailDTO> update(@Valid PoDetailDTO poDetailResponse, String key) {
         return poDetailService.updatePoDetail(poDetailResponse, key);
     }
 
@@ -54,29 +54,29 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     }
 
     @GetMapping("/getByPo/{id}")
-    public ListResponse<PoDetailResponse> getByPO(@PathVariable("id") String poNumber) {
+    public ListResponse<PoDetailDTO> getByPO(@PathVariable("id") String poNumber) {
         return poDetailService.getByPO(poNumber);
     }
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/update")
-    public ListResponse<ErrorResponseImport> updateStatus(@RequestParam("file") MultipartFile file) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public ListResponse<?> updateFromExcel(@RequestParam("file") MultipartFile file) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return poDetailService.updatePoDetailFromExcel(file);
     }
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/import")
-    public ListResponse<ErrorResponseImport> importPODetail(@RequestParam("file") MultipartFile file) {
+    public ListResponse<?> importFromExcel(@RequestParam("file") MultipartFile file) {
         return poDetailService.importPODetailFromExcel(file);
     }
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/search/serialNumber")
-    public ListResponse<PoDetailResponse> searchBySerialNumbers(@RequestParam("file") MultipartFile file) {
+    public ListResponse<PoDetailDTO> searchBySerialNumbers(@RequestParam("file") MultipartFile file) {
         return poDetailService.searchBySerialNumbers(file);
     }
 
     @Override
-    public ListResponse<PoDetailResponse> getAll() {
+    public ListResponse<PoDetailDTO> getAll() {
         return super.getAll();
     }
 
@@ -89,7 +89,7 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @GetMapping("/serialNumber")
-    public ListResponse<PoDetailResponse> getBySerialNumber(String serialNumber) {
+    public ListResponse<PoDetailDTO> getBySerialNumber(String serialNumber) {
         return poDetailService.getBySerialNumber(serialNumber);
     }
 
@@ -97,18 +97,18 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     /*Use For Swagger*/
     @Hidden
     @Override
-    public DataResponse<PoDetailResponse> add(PoDetailResponse objectDTO) {
+    public DataResponse<PoDetailDTO> add(PoDetailDTO objectDTO) {
         return null;
     }
     @Hidden
     @Override
-    public DataResponse<PoDetailResponse> getById(String id) {
+    public DataResponse<PoDetailDTO> getById(String id) {
         return null;
     }
 
     @Hidden
     @Override
-    public ListResponse<PoDetailResponse> getByIds(String ids) {
+    public ListResponse<PoDetailDTO> getByIds(String ids) {
         return null;
     }
     @Hidden
@@ -118,7 +118,7 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     }
     @Hidden
     @Override
-    public DataResponse<PoDetailResponse> delete(String id) {
+    public DataResponse<PoDetailDTO> delete(String id) {
         return null;
     }
 }

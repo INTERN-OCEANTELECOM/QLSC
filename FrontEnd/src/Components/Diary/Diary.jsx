@@ -1,4 +1,4 @@
-import  React, {useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./diary.scss";
 import { Form, Table } from "react-bootstrap";
 import Nav from "react-bootstrap/Nav";
@@ -7,7 +7,7 @@ import NavDropdown from "react-bootstrap/NavDropdown";
 import { GiEarthAsiaOceania } from "react-icons/gi";
 import { RxAvatar } from "react-icons/rx";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { getHistory } from "../../service/service";
+import { downloadHistory, getHistory } from "../../service/service";
 import _ from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -17,6 +17,8 @@ import {
 import logo from "../../assets/logo_28-06-2017_LogoOceanTelecomtailieupng-removebg-preview.png";
 import DatePicker from "react-datepicker";
 import moment from "moment";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 const Diary = () => {
   const [listHistory, setListHistory] = useState("");
@@ -55,8 +57,7 @@ const Diary = () => {
     dispatch(handleLogoutRedux());
   };
 
-  const handleHistory = async() => {
-
+  const handleHistory = async () => {
     let timeStart;
     let timeEnd;
     if (selectedDateEnd !== null) {
@@ -66,19 +67,43 @@ const Diary = () => {
     }
 
     if (selectedDateStart !== null) {
-      timeStart = selectedDateStart.getTime() 
+      timeStart = selectedDateStart.getTime();
     }
     let res = await getHistory(timeStart, timeEnd);
-    console.log(res)
-    if(res && res.statusCode == 200) {
-      setListHistory(res.data)
+    console.log(res);
+    if (res && res.statusCode == 200) {
+      setListHistory(res.data);
     }
-      if(res && res.statusCode == 204) {
-        setListHistory(res.data);
-        alert("Lấy dữ liệu không thành công!!");
-      }
-    
-  }
+    if (res && res.statusCode == 204) {
+      setListHistory(res.data);
+      alert("Lấy dữ liệu không thành công!!");
+    }
+  };
+
+  const handleDownloadHistory = async (item) => {
+
+      let res = await downloadHistory(item);
+      console.log(res.status)
+      if(res.status === 404) {
+        alert("File không tồn tại !!")
+        return
+      } 
+        const blob = new Blob([res], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+
+        // Tạo URL tạm thời cho Blob
+        const url = URL.createObjectURL(blob);
+
+        // Tạo một link ẩn để download file
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "history_file.xlsx";
+        link.click();
+
+        URL.revokeObjectURL(url);
+      
+  };
 
   const sortedListHistory = _.sortBy(listHistory, ["created"]);
 
@@ -174,6 +199,7 @@ const Diary = () => {
                 <th>Đối tượng </th>
                 <th>Hành động</th>
                 <th>Mô tả chi tiết</th>
+                <th>File</th>
               </tr>
             </thead>
             <tbody>
@@ -234,6 +260,15 @@ const Diary = () => {
                               style={{ cursor: "pointer" }}
                             >
                               {isExpanded ? "Thu gọn" : "Xem chi tiết"}
+                            </button>
+                          )}
+                        </td>
+                        <td
+                          onClick={() => handleDownloadHistory(item.filePath)}
+                        >
+                          {item.filePath && item.filePath.length > 0 && (
+                            <button className="btn btn-link btn-sm">
+                              Tải xuống
                             </button>
                           )}
                         </td>

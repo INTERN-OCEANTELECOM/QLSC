@@ -2,6 +2,7 @@ package com.ocena.qlsc.podetail.repository;
 
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.podetail.model.PoDetail;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -14,9 +15,6 @@ import java.util.Optional;
 @Repository
 public interface PoDetailRepository extends BaseRepository<PoDetail> {
     Optional<PoDetail> findByPoDetailId(String poDetailId);
-
-    @Query("Select count(pd) from PoDetail pd where pd.po.poNumber = ?1")
-    Long countByPoNumber(String poNumber);
 
     @Query("SELECT po FROM PoDetail po WHERE (CAST(po.product.productId AS string) LIKE %:keyword1% OR :keyword1 IS NULL)" +
 //            "AND (po.serialNumber LIKE %:keyword2% OR :keyword2 IS NULL)" +
@@ -40,7 +38,6 @@ public interface PoDetailRepository extends BaseRepository<PoDetail> {
                                   @Param("keyword10") String keyword10,
                                   Pageable pageable);
 
-//    @Cacheable(value = "po-detail")
     @Override
     Page<PoDetail> findAll(Pageable pageable);
 
