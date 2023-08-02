@@ -33,7 +33,7 @@ public class HistoryDescription {
 
     // Set description to import data excel
     public String setDescription(String data) {
-        return data != "" ? "- Số S/N: " + data : "";
+        return !data.equals("") ? "- Số S/N: " + data : "";
     }
 
 //    // Set description to update data excel

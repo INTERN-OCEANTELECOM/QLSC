@@ -1,9 +1,7 @@
 package com.ocena.qlsc.podetail.service;
 
 import com.ocena.qlsc.common.util.ReflectionUtil;
-import com.ocena.qlsc.podetail.constants.UpdateFieldsVNConstants;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
-import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.user.model.RoleUser;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
@@ -34,6 +32,7 @@ import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.enums.ObjectName;
 import com.ocena.qlsc.user_history.model.HistoryDescription;
 import com.ocena.qlsc.user_history.service.HistoryService;
+import com.ocena.qlsc.user_history.utils.FileUtil;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +44,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -53,7 +51,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse> implements IPoDetail {
+public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse> implements IPoDetailService {
     @Autowired
     PoDetailMapper poDetailMapper;
 
@@ -74,6 +72,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     @Autowired
     HistoryService historyService;
+
+    @Autowired
+    FileExcelUtil fileExcelUtil;
 
     @Override
     public List<String> validationRequest(Object object) {
@@ -173,7 +174,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
-
         return poDetail;
 
     }
@@ -202,7 +202,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
 
         // Validate the header row
-        Object dataInHeader = FileExcelUtil.getFieldsNameInHeader(rowIterator);
+        Object dataInHeader = fileExcelUtil.getFieldsNameInHeader(rowIterator);
         if(dataInHeader instanceof ErrorResponseImport) {
             listErrorResponse.add((ErrorResponseImport) dataInHeader);
             return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
@@ -238,6 +238,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 if(value instanceof ErrorResponseImport) {
                     listErrorResponse.add((ErrorResponseImport) value);
                 } else {
+                    System.out.println("value" + value);
                     listUpdatePoDetail.add((PoDetail) value);
                 }
             }
@@ -245,7 +246,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         if (listErrorResponse.isEmpty() && listUpdatePoDetail.size() > 0) {
             poDetailRepository.saveAll(listUpdatePoDetail);
-            saveHistoryImportDataExcel(Action.UPDATE.getValue(), listUpdatePoDetail, "priority");
+            saveHistoryImportDataExcel(Action.UPDATE.getValue(), listUpdatePoDetail, file);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ImportErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " dòng update thành công")));
         }
@@ -330,7 +331,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         return null;
     }
 
-    public void saveHistoryImportDataExcel(String action, List<PoDetail> listPoDetail, String attribute) {
+    public void saveHistoryImportDataExcel(String action, List<PoDetail> listPoDetail, MultipartFile file) {
         // Get List PoNumber distinct
         List<String> distinctPoNumber = listPoDetail.stream()
                 .map(poDetail -> poDetail.getPo().getPoNumber())
@@ -345,7 +346,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             descriptionHistory += "<" + poDetail.getSerialNumber().toString() + "> ";
         }
         description.setDetails(description.setDescription(descriptionHistory));
-        historyService.save(action, ObjectName.PoDetail, description.getDescription(), "");
+
+        // Save File to History
+        String filePath = FileUtil.saveUploadedFile(file, action);
+        //
+        historyService.save(action, ObjectName.PoDetail, description.getDescription(), "", filePath);
     }
 
     /**
@@ -373,7 +378,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         // Validate header value
         ErrorResponseImport errorResponse;
-        Object dataInHeader = FileExcelUtil.getFieldsNameInHeader(rowIterator);
+        Object dataInHeader = fileExcelUtil.getFieldsNameInHeader(rowIterator);
         if(dataInHeader instanceof ErrorResponseImport) {
             listErrorResponse.add((ErrorResponseImport) dataInHeader);
             return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
@@ -417,7 +422,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         if (listErrorResponse.isEmpty() && listInsertPoDetail.size() > 0) {
             poDetailRepository.saveAll(listInsertPoDetail);
-            saveHistoryImportDataExcel(Action.IMPORT.getValue(), listInsertPoDetail, "");
+            saveHistoryImportDataExcel(Action.IMPORT.getValue(), listInsertPoDetail, file);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ImportErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " dòng import thành công")));
         }
@@ -436,9 +441,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         PoDetailResponse poDetailResponse = new PoDetailResponse();
         int colIndex = 0;
         for(String field: fieldsImport) {
+            if(fieldsImport.get(colIndex).equals("productName")) {
+                colIndex++;
+                continue;
+            }
             Object value = RegexConstants.functionGetDateFromCellExcel.get(field).apply(row, colIndex);
             colIndex++;
-
             if(field.equals("productId")) {
                 poDetailResponse.setProduct(new ProductDTO((String) value));
                 continue;
@@ -449,19 +457,16 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 continue;
             }
 
-            if(value == null)
-                return new ErrorResponseImport(ImportErrorType.DATA_NOT_MAP, rowIndex, "Hàng " + rowIndex + " cột " + (colIndex + 1) + " không phải number");
-
             try {
                 if(value instanceof Long) {
                     Method method = ReflectionUtil.setterMethod(PoDetailResponse.class, field, Long.class);
-                    method.invoke(poDetailResponse, (Long) value);
+                    method.invoke(poDetailResponse, value);
                 } else if(value instanceof String) {
                     Method method = ReflectionUtil.setterMethod(PoDetailResponse.class, field, String.class);
-                    method.invoke(poDetailResponse, (String) value);
+                    method.invoke(poDetailResponse, value);
                 } else if(value instanceof Short) {
                     Method method = ReflectionUtil.setterMethod(PoDetailResponse.class, field, Short.class);
-                    method.invoke(poDetailResponse, (Short) value);
+                    method.invoke(poDetailResponse, value);
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
@@ -512,7 +517,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             poDetail.get().setPriority(poDetailResponse.getPriority());
 
             poDetailRepository.save(poDetail.get());
-            historyService.save(Action.EDIT.getValue(), ObjectName.PoDetail, description.getDescription(), "");
+            historyService.save(Action.EDIT.getValue(), ObjectName.PoDetail, description.getDescription(), "", null);
 
             return ResponseMapper.toDataResponse("", StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
         }
@@ -529,24 +534,47 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             description.setKey(poDetail.get().getPoDetailId());
 
             poDetailRepository.delete(poDetail.get());
-            historyService.save(Action.DELETE.getValue(), ObjectName.PoDetail, description.getDescription(), "");
+            historyService.save(Action.DELETE.getValue(), ObjectName.PoDetail, description.getDescription(), "", null);
             return ResponseMapper.toDataResponseSuccess("Success");
         }
         return ResponseMapper.toDataResponseSuccess(null);
     }
 
-    public Boolean validateRoleUpdatePO(String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
+    public Boolean validateRoleUpdatePO(List<String> attribute) {
         String email = SystemUtil.getCurrentEmail();
         List<Role> allRoles = roleRepository.getRoleByEmail(email);
+        List<String> fieldsKSCUpdate = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber","kcsVT"));
+        List<String> fieldsRepairStatusUpdate = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber","repairStatus"));
 
         for (Role role : allRoles) {
             if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
-                    || (attribute.equals(UpdateFieldConstants.REPAIR_STATUS) && !role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()))
-                    || (attribute.equals(UpdateFieldConstants.KCS_VT) && !role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()))) {
+                    || (role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()) && attribute.equals(fieldsKSCUpdate)
+                    || (role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()) && attribute.equals(fieldsRepairStatusUpdate)))){
                 return true;
             }
         }
         return false;
+    }
+
+    public List<String> validateRoleUpdatePO1(List<String> attribute) {
+        String email = SystemUtil.getCurrentEmail();
+        List<Role> allRoles = roleRepository.getRoleByEmail(email);
+        List<String> fields = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber"));
+
+        for (Role role : allRoles) {
+            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))){
+                fields = attribute;
+            }
+
+            if(role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()) && attribute.stream().anyMatch(field -> field.equals(UpdateFieldConstants.KCS_VT))){
+                fields.add("kcsVT");
+            }
+
+            if(role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()) && attribute.stream().anyMatch(field -> field.equals(UpdateFieldConstants.REPAIR_STATUS))){
+                fields.add("repairStatus");
+            }
+        }
+        return fields;
     }
 
     public ListResponse<PoDetailResponse> getBySerialNumber(String serialNumber){

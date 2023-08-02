@@ -8,6 +8,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseService;
+import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.user.dto.*;
 import com.ocena.qlsc.user.model.User;
 import com.ocena.qlsc.user.service.UserService;
@@ -96,10 +97,8 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     @Override
     @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
     public DataResponse<UserDTO> delete(String email) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = attributes.getRequest();
-        String emailHeader = request.getHeader("email");
-        return userService.hasDeleteUserPermission(email, emailHeader) ? super.delete(email) :
+        String emailModify = SystemUtil.getCurrentEmail();
+        return userService.hasDeleteUserPermission(email, emailModify) ? super.delete(email) :
                 ResponseMapper.toDataResponse("", StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
     }
 

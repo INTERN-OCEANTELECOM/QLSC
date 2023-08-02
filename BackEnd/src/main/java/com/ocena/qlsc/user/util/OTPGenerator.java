@@ -8,7 +8,7 @@ import com.google.common.cache.LoadingCache;
 import org.springframework.context.annotation.Description;
 import org.springframework.stereotype.Service;
 
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
 
 @Description(value = "Service for generating and validating OTP.")
@@ -42,8 +42,8 @@ public class OTPGenerator {
      */
     public Integer generateOTP(String key)
     {
-        Random random = new Random();
-        int OTP = 100000 + random.nextInt(900000);
+        SecureRandom secureRandom = new SecureRandom();
+        int OTP = 100000 + secureRandom.nextInt(900000);
         otpCache.put(key, OTP);
 
         System.out.println(otpCache.getIfPresent(key));

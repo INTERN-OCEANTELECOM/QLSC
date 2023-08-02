@@ -20,4 +20,6 @@ public class HistoryDTO{
     private String action;
 
     private String description;
+
+    private String filePath;
 }

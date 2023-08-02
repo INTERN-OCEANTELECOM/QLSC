@@ -148,10 +148,15 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         if(optionalPO.isPresent()) {
             Po po = optionalPO.get();
             // Add the total quantity of the Po and the number of PoDetail objects associated with it to the results map
-            resultsMap.put("TONG_SO_LUONG", new HashMap<>(){{
-                put("TONG", (long) po.getQuantity());
-                put("SO_LUONG_IMPORT", (long) listPoDetail.size());
-            }});
+//            resultsMap.put("TONG_SO_LUONG", new HashMap<>(){{
+//                put("TONG", (long) po.getQuantity());
+//                put("SO_LUONG_IMPORT", (long) listPoDetail.size());
+//            }});
+            Map<String, Long> tongSoLuong = new HashMap<>();
+            tongSoLuong.put("TONG", (long) po.getQuantity());
+            tongSoLuong.put("SO_LUONG_IMPORT", (long) listPoDetail.size());
+
+            resultsMap.put("TONG_SO_LUONG", tongSoLuong);
 
             // Get the counts of PoDetail objects with a certain RepairStatus property, and add it to the results map
             RepairStatus repairStatus = RepairStatus.SC_XONG;

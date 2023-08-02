@@ -54,9 +54,9 @@ public class ResponseMapper {
     }
 
     public static ListResponse toPagingResponseSuccess(Page page) {
-        if (page != null && !page.isEmpty()) {
+        if (page.hasContent()) {
             return toPagingResponse(page, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
         }
-        return toPagingResponse(page, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
+        return toPagingResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
     }
 }

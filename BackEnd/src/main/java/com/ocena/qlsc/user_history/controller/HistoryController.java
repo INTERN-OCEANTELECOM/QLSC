@@ -6,10 +6,11 @@ import com.ocena.qlsc.user_history.service.HistoryService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin
 @RequestMapping("/history")
 public class HistoryController {
     @Autowired
@@ -24,5 +25,10 @@ public class HistoryController {
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     public ListResponse<HistoryDTO> getHistoryByCreatedBetween(@RequestParam Long start, @RequestParam Long end){
         return historyService.getByCreatedBetween(start, end);
+    }
+
+    @GetMapping("/download")
+    public ResponseEntity<byte[]> downloadExcelFile(@RequestParam("filePath") String filePath) {
+        return historyService.downloadExcelFile(filePath);
     }
 }
