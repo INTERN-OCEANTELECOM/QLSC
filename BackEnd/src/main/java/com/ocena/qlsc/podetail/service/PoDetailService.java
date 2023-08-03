@@ -111,7 +111,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
 
         Pageable page = pageable;
 
-        if (!listSerialNumbers.isEmpty() && !listProductIds.isEmpty() && listPoNumbers.isEmpty()) {
+        if (!listSerialNumbers.isEmpty() || !listProductIds.isEmpty() || !listPoNumbers.isEmpty()) {
             pageable = PageRequest.of(0, Integer.MAX_VALUE);
         }
 
