@@ -101,18 +101,21 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
 
     @Override
     protected Page<PoDetail> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+        List<String> listProductIds = searchKeywordDto.getKeyword().get(0) != null ?
+                Arrays.asList(searchKeywordDto.getKeyword().get(0).split("\\s+")) : new ArrayList<>();
         List<String> listSerialNumbers = searchKeywordDto.getKeyword().get(1) != null ?
                 Arrays.asList(searchKeywordDto.getKeyword().get(1).split("\\s+")) : new ArrayList<>();
+        List<String> listPoNumbers = searchKeywordDto.getKeyword().get(2) != null ?
+                Arrays.asList(searchKeywordDto.getKeyword().get(2).split("\\s+")) : new ArrayList<>();
+
 
         Pageable page = pageable;
 
-        if (!listSerialNumbers.isEmpty()) {
+        if (!listSerialNumbers.isEmpty() && !listProductIds.isEmpty() && listPoNumbers.isEmpty()) {
             pageable = PageRequest.of(0, Integer.MAX_VALUE);
         }
 
         Page<PoDetail> pageSearchPoDetails = poDetailRepository.searchPoDetail(
-                searchKeywordDto.getKeyword().get(0),
-                searchKeywordDto.getKeyword().get(2),
                 searchKeywordDto.getKeyword().get(3),
                 searchKeywordDto.getKeyword().get(4),
                 searchKeywordDto.getKeyword().get(5),   
@@ -121,13 +124,22 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
                 searchKeywordDto.getKeyword().get(8),
                 searchKeywordDto.getKeyword().get(9), pageable);
 
-        if (listSerialNumbers.isEmpty()) {
+        if (listSerialNumbers.isEmpty() && listProductIds.isEmpty() && listPoNumbers.isEmpty()) {
             return pageSearchPoDetails;
         }
 
         List<PoDetail> mergeList = pageSearchPoDetails.getContent()
                 .stream()
-                .filter(poDetail -> listSerialNumbers.contains(poDetail.getSerialNumber()))
+                .filter(poDetail -> listProductIds.contains(poDetail.getProduct().getProductId())
+                        || listProductIds.isEmpty())
+                .toList()
+                .stream()
+                .filter(poDetail -> listSerialNumbers.contains(poDetail.getSerialNumber())
+                        || listSerialNumbers.isEmpty())
+                .toList()
+                .stream()
+                .filter(poDetail -> listPoNumbers.contains(poDetail.getPo().getPoNumber())
+                        || listPoNumbers.isEmpty())
                 .collect(Collectors.toList());
                 
         //Create Page with Start End
