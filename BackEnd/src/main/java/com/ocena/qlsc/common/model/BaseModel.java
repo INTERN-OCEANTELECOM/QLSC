@@ -1,5 +1,6 @@
 package com.ocena.qlsc.common.model;
 
+import com.ocena.qlsc.common.constants.FieldsConstants;
 import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.product.model.Product;
@@ -14,6 +15,7 @@ import lombok.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -73,8 +75,9 @@ public class BaseModel implements Cloneable {
     }
 
     public String getVietNameseFieldName(String fieldName) {
-        return ReflectionUtil.getFieldValueByReflection(fieldName,
-                "com.ocena.qlsc.common.fields." + this.getClass().getSimpleName() + "Fields");
+        return ((HashMap<String, String>)ReflectionUtil
+                .getFieldValueByReflection(this.getClass().getSimpleName().toUpperCase() + "_FIELDS_MAP", new FieldsConstants()))
+                .get(fieldName);
     }
 
     private void setHistoryEditRole(Object oldFieldValue,

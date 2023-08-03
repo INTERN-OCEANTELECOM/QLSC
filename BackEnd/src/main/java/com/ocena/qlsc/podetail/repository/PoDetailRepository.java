@@ -16,19 +16,21 @@ import java.util.Optional;
 public interface PoDetailRepository extends BaseRepository<PoDetail> {
     Optional<PoDetail> findByPoDetailId(String poDetailId);
 
-    @Query("SELECT po FROM PoDetail po WHERE (CAST(po.product.productId AS string) LIKE %:keyword1% OR :keyword1 IS NULL)" +
+    @Query("SELECT po FROM PoDetail po WHERE " +
+//            "(CAST(po.product.productId AS string) LIKE %:keyword1% OR :keyword1 IS NULL)" +
 //            "AND (po.serialNumber LIKE %:keyword2% OR :keyword2 IS NULL)" +
-            "AND (po.po.poNumber LIKE %:keyword3% OR :keyword3 IS NULL)" +
-            "AND (po.bbbgNumberExport LIKE %:keyword4% OR :keyword4 IS NULL)" +
+//            "AND (po.po.poNumber LIKE %:keyword3% OR :keyword3 IS NULL)" +
+            "(po.bbbgNumberExport LIKE %:keyword4% OR :keyword4 IS NULL)" +
             "AND (DATE_FORMAT(FROM_UNIXTIME(po.importDate/1000),'%d/%m/%Y') LIKE %:keyword5% OR :keyword5 IS NULL)" +
             "AND (CAST(po.repairCategory AS string) LIKE %:keyword6% OR :keyword6 IS NULL)" +
             "AND (CAST(po.repairStatus AS string) LIKE %:keyword7% OR :keyword7 IS NULL)" +
             "AND (DATE_FORMAT(FROM_UNIXTIME(po.exportPartner/1000),'%d/%m/%Y')  LIKE %:keyword8% OR :keyword8 IS NULL)" +
             "AND (CAST(po.kcsVT AS string) LIKE %:keyword9% OR :keyword9 IS NULL)" +
             "AND (CAST(po.priority AS string) LIKE %:keyword10% OR :keyword10 IS NULL)")
-    Page<PoDetail> searchPoDetail(@Param("keyword1") String keyword1,
+    Page<PoDetail> searchPoDetail(
+//                                  @Param("keyword1") String keyword1,
 //                                  @Param("keyword2") String keyword2,
-                                  @Param("keyword3") String keyword3,
+//                                  @Param("keyword3") String keyword3,
                                   @Param("keyword4") String keyword4,
                                   @Param("keyword5") String keyword5,
                                   @Param("keyword6") String keyword6,
