@@ -26,7 +26,7 @@ public class Product extends BaseModel implements Serializable{
     @Column(name = "product_id", unique = true, length = 100)
     private String productId;
 
-    @Column(name = "product_name")
+    @Column(name = "product_name", length = 500)
     private String productName;
     public Product(String productId) {
         this.productId = productId;

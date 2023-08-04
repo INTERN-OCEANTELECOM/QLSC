@@ -92,12 +92,29 @@ const Product = () => {
   // Export
   const handleExport = () => {
     const columnHeader = ["Mã hàng hóa", "Tên thiết bị"];
-    const dataArray = [
+    const exportData = [
       columnHeader,
-      ...dataExport.map((obj) => Object.values(obj)),
+      ...dataExport.map((item, index) => {
+        return [
+          // index + 1,
+          ...columnHeader.slice(0).map((column) => {
+            if (column === "Tên thiết bị") {
+              const formattedProductName = formatProductName(item.productName);
+              return formattedProductName;
+            }
+            if (column === "Mã hàng hóa") {
+              return item.productId;
+            }
+            if (column === "Số lượng") {
+              return item.amount;
+            }
+          }),
+        ];
+      }),
     ];
+
     const workbook = utils.book_new();
-    const worksheet = utils.aoa_to_sheet(dataArray);
+    const worksheet = utils.aoa_to_sheet(exportData);
     utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
     writeFile(workbook, "thiet_bi.xlsx");
@@ -149,6 +166,20 @@ const Product = () => {
       handleSearch(0);
     }
   };
+
+  const formatProductName = (name) => {
+    const parts = name.split("\n");
+    for (const part of parts) {
+      const trimmedPart = part.trim();
+      const asteriskIndex = trimmedPart.indexOf("*");
+      const colonIndex = trimmedPart.indexOf(":");
+      if (asteriskIndex !== -1) {
+        const startIndex = Math.max(asteriskIndex + 1, colonIndex + 1);
+        return trimmedPart.substring(startIndex).trim();
+      }
+    }
+    return name;
+  }
 
   return (
     <>
@@ -221,6 +252,7 @@ const Product = () => {
               <th>Stt</th>
               <th>Mã thiết bị</th>
               <th>Tên thiết bị</th>
+              <th className="col-amount">Số lượng</th>
             </tr>
           </thead>
           <tbody>
@@ -228,6 +260,9 @@ const Product = () => {
               listHH.length > 0 &&
               listHH.map((item, index) => {
                 const currentIndex = startIndex + index;
+                const formattedProductName = formatProductName(
+                  item.productName
+                );
                 return (
                   <tr
                     key={`sc-${currentIndex}`}
@@ -235,7 +270,8 @@ const Product = () => {
                   >
                     <td>{currentIndex + 1}</td>
                     <td>{item.productId}</td>
-                    <td>{item.productName}</td>
+                    <td>{formattedProductName}</td>
+                    <td>{item.amount}</td>
                   </tr>
                 );
               })}

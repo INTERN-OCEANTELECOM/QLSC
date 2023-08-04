@@ -81,9 +81,11 @@ const Diary = () => {
   };
 
   const handleDownloadHistory = async (item) => {
-
+      const encodedPath = item;
+      const decodedPath = decodeURIComponent(encodedPath);
+      const fileName = decodedPath.split(/[\\/]/).pop();
       let res = await downloadHistory(item);
-      console.log(res.status)
+      // console.log(res.status)
       if(res.status === 404) {
         alert("File không tồn tại !!")
         return
@@ -98,7 +100,7 @@ const Diary = () => {
         // Tạo một link ẩn để download file
         const link = document.createElement("a");
         link.href = url;
-        link.download = "history_file.xlsx";
+        link.download = fileName;
         link.click();
 
         URL.revokeObjectURL(url);

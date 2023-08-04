@@ -286,7 +286,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
 
         List<String> listSearchSerialNumber = new ArrayList<>();
         while (rowIterator.hasNext()) {
-
             Row row = rowIterator.next();
             int rowIndex = row.getRowNum() + 1;
 
@@ -295,8 +294,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
                 listError.add(new ErrorResponseImport(ImportErrorType.DATA_NOT_MAP, rowIndex, "Dữ liệu không được để trống"));
                 continue;
             }
-
             String serialNumber = FileExcelUtil.getCellValueToString(row, 0);
+            if(serialNumber.contains(" ")) {
+                listError.add(new ErrorResponseImport(ImportErrorType.DATA_NOT_MAP, rowIndex, "S/N chứa khoảng trắng"));
+                continue;
+            }
+
             listSearchSerialNumber.add(serialNumber);
         }
         if(!listError.isEmpty()) {

@@ -6,6 +6,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
+import com.ocena.qlsc.product.dto.ProductResponse;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.service.ProductService;
@@ -16,6 +17,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +37,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @Override
-    @CacheEvict(value = {"getProducts", "findAllProduct"}, allEntries = true)
+    @CacheEvict(value = {"findAllProduct"}, allEntries = true)
     public DataResponse<ProductDTO> add(@Valid ProductDTO objectDTO) {
         return super.add(objectDTO);
     }
@@ -45,10 +47,10 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
         return super.getAll();
     }
 
-    @Override
-    @Cacheable(value = "getProducts")
-    public ListResponse<ProductDTO> getAllByPage(int page, int size) {
-        return super.getAllByPage(page, size);
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
+    @GetMapping("/get-by-pages")
+    public ListResponse<ProductResponse> getProductByPage(@Param("page") int page, @Param("size") int size) {
+        return productService.getProductByPage(page, size);
     }
 
     @Override
@@ -57,7 +59,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @Override
-    @CacheEvict(value = {"getProducts", "findAllProduct"}, allEntries = true)
+    @CacheEvict(value = {"findAllProduct"}, allEntries = true)
     public DataResponse<ProductDTO> update(@Valid ProductDTO objectDTO, String key) {
         return super.update(objectDTO, key);
     }
@@ -70,6 +72,12 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
 //    }
 
     /* Use For Swagger*/
+
+    @Override
+    @Hidden
+    public ListResponse<ProductDTO> getAllByPage(int page, int size) {
+        return null;
+    }
     @Hidden
     @Override
     public DataResponse<ProductDTO> getById(String id) {

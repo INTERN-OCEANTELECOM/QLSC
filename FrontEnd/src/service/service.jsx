@@ -8,7 +8,7 @@ const fecthAll = (page, size) => {
     },
   };
   return axioss.get(
-    `/product/get-all-by-page?page=${page}&size=${size}`,
+    `/product/get-by-pages?page=${page}&size=${size}`,
     config
   );
 };

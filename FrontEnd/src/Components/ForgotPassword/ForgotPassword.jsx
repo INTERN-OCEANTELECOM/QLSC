@@ -28,7 +28,7 @@ export const ForgotPassword = () => {
   // handle verify email and otp
   const handleVerify = async () => {
     // check format email
-    const emailRegex = /^[A-Za-z0-9._%+-]+@gmail.com$/;
+    const emailRegex = /^[A-Za-z0-9._%+-]+@(gmail|daiduongtelecom).com$/;
     // validate email, otp, password, confirmPassword
     if (!email || !otp || !password || !confirmPassword) {
       setIsValidation("Email/OTP/Password is required!");

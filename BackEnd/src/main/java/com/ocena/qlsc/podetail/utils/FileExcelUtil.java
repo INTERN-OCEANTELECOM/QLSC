@@ -51,6 +51,7 @@ public class FileExcelUtil {
                 }
             }
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Header không đúng! Hãy kiểm tra lại");
         }
         return null;

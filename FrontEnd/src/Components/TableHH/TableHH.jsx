@@ -37,6 +37,7 @@ const ItemContext = React.createContext(null);
 
 export const TableHH = () => {
   const [listPoDetail, setListPoDetail] = useState([]);
+  const [listPoDetailImport, setListPoDetailImport] = useState([]);
   const [listPoDetailSN, setListPoDetailSN] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -73,7 +74,7 @@ export const TableHH = () => {
   const [showDelete, setShowDelete] = useState(false);
   const [dataDeletePODetail, setDataDeletePoDetail] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const [value1, setValue1] = useState(""); 
+  const [value1, setValue1] = useState("");
   const [debounceTimeout, setDebounceTimeout] = useState(null);
   const [currentPageSearch, setCurrentPageSearch] = useState("");
   const [barcodeScan, setBarcodeScan] = useState("");
@@ -86,6 +87,8 @@ export const TableHH = () => {
   const [isExportButtonEnabled, setIsExportButtonEnabled] = useState(false);
   const [isExportButtonEnabledSN, setIsExportButtonEnabledSN] = useState(false);
   const [isExportButtonEnabledBC, setIsExportButtonEnabledBC] = useState(false);
+  const [flag, setFlag] = useState(false)
+  
 
   // call api when load page
   useEffect(() => {
@@ -115,6 +118,7 @@ export const TableHH = () => {
 
   // search by po
   const searchByPO = async (page) => {
+    setFlag(false);
     let time = selectedDateStart;
     let timeExport = exportPartner;
     if (selectedDateStart !== null) {
@@ -145,15 +149,15 @@ export const TableHH = () => {
       setTotalProducts(res.totalPages);
       setTotalPages(res.data.number);
       setCurrentPageSearch(page);
-      setIsExportButtonEnabled(true)
+      setIsExportButtonEnabled(true);
     }
     if (res && res.statusCode === 204) {
       setListPoDetail(res.data);
       setTotalProducts(res.totalPages);
       setIsExportButtonEnabled(false);
+      toast.warning("Dữ liệu không tồn tại!!!")
     }
   };
-
 
   // call api get product by page
   const getProducts = async (page) => {
@@ -179,6 +183,9 @@ export const TableHH = () => {
   // import po detail
   const handleFileUpload = async (event) => {
     try {
+      setDataBarcode([]);
+      setListPoDetail([])
+      setListPoDetailSN([])
       const file = event.target.files[0];
       if (
         file.type !==
@@ -193,12 +200,30 @@ export const TableHH = () => {
       let response = await importPODetail(formData);
       if (response && response.statusCode === 200) {
         toast.success("Dữ liệu đã được tải thành công!!");
-        setListPoDetail(response.data);
+        setListPoDetailImport(response.data);
         setTotalProducts(response.totalPages);
+        setValue1("");
+        setProductId(null);
+        setSerialNumber(null);
+        setBbbg(null);
+        setRepairStatus(null);
+        setKcsVt(null);
+        setPriority(null);
+        setIsExportButtonEnabled(true);
+        setFlag(true)
       } else {
         toast.error("Dữ liệu đã được tải không thành công!");
         setData(response.data);
         setIsShowNotify(true);
+        setValue1("");
+        setProductId(null);
+        setSerialNumber(null);
+        setBbbg(null);
+        setRepairStatus(null);
+        setKcsVt(null);
+        setPriority(null);
+        setIsExportButtonEnabled(false);
+        setFlag(false)
       }
     } catch (error) {
       toast.error("Dữ liệu đã được tải không thành công!");
@@ -211,6 +236,9 @@ export const TableHH = () => {
   // handle import status po detail
   const handleUploadSC = async (event) => {
     try {
+      setDataBarcode([]);
+      setListPoDetail([]);
+      setListPoDetailSN([]);
       const file = event.target.files[0];
 
       if (
@@ -227,12 +255,30 @@ export const TableHH = () => {
       let response = await updateStatusPoDetail(formData);
       if (response && response.statusCode === 200) {
         toast.success("Dữ liệu đã được tải thành công!");
-        setListPoDetail(response.data);
+        setListPoDetailImport(response.data);
         setTotalProducts(response.totalPages);
+        setValue1("");
+        setProductId(null);
+        setSerialNumber(null);
+        setBbbg(null);
+        setRepairStatus(null);
+        setKcsVt(null);
+        setPriority(null);
+        setIsExportButtonEnabled(true);
+        setFlag(true);
       } else {
         toast.error("Dữ liệu đã được tải không thành công!");
         setData(response.data);
         setIsShowNotify(true);
+        setValue1("");
+      setProductId(null);
+      setSerialNumber(null);
+      setBbbg(null);
+      setRepairStatus(null);
+      setKcsVt(null);
+      setPriority(null);
+      setIsExportButtonEnabled(false);
+      setFlag(false);
       }
     } catch (error) {
       toast.error("Dữ liệu đã được tải không thành công!");
@@ -274,7 +320,6 @@ export const TableHH = () => {
     }
   };
 
-
   // export notify error when import
   const handleExportNotify = () => {
     const columnHeader = ["Loại lỗi", "Số hàng", "Mô tả lỗi"];
@@ -282,7 +327,6 @@ export const TableHH = () => {
     const workbook = utils.book_new();
     const worksheet = utils.aoa_to_sheet(dataArray);
     utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
     writeFile(workbook, "mo_ta_po_detail.xlsx");
   };
 
@@ -297,7 +341,9 @@ export const TableHH = () => {
   // Search
 
   const handleSearch = async (page) => {
+    setFlag(false);
     setListPoDetailSN([]);
+    setListPoDetailImport([])
     setDataBarcode([]);
     localStorage.removeItem("dataBarcode");
     localStorage.removeItem("dataList");
@@ -313,8 +359,8 @@ export const TableHH = () => {
     if (item) {
       poItem = item;
     } else {
-      if(value1 === "") {
-        poItem = null
+      if (value1 === "") {
+        poItem = null;
       } else {
         poItem = value1;
       }
@@ -352,6 +398,8 @@ export const TableHH = () => {
       setTotalProducts(res.totalPages);
       setCurrentPageSearch(page);
       setIsExportButtonEnabled(false);
+      toast.warning("Dữ liệu không tồn tại!!!");
+
     }
   };
 
@@ -363,15 +411,14 @@ export const TableHH = () => {
     localStorage.removeItem("dataList");
     setisShowEditPoDetail(true);
     setDataEditPoDetail(item);
-    console.log("tui check", item);
   };
 
   // handle download file sample
 
   const handleDownloadSampleFile = () => {
     const columnHeader = [
-      "Mã hàng hóa (*)",
       "Tên thiết bị",
+      "Mã hàng hóa (*)",
       "Số serial (*)",
       "Số PO (*)",
       "Ngày nhập kho",
@@ -403,39 +450,39 @@ export const TableHH = () => {
   };
 
   const onChange1 = (event, { newValue }) => {
-    setValue1(newValue);
-    setSelectedSuggestion(null); // Reset selected suggestion when the input changes
+    setValue1(newValue); // Cập nhật giá trị ô tìm kiếm
   };
 
   const getSuggestions = (inputValue) => {
-    const inputValueLowerCase = inputValue.toLowerCase();
-    const allOption = { poNumber: "Tất cả" }; // Tạo option "Tất cả"
-
-    // Lấy danh sách gợi ý từ listPo và thêm option "Tất cả" vào đầu mảng
-    const suggestions = [
-      allOption,
-      ...listPo.filter((item) =>
-        item.poNumber.toLowerCase().includes(inputValueLowerCase)
-      ),
-    ];
-
-    return suggestions;
+    const inputValues = inputValue.trim().split(" ");
+    const lastValue = inputValues[inputValues.length - 1].toLowerCase();
+    const filteredSuggestions = listPo.filter((item) =>
+      item.poNumber.toLowerCase().startsWith(lastValue)
+    );
+    return filteredSuggestions;
   };
 
   const getSuggestionValue = (suggestion) => suggestion.poNumber;
 
-  const renderSuggestion = (suggestion) => <div>{suggestion.poNumber}</div>;
+  const renderSuggestion = (suggestion, { query }) => {
+    const suggestionText = suggestion.poNumber;
+    const matchIndex = suggestionText.toLowerCase().indexOf(query.toLowerCase());
+    const matchStart = matchIndex >= 0 ? matchIndex : suggestionText.length;
+    const matchEnd = matchStart + query.length;
+    const beforeMatch = suggestionText.slice(0, matchStart);
+    const match = suggestionText.slice(matchStart, matchEnd);
+    const afterMatch = suggestionText.slice(matchEnd);
+    return (
+      <div>
+        {beforeMatch}
+        <strong>{match}</strong>
+        {afterMatch}
+      </div>
+    );
+  };
 
   const onSuggestionsFetchRequested = ({ value }) => {
-    // Xóa timeout hiện tại (nếu có)
-    if (debounceTimeout) {
-      clearTimeout(debounceTimeout);
-    }
-    // Tạo timeout mới
-    const timeout = setTimeout(() => {
-      setSuggestions(getSuggestions(value));
-    }, 1000); // Khoảng thời gian trễ (1 giây)
-    setDebounceTimeout(timeout);
+    setSuggestions(getSuggestions(value));
   };
 
   const onSuggestionsClearRequested = () => {
@@ -444,13 +491,16 @@ export const TableHH = () => {
 
   const onSuggestionSelected = (event, { suggestion }) => {
     setSelectedSuggestion(suggestion);
+    setValue1((prevValue) => {
+      const inputValues = prevValue.trim().split(" ");
+      const newValue = inputValues.slice(0, -1).join(" ") + " " + suggestion.poNumber + " ";
+      return newValue;
+    });
   };
 
   const onKeyDown = (event) => {
     if (event.key === "Enter") {
-      if (!selectedSuggestion) {
         handleSearch();
-      }
     }
   };
 
@@ -458,14 +508,14 @@ export const TableHH = () => {
     placeholder: "Nhập PO",
     value: value1,
     onChange: onChange1,
-    onKeyDown: onKeyDown, // Thêm xử lý sự kiện onKeyDown
+    onKeyDown: onKeyDown,
   };
 
   //export sn check
   const handleExportSN = () => {
     let selectedColumns = [
-      "Mã hàng hóa (*)",
       "Tên thiết bị",
+      "Mã hàng hóa (*)",
       "Số serial (*)",
       "Số PO (*)",
       "Ngày nhập kho",
@@ -485,7 +535,10 @@ export const TableHH = () => {
           // index + 1,
           ...selectedColumns.slice(0).map((column) => {
             if (column === "Tên thiết bị") {
-              return item.product.productName;
+              const formattedProductName = formatProductName(
+                item.product.productName
+              );
+              return formattedProductName;
             }
             if (column === "Mã hàng hóa (*)") {
               return item.product.productId;
@@ -569,7 +622,9 @@ export const TableHH = () => {
   // import sn check
   const handleImportSN = async (event) => {
     try {
+      setFlag(false);
       setListPoDetail("");
+      setListPoDetailImport("")
       setData([]);
       localStorage.removeItem("dataBarcode");
       const file = event.target.files[0];
@@ -588,7 +643,6 @@ export const TableHH = () => {
         toast.success("Dữ liệu đã được tải thành công!!");
         localStorage.setItem("dataList", JSON.stringify(response.data));
         setIsExportButtonEnabledSN(true);
-
       } else {
         if (response && response.statusCode === 205) {
           setIsShowNotify(true);
@@ -606,8 +660,10 @@ export const TableHH = () => {
 
   // api barcode scan
   const BarcodeScanner = async () => {
+    setFlag(false);
     setListPoDetail("");
     setListPoDetailSN("");
+    setListPoDetailImport("")
     localStorage.removeItem("dataList");
     let res = await checkBarcode(barcodeScan);
     if (res && res.statusCode === 200) {
@@ -767,8 +823,8 @@ export const TableHH = () => {
   // export barcode excel
   const handleExportBarcode = () => {
     let selectedColumns = [
-      "Mã hàng hóa (*)",
       "Tên thiết bị",
+      "Mã hàng hóa (*)",
       "Số serial (*)",
       "Số PO (*)",
       "Ngày nhập kho",
@@ -789,7 +845,10 @@ export const TableHH = () => {
           // index + 1,
           ...selectedColumns.slice(0).map((column) => {
             if (column === "Tên thiết bị") {
-              return item.product.productName;
+              const formattedProductName = formatProductName(
+                item.product.productName
+              );
+              return formattedProductName;
             }
             if (column === "Mã hàng hóa (*)") {
               return item.product.productId;
@@ -864,9 +923,10 @@ export const TableHH = () => {
   };
 
   const handleExportSearch = async () => {
+    console.log(flag)
     let selectedColumns = [
-      "Mã hàng hóa (*)",
       "Tên thiết bị",
+      "Mã hàng hóa (*)",
       "Số serial (*)",
       "Số PO (*)",
       "Ngày nhập kho",
@@ -892,33 +952,87 @@ export const TableHH = () => {
     if (item) {
       poItem = item;
     } else {
-      poItem = value1;
+      if (value1 === "") {
+        poItem = null;
+      } else {
+        poItem = value1;
+      }
     }
-    let listPoDetailSearch = []
-
-    let res = await searchPODetail(
-      [
-        productId,
-        serialNumber,
-        poItem,
-        bbbg,
-        time,
-        repairCategory,
-        repairStatus,
-        timeExport,
-        kcsVt,
-        priority,
-      ],
-      "ALL",
-      0,
-      selectedOption
-    );
-    if (res && res.statusCode === 200) {
-      listPoDetailSearch = res.data;
-    }
-    if (res && res.statusCode === 204) {
-      listPoDetailSearch = res.data;
-    }
+    let listPoDetailSearch = [];
+    if(productId ||
+      serialNumber ||
+      value1 ||
+      item ||
+      bbbg ||
+      selectedDateStart ||
+      repairCategory ||
+      repairStatus ||
+      exportPartner ||
+      kcsVt ||
+      priority
+      ) {
+        let res = await searchPODetail(
+          [
+            productId,
+            serialNumber,
+            poItem,
+            bbbg,
+            time,
+            repairCategory,
+            repairStatus,
+            timeExport,
+            kcsVt,
+            priority,
+          ],
+          "ALL",
+          0,
+          selectedOption
+        );
+        if (res && res.statusCode === 200) {
+          listPoDetailSearch = res.data;
+        }
+        if (res && res.statusCode === 204) {
+          listPoDetailSearch = res.data;
+        }
+      } else if (
+        productId === null &&
+        serialNumber === null &&
+        poItem === null &&
+        bbbg === null &&
+        selectedDateStart === null &&
+        repairCategory === null &&
+        repairStatus === null &&
+        exportPartner === null &&
+        kcsVt === null &&
+        priority === null &&
+        flag === false
+      ) {
+        let res = await searchPODetail(
+          [
+            productId,
+            serialNumber,
+            poItem,
+            bbbg,
+            time,
+            repairCategory,
+            repairStatus,
+            timeExport,
+            kcsVt,
+            priority,
+          ],
+          "ALL",
+          0,
+          selectedOption
+        );
+        if (res && res.statusCode === 200) {
+          listPoDetailSearch = res.data;
+        }
+        if (res && res.statusCode === 204) {
+          listPoDetailSearch = res.data;
+        }
+      } else if (flag === true) {
+        listPoDetailSearch = listPoDetailImport;
+      } 
 
     const exportData = [
       selectedColumns,
@@ -927,7 +1041,10 @@ export const TableHH = () => {
           // index + 1,
           ...selectedColumns.slice(0).map((column) => {
             if (column === "Tên thiết bị") {
-              return item.product.productName;
+              const formattedProductName = formatProductName(
+                item.product.productName
+              );
+              return formattedProductName;
             }
             if (column === "Mã hàng hóa (*)") {
               return item.product.productId;
@@ -1007,6 +1124,25 @@ export const TableHH = () => {
     }
   };
 
+  const formatProductName = (name) => {
+    if(name === null) {
+      return name
+    } else {
+      const parts = name.split("\n");
+      for (const part of parts) {
+        const trimmedPart = part.trim();
+        const asteriskIndex = trimmedPart.indexOf("*");
+        const colonIndex = trimmedPart.indexOf(":");
+        if (asteriskIndex !== -1) {
+          const startIndex = Math.max(asteriskIndex + 1, colonIndex + 1);
+          return trimmedPart.substring(startIndex).trim();
+        }
+      }
+      return name;
+    }
+  };
+
+
   return (
     <>
       <div className="tables">
@@ -1077,6 +1213,7 @@ export const TableHH = () => {
                         onSuggestionsClearRequested={
                           onSuggestionsClearRequested
                         }
+                        onSuggestionSelected={onSuggestionSelected}
                         getSuggestionValue={getSuggestionValue}
                         renderSuggestion={renderSuggestion}
                         inputProps={{
@@ -1122,6 +1259,7 @@ export const TableHH = () => {
                     >
                       <Form.Select
                         aria-label="Default select example"
+                        value={repairStatus === null ? "Tất cả" : repairStatus}
                         onChange={(event) => {
                           const value = event.target.value;
                           setRepairStatus(value === "Tất cả" ? null : value);
@@ -1144,6 +1282,7 @@ export const TableHH = () => {
                     >
                       <Form.Select
                         aria-label="Default select example"
+                        value={kcsVt === null ? "Tất cả" : kcsVt}
                         onChange={(event) => {
                           const value = event.target.value;
                           setKcsVt(value === "Tất cả" ? null : value);
@@ -1165,6 +1304,7 @@ export const TableHH = () => {
                     >
                       <Form.Select
                         aria-label="Default select example"
+                        value={priority === null ? "Tất cả" : priority}
                         onChange={(event) => {
                           const value = event.target.value;
                           setPriority(value === "Tất cả" ? null : value);
@@ -1361,7 +1501,8 @@ export const TableHH = () => {
           <thead>
             {(listPoDetail && listPoDetail.length > 0) ||
             (listPoDetailSN && listPoDetailSN.length > 0) ||
-            (dataBarcode && dataBarcode.length > 0) ? (
+            (dataBarcode && dataBarcode.length > 0) ||
+            (listPoDetailImport && listPoDetailImport.length > 0) ? (
               <tr>
                 <th>Stt</th>
                 <th>Mã HH</th>
@@ -1414,6 +1555,9 @@ export const TableHH = () => {
                   item.priority === 1
                     ? rowStyles
                     : { backgroundColor: "#ffffff" };
+                const formattedProductName = formatProductName(
+                  item.product.productName
+                );
                 return (
                   <tr
                     key={`sc-${currentIndex}`}
@@ -1423,9 +1567,74 @@ export const TableHH = () => {
                   >
                     <td>{currentIndex + 1}</td>
                     <td>{item.product.productId}</td>
-                    <td className="col-name-product">
-                      {item.product.productName}
+                    <td className="col-name-product">{formattedProductName}</td>
+                    <td>{item.serialNumber}</td>
+                    <td>{item.po.poNumber}</td>
+                    <td>{data}</td>
+                    <td>
+                      {item.repairCategory === 0 && "Hàng SC"}
+                      {item.repairCategory === 1 && "Hàng BH"}
                     </td>
+                    <td>{item.priority === 1 && "Ưu tiên"}</td>
+                    <td>
+                      {item.repairStatus === 0 && "SC không được"}
+                      {item.repairStatus === 1 && "SC xong"}
+                      {item.repairStatus === 2 && "Cháy nổ"}
+                    </td>
+                    <td className="col-bbxk">{item.bbbgNumberExport}</td>
+                    <td>{dataExportPartner}</td>
+                    <td>
+                      {item.kcsVT === 0 && "FAIL"}
+                      {item.kcsVT === 1 && "PASS"}
+                    </td>
+                    <td>{dataWarranty}</td>
+                    <td className="col-note">{item.note}</td>
+                  </tr>
+                );
+              })}
+
+            {listPoDetailImport &&
+              listPoDetailImport.length > 0 &&
+              listPoDetailImport.map((item, index) => {
+                // background color when priority is equal to 1
+                const rowStyles = {
+                  backgroundColor: "#ffeeba", // Màu nền sáng
+                };
+                // convert this from long to date
+                const timeExport = item.exportPartner;
+                const currentIndex = startIndex + index;
+                const time = item.importDate;
+                const timeWarranty = item.warrantyPeriod;
+                let dataWarranty;
+                if (timeWarranty !== null) {
+                  dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
+                }
+                let data;
+                if (time !== null) {
+                  data = moment(time).format("DD/MM/YYYY");
+                }
+                let dataExportPartner;
+                if (timeExport !== null) {
+                  dataExportPartner = moment(timeExport).format("DD/MM/YYYY");
+                }
+                // check if priority === 1 then change color
+                const rowStyle =
+                  item.priority === 1
+                    ? rowStyles
+                    : { backgroundColor: "#ffffff" };
+                const formattedProductName = formatProductName(
+                  item.product.productName
+                );
+                return (
+                  <tr
+                    key={`sc-${currentIndex}`}
+                    // onDoubleClick={() => handleEditPoDetail(item)}
+                    style={rowStyle}
+                    className="table-striped"
+                  >
+                    <td>{currentIndex + 1}</td>
+                    <td>{item.product.productId}</td>
+                    <td className="col-name-product">{formattedProductName}</td>
                     <td>{item.serialNumber}</td>
                     <td>{item.po.poNumber}</td>
                     <td>{data}</td>
@@ -1481,6 +1690,10 @@ export const TableHH = () => {
                   item.priority === 1
                     ? rowStyles
                     : { backgroundColor: "#ffffff" };
+                
+                const formattedProductName = formatProductName(
+                  item.product.productName
+                );
                 return (
                   <tr
                     key={`sc-${currentIndex}`}
@@ -1490,9 +1703,7 @@ export const TableHH = () => {
                   >
                     <td>{currentIndex + 1}</td>
                     <td>{item.product.productId}</td>
-                    <td className="col-name-product">
-                      {item.product.productName}
-                    </td>
+                    <td className="col-name-product">{formattedProductName}</td>
                     <td>{item.serialNumber}</td>
                     <td>{item.po.poNumber}</td>
                     <td>{data}</td>
@@ -1538,6 +1749,10 @@ export const TableHH = () => {
                   dataExportPartner = moment(timeExport).format("DD/MM/YYYY");
                 }
 
+                const formattedProductName = formatProductName(
+                  item.product.productName
+                );
+
                 return (
                   <tr
                     key={`sc-${index}`}
@@ -1546,9 +1761,7 @@ export const TableHH = () => {
                   >
                     <td>{index + 1}</td>
                     <td>{item.product.productId}</td>
-                    <td className="col-name-product">
-                      {item.product.productName}
-                    </td>
+                    <td className="col-name-product">{formattedProductName}</td>
                     <td>{item.serialNumber}</td>
                     <td>{item.po.poNumber}</td>
                     <td>{data}</td>
