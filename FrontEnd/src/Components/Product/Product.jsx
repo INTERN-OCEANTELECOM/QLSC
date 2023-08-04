@@ -271,7 +271,7 @@ const Product = () => {
                     <td>{currentIndex + 1}</td>
                     <td>{item.productId}</td>
                     <td>{formattedProductName}</td>
-                    <td>{item.amount}</td>
+                    <td className="col-amount-sl">{item.amount}</td>
                   </tr>
                 );
               })}

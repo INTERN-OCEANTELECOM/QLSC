@@ -81,7 +81,9 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
     @Override
     protected Page<Product> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         List<String> listKeywords = searchKeywordDto.getKeyword().get(0) != null ?
-                Arrays.asList(searchKeywordDto.getKeyword().get(0).split("\\s+")) : new ArrayList<>();
+                Arrays.asList(searchKeywordDto.getKeyword().get(0).trim().split("\\s+")) : new ArrayList<>();
+        listKeywords.forEach(System.out::println);
+
         try {
             //Check if the first element of the list is of type Long
             Long.parseLong(listKeywords.get(0));
