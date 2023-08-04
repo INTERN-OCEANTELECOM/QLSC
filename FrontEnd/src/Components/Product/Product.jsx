@@ -252,7 +252,7 @@ const Product = () => {
               <th>Stt</th>
               <th>Mã thiết bị</th>
               <th>Tên thiết bị</th>
-              <th className="col-amount">Số lượng</th>
+              <th className="col-amount">Thống kê SL</th>
             </tr>
           </thead>
           <tbody>
