@@ -8,6 +8,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseService;
+import com.ocena.qlsc.podetail.constants.RegexConstants;
 import com.ocena.qlsc.podetail.dto.PoDetailDTO;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
@@ -70,6 +71,17 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailDTO> {
     }
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
+    @PostMapping("/update/import-date")
+    public DataResponse updateImportDate(@RequestParam("list") String listPoDetailId) {
+        return poDetailService.updateImportDateOrExportPartner(listPoDetailId, RegexConstants.FIELDS_REGEX_MAP.get(RegexConstants.REGEX_IMPORT_DATE));
+    }
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
+    @PostMapping("/update/export-partner")
+    public DataResponse updateExportPartner(@RequestParam("list") String listPoDetailId) {
+        return poDetailService.updateImportDateOrExportPartner(listPoDetailId, RegexConstants.FIELDS_REGEX_MAP.get(RegexConstants.REGEX_EXPORT_PARTNER));
+    }
+
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/search/serialNumber")
     public ListResponse<PoDetailDTO> searchBySerialNumbers(@RequestParam("file") MultipartFile file) {
         return poDetailService.searchBySerialNumbers(file);
@@ -81,7 +93,7 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailDTO> {
     }
 
     @Override
-    public ListResponse<PoDetail> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+    public ListResponse<PoDetailDTO> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return searchKeywordDto.getProperty().equals("ALL")
         ? poDetailService.getAllByListKeyword(searchKeywordDto)
         : super.searchByKeyword(searchKeywordDto);

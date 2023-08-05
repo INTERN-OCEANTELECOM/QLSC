@@ -76,7 +76,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     }
 
     @Override
-    protected Page<User> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    protected Page<UserDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return null;
     }
     @Override

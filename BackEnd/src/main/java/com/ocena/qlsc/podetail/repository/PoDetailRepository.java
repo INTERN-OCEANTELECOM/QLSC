@@ -49,4 +49,6 @@ public interface PoDetailRepository extends BaseRepository<PoDetail> {
     List<PoDetail> findBySerialNumberIn(List<String> serialNumbers);
 
     List<PoDetail> getPoDetailsBySerialNumber(String serialNumbers);
+
+    List<PoDetail> getPoDetailsByPoDetailIdIn(List<String> listPoDetailId);
 }

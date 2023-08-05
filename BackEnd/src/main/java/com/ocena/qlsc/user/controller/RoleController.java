@@ -73,7 +73,7 @@ public class RoleController extends BaseApiImpl<Role, RoleDTO> {
     }
     @Hidden
     @Override
-    public ListResponse<Role> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+    public ListResponse<RoleDTO> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return null;
     }
     @Hidden

@@ -32,7 +32,7 @@ public interface BaseService<E, D> {
 
     ListResponse<E> getAllByKeyword(String keyword);
 
-    ListResponse<E> searchByKeyword(SearchKeywordDto searchKeywordDto);
+    ListResponse<D> searchByKeyword(SearchKeywordDto searchKeywordDto);
 
     List<String> validationRequest (Object object);
 

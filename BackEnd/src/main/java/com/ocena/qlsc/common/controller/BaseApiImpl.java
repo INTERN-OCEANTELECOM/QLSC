@@ -56,7 +56,7 @@ public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
 
     @Override
     @PostMapping(ApiResources.SEARCH_BY_KEYWORD)
-    public ListResponse<E> searchByKeyword(@Valid @RequestBody SearchKeywordDto searchKeywordDto) {
+    public ListResponse<D> searchByKeyword(@Valid @RequestBody SearchKeywordDto searchKeywordDto) {
         return this.getBaseService().searchByKeyword(searchKeywordDto);
     }
 

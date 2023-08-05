@@ -48,7 +48,7 @@ public interface BaseApi<E, D> {
 
     @PostMapping(ApiResources.SEARCH_BY_KEYWORD)
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
-    public ListResponse<E> searchByKeyword(@Valid @RequestBody SearchKeywordDto searchKeywordDto);
+    public ListResponse<D> searchByKeyword(@Valid @RequestBody SearchKeywordDto searchKeywordDto);
 
     @GetMapping(ApiResources.GET_ALL_BY_PAGE)
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")

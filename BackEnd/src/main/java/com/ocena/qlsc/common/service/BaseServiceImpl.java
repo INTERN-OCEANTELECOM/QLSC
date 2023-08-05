@@ -163,7 +163,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
     @Override
     @SuppressWarnings("unchecked")
-    public ListResponse<E> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+    public ListResponse<D> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         Pageable pageable = PageRequest.of(searchKeywordDto.getPageIndex(), searchKeywordDto.getPageSize());
         return ResponseMapper.toPagingResponseSuccess(getPageResults(searchKeywordDto, pageable));
     }
@@ -204,7 +204,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         return ResponseMapper.toPagingResponse(listDTO, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
     }
 
-    protected abstract Page<E> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable);
+    protected abstract Page<D> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable);
 
     protected abstract List<E> getListSearchResults(String keyword);
 }

@@ -50,7 +50,7 @@ public class RoleService extends BaseServiceImpl<Role, RoleDTO> implements IRole
     }
 
     @Override
-    protected Page<Role> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    protected Page<RoleDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return null;
     }
 

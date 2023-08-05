@@ -67,7 +67,7 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     }
 
     @Override
-    public ListResponse<Po> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+    public ListResponse<PoDTO> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return super.searchByKeyword(searchKeywordDto);
     }
 

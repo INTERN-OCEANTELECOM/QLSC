@@ -5,8 +5,6 @@ import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
-import com.ocena.qlsc.common.response.ErrorResponseImport;
-import com.ocena.qlsc.product.dto.ProductResponse;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.service.ProductService;
@@ -44,17 +42,17 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
 
     @Override
     public ListResponse<ProductDTO> getAll() {
-        return super.getAll();
+        return productService.getAllProduct();
     }
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @GetMapping("/get-by-pages")
-    public ListResponse<ProductResponse> getProductByPage(@Param("page") int page, @Param("size") int size) {
+    public ListResponse<ProductDTO> getProductByPage(@Param("page") int page, @Param("size") int size) {
         return productService.getProductByPage(page, size);
     }
 
     @Override
-    public ListResponse<Product> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+    public ListResponse<ProductDTO> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return super.searchByKeyword(searchKeywordDto);
     }
 
@@ -63,13 +61,6 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     public DataResponse<ProductDTO> update(@Valid ProductDTO objectDTO, String key) {
         return super.update(objectDTO, key);
     }
-
-
-//    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
-//    @GetMapping("/po")
-//    public ListResponse<ProductDTO> getProductsByPo(@RequestParam("Po") String Po) {
-//        return productService.getProductsByPO(Po);
-//    }
 
     /* Use For Swagger*/
 
