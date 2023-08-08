@@ -484,9 +484,9 @@ export const TableHH = () => {
             }
             if (column === "Cập nhật SC") {
               if (item.repairStatus === 1) {
-                return "Sửa chữa xong";
+                return "SC OK";
               } else if (item.repairStatus === 0) {
-                return "Sửa chữa không được";
+                return "Trả hỏng";
               } else if (item.repairStatus === 2) {
                 return "Cháy nổ";
               }
@@ -806,9 +806,9 @@ export const TableHH = () => {
             }
             if (column === "Cập nhật SC") {
               if (item.repairStatus === 1) {
-                return "Sửa chữa xong";
+                return "SC OK";
               } else if (item.repairStatus === 0) {
-                return "Sửa chữa không được";
+                return "Trả hỏng";
               } else if (item.repairStatus === 2) {
                 return "Cháy nổ";
               }
@@ -1899,8 +1899,8 @@ export const TableHH = () => {
                     </td>
                     <td>{item.priority === 1 && "Ưu tiên"}</td>
                     <td>
-                      {item.repairStatus === 0 && "SC không được"}
-                      {item.repairStatus === 1 && "SC xong"}
+                      {item.repairStatus === 0 && "Trả hỏng"}
+                      {item.repairStatus === 1 && "SC OK"}
                       {item.repairStatus === 2 && "Cháy nổ"}
                     </td>
                     <td className="col-bbxk">{item.bbbgNumberExport}</td>
