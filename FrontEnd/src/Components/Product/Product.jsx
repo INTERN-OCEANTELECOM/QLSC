@@ -91,7 +91,7 @@ const Product = () => {
 
   // Export
   const handleExport = () => {
-    const columnHeader = ["Mã hàng hóa", "Tên thiết bị"];
+    const columnHeader = ["Mã hàng hóa", "Tên thiết bị", "Thống kê SL"];
     const exportData = [
       columnHeader,
       ...dataExport.map((item, index) => {
@@ -105,7 +105,7 @@ const Product = () => {
             if (column === "Mã hàng hóa") {
               return item.productId;
             }
-            if (column === "Số lượng") {
+            if (column === "Thống kê SL") {
               return item.amount;
             }
           }),

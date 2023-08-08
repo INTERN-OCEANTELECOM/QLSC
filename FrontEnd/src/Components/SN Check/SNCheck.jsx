@@ -12,85 +12,45 @@ import moment from "moment";
 
 const SNCheck = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState("");
-  const [isShowNotify,setIsShowNotify] = useState("")
-  const [dataError, setDataError] = useState("")
+  const [listPoDetailSN, setListPoDetailSN] = useState([]);
+  const [isShowNotify, setIsShowNotify] = useState("");
+  const [dataError, setDataError] = useState("");
 
-  useEffect(() => {
-    const dataList = localStorage.getItem("dataList");
-    if (dataList) {
-      setData(JSON.parse(dataList));
-    }
-  }, [localStorage.getItem("dataList")]);
-
-  const handleImportSN = async (event) => {
-    try {
-      const file = event.target.files[0];
-      if (
-        file.type !==
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      ) {
-        toast.error("Vui lòng chỉ chọn tệp tin định dạng .xlsx!");
-        return;
-      }
-      const formData = new FormData();
-      formData.append("file", file);
-      setIsLoading(true);
-      let response = await searchSerialNumber(formData);
-      if (response && response.statusCode === 200) {
-        toast.success("Dữ liệu đã được tải thành công!!");
-        // setData(response.data);
-        localStorage.setItem("dataList", JSON.stringify(response.data));
-
-        // globalData = response.data;
-      } else {
-        if(response && response.statusCode === 205) {
-          setDataError(response.data);
-          setIsShowNotify(true)
-          toast.error("Dữ liệu được tải không thành công!!")
-        }
-        // toast.error("Dữ liệu đã được tải không thành công!");
-        // setData(response.data);
-      }
-    } catch (error) {
-      toast.error("Dữ liệu đã được tải không thành công!");
-    } finally {
-      setIsLoading(false);
-      event.target.value = null; // Reset giá trị của input file
-    }
-  };
-
-  const handleExport = () => {
-    let selectedColumns = [
-      "Mã hàng hóa",
-      "Số serial",
-      "Số PO",
-      "Ngày nhập kho",
-      "Hạng mục SC",
-      "Ưu Tiên SC",
-      "Cập nhật SC",
-      "Số BBXK",
-      "Cập nhật KCS",
-      "Cập nhật BH",
-      "Ghi chú"
-    ];
+    const handleExportSN = () => {
+      let selectedColumns = [
+        "Tên thiết bị",
+        "Mã hàng hóa (*)",
+        "Số serial (*)",
+        "Số PO (*)",
+        "Ngày nhập kho",
+        "Hạng mục SC",
+        "Ưu Tiên SC",
+        "Cập nhật SC",
+        "Số BBXK",
+        "Cập nhật KCS",
+        "Cập nhật BH",
+        "Ghi chú",
+      ];
 
       const exportData = [
         selectedColumns,
-        ...data.map((item, index) => {
+        ...listPoDetailSN.map((item, index) => {
           return [
             // index + 1,
             ...selectedColumns.slice(0).map((column) => {
-              // if (column === "Tên sản phẩm") {
-              //   return item.product.productName;
-              // }
-              if (column === "Mã hàng hóa") {
+              if (column === "Tên thiết bị") {
+                const formattedProductName = formatProductName(
+                  item.product.productName
+                );
+                return formattedProductName;
+              }
+              if (column === "Mã hàng hóa (*)") {
                 return item.product.productId;
               }
-              if (column === "Số serial") {
+              if (column === "Số serial (*)") {
                 return item.serialNumber;
               }
-              if (column === "Số PO") {
+              if (column === "Số PO (*)") {
                 return item.po.poNumber;
               }
               if (column === "Ngày nhập kho") {
@@ -107,16 +67,16 @@ const SNCheck = () => {
               }
               if (column === "Ưu Tiên SC") {
                 if (item.priority === 0) {
-                  return 
+                  return;
                 } else if (item.priority === 1) {
-                  return "Ưu tiên";
+                  return "Ưu tiên SC";
                 }
               }
               if (column === "Cập nhật SC") {
                 if (item.repairStatus === 1) {
-                  return "Sửa chữa xong";
+                  return "SC OK";
                 } else if (item.repairStatus === 0) {
-                  return "Sửa chữa không được";
+                  return "Trả hỏng";
                 } else if (item.repairStatus === 2) {
                   return "Cháy nổ";
                 }
@@ -154,17 +114,75 @@ const SNCheck = () => {
       utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
       writeFile(workbook, "serial_check.xlsx");
-    }
-  
+    };
+
+    useEffect(() => {
+      const dataList = localStorage.getItem("dataList");
+      if (dataList) {
+        setListPoDetailSN(JSON.parse(dataList));
+      }
+    }, [localStorage.getItem("dataList")]);
+
+    // import sn check
+    const handleImportSN = async (event) => {
+      try {
+        const file = event.target.files[0];
+        if (
+          file.type !==
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ) {
+          toast.error("Vui lòng chỉ chọn tệp tin định dạng .xlsx!");
+          return;
+        }
+        const formData = new FormData();
+        formData.append("file", file);
+        setIsLoading(true);
+        let response = await searchSerialNumber(formData);
+        if (response && response.statusCode === 200) {
+          toast.success("Dữ liệu đã được tải thành công!!");
+          localStorage.setItem("dataList", JSON.stringify(response.data));
+        } else {
+          if (response && response.statusCode === 205) {
+            setIsShowNotify(true);
+            setData(response.data);
+            toast.error("Dữ liệu được tải không thành công!!");
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        toast.error("Dữ liệu đã được tải không thành công!");
+      } finally {
+        setIsLoading(false);
+        event.target.value = null; // Reset giá trị của input file
+      }
+    };
 
   const handleReset = () => {
-    setData("");
-    localStorage.removeItem("dataList")
+    setListPoDetailSN("");
+    localStorage.removeItem("dataList");
   };
 
   const handleCloses = () => {
     setIsShowNotify(false);
   };
+
+   const formatProductName = (name) => {
+     if (name === null) {
+       return name;
+     } else {
+       const parts = name.split("\n");
+       for (const part of parts) {
+         const trimmedPart = part.trim();
+         const asteriskIndex = trimmedPart.indexOf("*");
+         const colonIndex = trimmedPart.indexOf(":");
+         if (asteriskIndex !== -1) {
+           const startIndex = Math.max(asteriskIndex + 1, colonIndex + 1);
+           return trimmedPart.substring(startIndex).trim();
+         }
+       }
+       return name;
+     }
+   };
 
   return (
     <div className="sn-check">
@@ -185,7 +203,7 @@ const SNCheck = () => {
         </div>
         <button
           className="btn btn-success btn-reset "
-          onClick={() => handleExport()}
+          onClick={() => handleExportSN()}
         >
           <FaFileExport className="reset-icon" />
           Export
@@ -196,9 +214,10 @@ const SNCheck = () => {
           <thead>
             <tr className="table-header">
               <th>Stt</th>
-              <th>Mã hàng hóa</th>
-              <th>Số serial</th>
-              <th>Số PO</th>
+              <th>Mã hàng hóa (*)</th>
+              <th>Tên thiết bị</th>
+              <th>Số serial (*)</th>
+              <th>Số PO (*)</th>
               <th>Ngày nhập kho</th>
               <th>Hạng mục SC</th>
               <th>Ưu tiên SC</th>
@@ -211,9 +230,9 @@ const SNCheck = () => {
             </tr>
           </thead>
           <tbody>
-            {data &&
-              data.length > 0 &&
-              data.map((item, index) => {
+            {listPoDetailSN &&
+              listPoDetailSN.length > 0 &&
+              listPoDetailSN.map((item, index) => {
                 // background color when priority is equal to 1
                 const rowStyles = {
                   backgroundColor: "#ffeeba", // Màu nền sáng
@@ -240,30 +259,31 @@ const SNCheck = () => {
                   item.priority === 1
                     ? rowStyles
                     : { backgroundColor: "#ffffff" };
+
+                const formattedProductName = formatProductName(
+                  item.product.productName
+                );
                 return (
                   <tr
                     key={`sc-${index}`}
-                    onDoubleClick={() => handleShowPoDetail(item)}
+                    // onDoubleClick={() => handleEditPoDetail(item)}
                     style={rowStyle}
                     className="table-striped"
                   >
                     <td>{index + 1}</td>
                     <td>{item.product.productId}</td>
+                    <td className="col-name-product">{formattedProductName}</td>
                     <td>{item.serialNumber}</td>
                     <td>{item.po.poNumber}</td>
-                    {/* <td>{item.bbbgNumber}</td> */}
                     <td>{data}</td>
                     <td>
                       {item.repairCategory === 0 && "Hàng SC"}
                       {item.repairCategory === 1 && "Hàng BH"}
                     </td>
+                    <td>{item.priority === 1 && "Ưu tiên"}</td>
                     <td>
-                      {/* {item.priority === 0 && "Không UT"} */}
-                      {item.priority === 1 && "Ưu tiên"}
-                    </td>
-                    <td>
-                      {item.repairStatus === 0 && "SC không được"}
-                      {item.repairStatus === 1 && "SC xong"}
+                      {item.repairStatus === 0 && "Trả hỏng"}
+                      {item.repairStatus === 1 && "SC OK"}
                       {item.repairStatus === 2 && "Cháy nổ"}
                     </td>
                     <td className="col-bbxk">{item.bbbgNumberExport}</td>

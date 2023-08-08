@@ -97,8 +97,8 @@ export const Header = () => {
                   </NavLink>
                   {/* <NavLink to="/sn-check" className="nav-link">
                     S/N Check
-                  </NavLink> */}
-                  {/* <NavLink to="/barcode-check" className="nav-link">
+                  </NavLink> 
+                   <NavLink to="/barcode-check" className="nav-link">
                     Barcode Check
                   </NavLink> */}
                   <NavLink to="/sanpham" className="nav-link">

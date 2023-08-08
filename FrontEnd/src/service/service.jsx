@@ -466,6 +466,22 @@ const downloadHistory = (filePath) => {
   });
 }
 
+const writeAllNK = (list) => {
+  return axioss.post(`/po-detail/update/import-date?list=${list}`,null, {
+    headers: {
+      email: `${localStorage.getItem("email")}`,
+    },
+  });
+}
+
+const writeAllXK = (list) => {
+  return axioss.post(`/po-detail/update/export-partner?list=${list}`, null, {
+    headers: {
+      email: `${localStorage.getItem("email")}`,
+    },
+  });
+}
+
 export {
   fecthAll,
   notify,
@@ -502,4 +518,6 @@ export {
   checkBarcode,
   getHistory,
   downloadHistory,
+  writeAllNK,
+  writeAllXK,
 };

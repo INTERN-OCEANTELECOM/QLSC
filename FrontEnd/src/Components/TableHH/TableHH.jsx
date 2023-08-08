@@ -22,6 +22,8 @@ import {
   searchSerialNumber,
   updatePoDetail,
   updateStatusPoDetail,
+  writeAllNK,
+  writeAllXK,
 } from "../../service/service";
 import { FaCalendarAlt } from "react-icons/fa";
 import Spinner from "react-bootstrap/Spinner";
@@ -46,7 +48,7 @@ export const TableHH = () => {
   const [dataBarcode, setDataBarcode] = useState([]);
   const [selectedDateStart, setSelectedDateStart] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [dateEditPoDetail, setDataEditPoDetail] = useState("");
+  const [dateEditPoDetail, setDataEditPoDetail] = useState([]);
   const [dateShowPoDetail, setDataShowPoDetail] = useState("");
   const [isShowEditPoDetail, setisShowEditPoDetail] = useState(false);
   const [startIndex, setStartIndex] = useState(0);
@@ -88,7 +90,7 @@ export const TableHH = () => {
   const [isExportButtonEnabledSN, setIsExportButtonEnabledSN] = useState(false);
   const [isExportButtonEnabledBC, setIsExportButtonEnabledBC] = useState(false);
   const [flag, setFlag] = useState(false)
-  
+  let dataEdit = []
 
   // call api when load page
   useEffect(() => {
@@ -113,12 +115,19 @@ export const TableHH = () => {
       }
     } else {
       getAllPO();
+      // getProducts(0)
     }
   }, [selectedOption]);
 
   // search by po
   const searchByPO = async (page) => {
     setFlag(false);
+    setListPoDetailSN([]);
+    setListPoDetailImport([]);
+    setDataBarcode([]);
+    localStorage.removeItem("dataBarcode");
+    localStorage.removeItem("dataList");
+    localStorage.removeItem("podetailId");
     let time = selectedDateStart;
     let timeExport = exportPartner;
     if (selectedDateStart !== null) {
@@ -184,8 +193,8 @@ export const TableHH = () => {
   const handleFileUpload = async (event) => {
     try {
       setDataBarcode([]);
-      setListPoDetail([])
-      setListPoDetailSN([])
+      setListPoDetail([]);
+      setListPoDetailSN([]);
       const file = event.target.files[0];
       if (
         file.type !==
@@ -343,7 +352,7 @@ export const TableHH = () => {
   const handleSearch = async (page) => {
     setFlag(false);
     setListPoDetailSN([]);
-    setListPoDetailImport([])
+    setListPoDetailImport([]);
     setDataBarcode([]);
     localStorage.removeItem("dataBarcode");
     localStorage.removeItem("dataList");
@@ -405,113 +414,18 @@ export const TableHH = () => {
 
   // handle edit po detail
   const handleEditPoDetail = (item) => {
+    dataEdit = item
+    setDataEditPoDetail(item);
+    setisShowEditPoDetail(true);
     setListPoDetailSN([]);
     setData([]);
     localStorage.removeItem("dataBarcode");
     localStorage.removeItem("dataList");
     setisShowEditPoDetail(true);
-    setDataEditPoDetail(item);
   };
 
-  // handle download file sample
+  // console.log("check", dateEditPoDetail)
 
-  const handleDownloadSampleFile = () => {
-    const columnHeader = [
-      "Tên thiết bị",
-      "Mã hàng hóa (*)",
-      "Số serial (*)",
-      "Số PO (*)",
-      "Ngày nhập kho",
-      "Hạng mục SC",
-      "Ưu Tiên SC",
-      "Cập nhật SC",
-      "Số BBXK",
-      "Cập nhật XK",
-      "Cập nhật KCS",
-      "Cập nhật BH",
-      "Ghi chú",
-    ];
-    const dataArray = [columnHeader];
-
-    const workbook = utils.book_new();
-    const worksheet = utils.aoa_to_sheet(dataArray);
-    utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-    writeFile(workbook, "sample_file.xlsx");
-  };
-
-  // handle reset
-  const handleReset = () => {
-    window.location.reload();
-    window.location.href = `/quanly`;
-    localStorage.removeItem("dataList");
-    setBarcodeScan("");
-    localStorage.removeItem("dataBarcode");
-  };
-
-  const onChange1 = (event, { newValue }) => {
-    setValue1(newValue); // Cập nhật giá trị ô tìm kiếm
-  };
-
-  const getSuggestions = (inputValue) => {
-    const inputValues = inputValue.trim().split(" ");
-    const lastValue = inputValues[inputValues.length - 1].toLowerCase();
-    const filteredSuggestions = listPo.filter((item) =>
-      item.poNumber.toLowerCase().startsWith(lastValue)
-    );
-    return filteredSuggestions;
-  };
-
-  const getSuggestionValue = (suggestion) => suggestion.poNumber;
-
-  const renderSuggestion = (suggestion, { query }) => {
-    const suggestionText = suggestion.poNumber;
-    const matchIndex = suggestionText.toLowerCase().indexOf(query.toLowerCase());
-    const matchStart = matchIndex >= 0 ? matchIndex : suggestionText.length;
-    const matchEnd = matchStart + query.length;
-    const beforeMatch = suggestionText.slice(0, matchStart);
-    const match = suggestionText.slice(matchStart, matchEnd);
-    const afterMatch = suggestionText.slice(matchEnd);
-    return (
-      <div>
-        {beforeMatch}
-        <strong>{match}</strong>
-        {afterMatch}
-      </div>
-    );
-  };
-
-  const onSuggestionsFetchRequested = ({ value }) => {
-    setSuggestions(getSuggestions(value));
-  };
-
-  const onSuggestionsClearRequested = () => {
-    setSuggestions([]);
-  };
-
-  const onSuggestionSelected = (event, { suggestion }) => {
-    setSelectedSuggestion(suggestion);
-    setValue1((prevValue) => {
-      const inputValues = prevValue.trim().split(" ");
-      const newValue = inputValues.slice(0, -1).join(" ") + " " + suggestion.poNumber + " ";
-      return newValue;
-    });
-  };
-
-  const onKeyDown = (event) => {
-    if (event.key === "Enter") {
-        handleSearch();
-    }
-  };
-
-  const inputProps1 = {
-    placeholder: "Nhập PO",
-    value: value1,
-    onChange: onChange1,
-    onKeyDown: onKeyDown,
-  };
-
-  //export sn check
   const handleExportSN = () => {
     let selectedColumns = [
       "Tên thiết bị",
@@ -624,9 +538,11 @@ export const TableHH = () => {
     try {
       setFlag(false);
       setListPoDetail("");
-      setListPoDetailImport("")
+      setListPoDetailImport("");
       setData([]);
+      setDataBarcode("")
       localStorage.removeItem("dataBarcode");
+      localStorage.removeItem("podetailId");
       const file = event.target.files[0];
       if (
         file.type !==
@@ -663,7 +579,7 @@ export const TableHH = () => {
     setFlag(false);
     setListPoDetail("");
     setListPoDetailSN("");
-    setListPoDetailImport("")
+    setListPoDetailImport("");
     localStorage.removeItem("dataList");
     let res = await checkBarcode(barcodeScan);
     if (res && res.statusCode === 200) {
@@ -713,6 +629,16 @@ export const TableHH = () => {
       setBarcodeScan("");
     }
   }, []);
+
+   useEffect(() => {
+     if (dataBarcode && dataBarcode.length > 0) {
+       const newDataList = dataBarcode
+         .filter((item) => item.poDetailId) // Loại bỏ các item không có poDetailId
+         .map((item) => item.poDetailId)
+         .join(" "); // Kết hợp thành chuỗi cách nhau bằng dấu cách
+       localStorage.setItem("podetailId", newDataList);
+     }
+   }, [dataBarcode]);
 
   const handleScanComplete = async (scanResult) => {
     const processedScanResult = scanResult
@@ -922,6 +848,158 @@ export const TableHH = () => {
     writeFile(workbook, "barcode_check.xlsx");
   };
 
+  // handle download file sample
+
+  const handleDownloadSampleFile = () => {
+    const columnHeader = [
+      "Tên thiết bị",
+      "Mã hàng hóa (*)",
+      "Số serial (*)",
+      "Số PO (*)",
+      "Ngày nhập kho",
+      "Hạng mục SC",
+      "Ưu Tiên SC",
+      "Cập nhật SC",
+      "Số BBXK",
+      "Cập nhật XK",
+      "Cập nhật KCS",
+      "Cập nhật BH",
+      "Ghi chú",
+    ];
+
+    const columnHeader1 = [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "0 - Hàng SC",
+      "0 - Không ưu tiên SC",
+      "0 - Trả hỏng",
+      "",
+      "",
+      "0 - Fail",
+      "",
+      "",
+    ];
+
+    const columnHeader2 = [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "1 - Hàng BH",
+      "1- Ưu tiên SC",
+      "1 - SC OK  ",
+      "",
+      "",
+      "1 - PASS",
+      "",
+      "",
+    ];
+
+    const columnHeader3 = [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "2 - Cháy nổ",
+      "",
+      "",
+      "",
+      "",
+      "",
+    ];
+    const dataArray = [
+      columnHeader,
+      columnHeader1,
+      columnHeader2,
+      columnHeader3,
+    ];
+
+    const workbook = utils.book_new();
+    const worksheet = utils.aoa_to_sheet(dataArray);
+    utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+    writeFile(workbook, "sample_file.xlsx");
+  };
+
+  // handle reset
+  const handleReset = () => {
+    window.location.reload();
+    window.location.href = `/quanly`;
+    localStorage.removeItem("dataList");
+    setBarcodeScan("");
+    localStorage.removeItem("dataBarcode");
+    localStorage.removeItem("podetailId");
+  };
+
+  const onChange1 = (event, { newValue }) => {
+    setValue1(newValue); // Cập nhật giá trị ô tìm kiếm
+  };
+
+  const getSuggestions = (inputValue) => {
+    const inputValues = inputValue.trim().split(" ");
+    const lastValue = inputValues[inputValues.length - 1].toLowerCase();
+    const filteredSuggestions = listPo.filter((item) =>
+      item.poNumber.toLowerCase().includes(lastValue)
+    );
+    return filteredSuggestions;
+  };
+
+  const getSuggestionValue = (suggestion) => suggestion.poNumber;
+
+  const renderSuggestion = (suggestion, { query }) => {
+    const suggestionText = suggestion.poNumber;
+    const matchIndex = suggestionText.toLowerCase().indexOf(query.toLowerCase());
+    const matchStart = matchIndex >= 0 ? matchIndex : suggestionText.length;
+    const matchEnd = matchStart + query.length;
+    const beforeMatch = suggestionText.slice(0, matchStart);
+    const match = suggestionText.slice(matchStart, matchEnd);
+    const afterMatch = suggestionText.slice(matchEnd);
+    return (
+      <div>
+        {beforeMatch}
+        <strong>{match}</strong>
+        {afterMatch}
+      </div>
+    );
+  };
+
+  const onSuggestionsFetchRequested = ({ value }) => {
+    setSuggestions(getSuggestions(value));
+  };
+
+  const onSuggestionsClearRequested = () => {
+    setSuggestions([]);
+  };
+
+  const onSuggestionSelected = (event, { suggestion }) => {
+    setSelectedSuggestion(suggestion);
+    setValue1((prevValue) => {
+      const inputValues = prevValue.trim().split(" ");
+      const newValue = inputValues.slice(0, -1).join(" ") + " " + suggestion.poNumber + " ";
+      return newValue;
+    });
+  };
+
+  const onKeyDown = (event) => {
+    if (event.key === "Enter") {
+        handleSearch();
+    }
+  };
+
+  const inputProps1 = {
+    placeholder: "Nhập PO",
+    value: value1,
+    onChange: onChange1,
+    onKeyDown: onKeyDown,
+  };
+
   const handleExportSearch = async () => {
     console.log(flag)
     let selectedColumns = [
@@ -1071,14 +1149,14 @@ export const TableHH = () => {
               if (item.priority === 0) {
                 return;
               } else if (item.priority === 1) {
-                return "Ưu tiên";
+                return "Ưu tiên SC";
               }
             }
             if (column === "Cập nhật SC") {
               if (item.repairStatus === 1) {
-                return "Sửa chữa xong";
+                return "SC OK";
               } else if (item.repairStatus === 0) {
-                return "Sửa chữa không được";
+                return "Trả hỏng";
               } else if (item.repairStatus === 2) {
                 return "Cháy nổ";
               }
@@ -1141,6 +1219,26 @@ export const TableHH = () => {
       return name;
     }
   };
+
+    const handleWriteNKAll = async () => {
+      const modifiedList = localStorage.getItem("podetailId");
+      let res = await writeAllNK(modifiedList);
+      if (res && res.statusCode === 200) {
+        toast.success("Ghi thành công!!");
+      } else {
+        toast.error("Ghi không thành công!!");
+      }
+    };
+
+    const handleWriteXKAll = async () => {
+      const modifiedList = localStorage.getItem("podetailId");
+      let res = await writeAllXK(modifiedList);
+      if (res && res.statusCode === 200) {
+        toast.success("Ghi thành công!!");
+      } else {
+        toast.error("Ghi không thành công!!");
+      }
+    };
 
 
   return (
@@ -1259,6 +1357,7 @@ export const TableHH = () => {
                     >
                       <Form.Select
                         aria-label="Default select example"
+                        className="me-5"
                         value={repairStatus === null ? "Tất cả" : repairStatus}
                         onChange={(event) => {
                           const value = event.target.value;
@@ -1266,8 +1365,8 @@ export const TableHH = () => {
                         }}
                       >
                         <option>Tất cả</option>
-                        <option value="0">SC không được</option>
-                        <option value="1">SC xong</option>
+                        <option value="0">Trả hỏng</option>
+                        <option value="1">SC OK</option>
                         <option value="2">Cháy nổ</option>
                       </Form.Select>
                     </Form.Group>
@@ -1281,6 +1380,7 @@ export const TableHH = () => {
                       className="repariStatus"
                     >
                       <Form.Select
+                        className="me-5"
                         aria-label="Default select example"
                         value={kcsVt === null ? "Tất cả" : kcsVt}
                         onChange={(event) => {
@@ -1303,6 +1403,7 @@ export const TableHH = () => {
                       className="repariStatus"
                     >
                       <Form.Select
+                        className="me-5"
                         aria-label="Default select example"
                         value={priority === null ? "Tất cả" : priority}
                         onChange={(event) => {
@@ -1339,7 +1440,7 @@ export const TableHH = () => {
                 </div>
               </Row>
             </div>
-            {/* S/n check */}
+
             <div className="row-sn">
               <Row className="mb-3">
                 <Form.Label className="text-center">
@@ -1353,14 +1454,14 @@ export const TableHH = () => {
                   className="d-flex justify-content-center"
                 >
                   <div className="import">
-                    <label htmlFor="test9" className="btn btn-danger ">
+                    <label htmlFor="test9999" className="btn btn-danger ">
                       <FaFileImport className="icon-import" />
                       S/N Check
                     </label>
                     <input
                       type="file"
                       onChange={handleImportSN}
-                      id="test9"
+                      id="test9999"
                       hidden
                     />
                   </div>
@@ -1409,6 +1510,22 @@ export const TableHH = () => {
                   controlId="validationCustomUsername8"
                   className="d-flex justify-content-end mt-3"
                 >
+                  {dataBarcode && dataBarcode.length > 0 && (
+                    <>
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleWriteNKAll}
+                      >
+                        Ghi NK All
+                      </button>
+                      <button
+                        className="btn btn-warning mx-2"
+                        onClick={handleWriteXKAll}
+                      >
+                        Ghi XK All
+                      </button>
+                    </>
+                  )}
                   <div className="update">
                     <button
                       className="btn btn-success label-export"
@@ -1416,7 +1533,7 @@ export const TableHH = () => {
                       disabled={!isExportButtonEnabledBC}
                     >
                       <AiOutlineDownload className="icon-export" />
-                      Export Barcode
+                      Export
                     </button>
                   </div>
                 </Form.Group>
@@ -1430,6 +1547,15 @@ export const TableHH = () => {
             <div className="col-3"></div>
             <div className="group-btn d-flex">
               {/* button search */}
+              {/* <div className="search">
+                <button
+                  className="btn btn-primary label-search"
+                  onClick={() => handleSearch()}
+                >
+                  <AiOutlineSearch className="icon-search" />
+                  Search
+                </button>
+              </div> */}
               <div className="search">
                 <button
                   className="btn btn-primary label-search"
@@ -1505,17 +1631,17 @@ export const TableHH = () => {
             (listPoDetailImport && listPoDetailImport.length > 0) ? (
               <tr>
                 <th>Stt</th>
-                <th>Mã HH</th>
+                <th>Mã hàng hóa (*)</th>
                 <th>Tên thiết bị</th>
-                <th>Số serial</th>
-                <th>Số PO</th>
-                <th>Ngày NK</th>
+                <th>Số serial (*)</th>
+                <th>Số PO (*)</th>
+                <th>Ngày nhập kho</th>
                 <th>Hạng mục SC</th>
-                <th>Ưu tiên</th>
+                <th>Ưu tiên SC</th>
                 <th>Cập nhật SC</th>
                 <th>Số BBXK</th>
                 <th>Cập nhật XK</th>
-                <th>KCS</th>
+                <th>Cập nhật KCS</th>
                 <th>Cập nhật BH</th>
                 <th>Ghi chú</th>
                 {dataBarcode && dataBarcode.length > 0 && (
@@ -1577,8 +1703,8 @@ export const TableHH = () => {
                     </td>
                     <td>{item.priority === 1 && "Ưu tiên"}</td>
                     <td>
-                      {item.repairStatus === 0 && "SC không được"}
-                      {item.repairStatus === 1 && "SC xong"}
+                      {item.repairStatus === 0 && "Trả hỏng"}
+                      {item.repairStatus === 1 && "SC OK"}
                       {item.repairStatus === 2 && "Cháy nổ"}
                     </td>
                     <td className="col-bbxk">{item.bbbgNumberExport}</td>
@@ -1644,8 +1770,8 @@ export const TableHH = () => {
                     </td>
                     <td>{item.priority === 1 && "Ưu tiên"}</td>
                     <td>
-                      {item.repairStatus === 0 && "SC không được"}
-                      {item.repairStatus === 1 && "SC xong"}
+                      {item.repairStatus === 0 && "Trả hỏng"}
+                      {item.repairStatus === 1 && "SC OK"}
                       {item.repairStatus === 2 && "Cháy nổ"}
                     </td>
                     <td className="col-bbxk">{item.bbbgNumberExport}</td>
@@ -1690,7 +1816,7 @@ export const TableHH = () => {
                   item.priority === 1
                     ? rowStyles
                     : { backgroundColor: "#ffffff" };
-                
+
                 const formattedProductName = formatProductName(
                   item.product.productName
                 );
@@ -1713,8 +1839,8 @@ export const TableHH = () => {
                     </td>
                     <td>{item.priority === 1 && "Ưu tiên"}</td>
                     <td>
-                      {item.repairStatus === 0 && "SC không được"}
-                      {item.repairStatus === 1 && "SC xong"}
+                      {item.repairStatus === 0 && "Trả hỏng"}
+                      {item.repairStatus === 1 && "SC OK"}
                       {item.repairStatus === 2 && "Cháy nổ"}
                     </td>
                     <td className="col-bbxk">{item.bbbgNumberExport}</td>
@@ -1753,13 +1879,15 @@ export const TableHH = () => {
                   item.product.productName
                 );
 
+                const reverseIndex = dataBarcode.length - index;
+
                 return (
                   <tr
                     key={`sc-${index}`}
                     style={rowStyle(item)}
                     className="table-striped"
                   >
-                    <td>{index + 1}</td>
+                    <td>{reverseIndex}</td>
                     <td>{item.product.productId}</td>
                     <td className="col-name-product">{formattedProductName}</td>
                     <td>{item.serialNumber}</td>
@@ -1870,6 +1998,7 @@ export const TableHH = () => {
         />
 
         <ModalUpdatePoDetail
+          datae = {dataEdit}
           show={isShowEditPoDetail}
           handleCloses={handleCloses}
           dateEditPoDetail={dateEditPoDetail}
