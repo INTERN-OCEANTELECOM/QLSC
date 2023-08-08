@@ -589,7 +589,7 @@ export const TableHH = () => {
       if (dataList) {
         newDataList = JSON.parse(dataList);
       }
-      newDataList.push(newData);
+      newDataList.unshift(newData);
       localStorage.setItem("dataBarcode", JSON.stringify(newDataList));
       setDataBarcode(newDataList.flat());
       setIsExportButtonEnabledBC(true);
@@ -599,7 +599,7 @@ export const TableHH = () => {
       if (dataList) {
         newDataList = JSON.parse(dataList);
       }
-      newDataList.push({
+      newDataList.unshift({
         serialNumber: barcodeScan,
         product: {
           productName: null,
