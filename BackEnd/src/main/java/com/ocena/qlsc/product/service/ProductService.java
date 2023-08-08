@@ -71,18 +71,18 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         List<String> listKeywords = searchKeywordDto.getKeyword().get(0) != null ?
                 Arrays.asList(searchKeywordDto.getKeyword().get(0).trim().split("\\s+")) : new ArrayList<>();
 
+        Page<Object[]> resultPage = productRepository.getProductPageable(PageRequest.of(0, Integer.MAX_VALUE));
+        List<ProductDTO> productDTOs = resultPage.getContent().stream().map(objects -> ProductDTO.builder()
+                .productId(objects[0].toString())
+                .productName(objects[1].toString())
+                .amount(Integer.valueOf(objects[2].toString()))
+                .build()).toList();
+
         try {
             if (!listKeywords.isEmpty()) {
                 //Check if the first element of the list is of type Long
                 Long.parseLong(listKeywords.get(0));
             }
-
-            Page<Object[]> resultPage = productRepository.getProductPageable(PageRequest.of(0, Integer.MAX_VALUE));
-            List<ProductDTO> productDTOs = resultPage.getContent().stream().map(objects -> ProductDTO.builder()
-                    .productId(objects[0].toString())
-                    .productName(objects[1].toString())
-                    .amount(Integer.valueOf(objects[2].toString()))
-                    .build()).collect(Collectors.toList());
 
             List<ProductDTO> mergeList = productDTOs.stream()
                     .filter(product -> listKeywords.isEmpty()
@@ -90,14 +90,12 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
                             .anyMatch(keyword -> product.getProductId().contains(keyword)))
                     .collect(Collectors.toList());
 
-            //Create Page with Start End
-            List<ProductDTO> pageProducts = mergeList
-                    .subList(pageable.getPageNumber() * pageable.getPageSize(),
-                            Math.min(pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize(), mergeList.size()));
-
-            return new PageImpl<>(pageProducts, pageable, mergeList.size());
+            return mergeListToPageProductDTO(mergeList, pageable);
         } catch (NumberFormatException e) {
-            return productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), pageable).map(product -> productMapper.entityToDto(product));
+            List<ProductDTO> mergeList =  productDTOs.stream().filter(productDTO -> productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), pageable)
+                            .map(product -> productMapper.entityToDto(product)).stream().anyMatch(productDTO1 -> productDTO1.getProductId().equals(productDTO.getProductId()))).collect(Collectors.toList());
+
+            return mergeListToPageProductDTO(mergeList, pageable);
         }
     }
 
@@ -122,5 +120,13 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         List<ProductDTO> allProducts = getProductByPage(0, Integer.MAX_VALUE).getData() ;
 
         return ResponseMapper.toListResponseSuccess(allProducts);
+    }
+
+    public Page<ProductDTO> mergeListToPageProductDTO(List<ProductDTO> mergeList, Pageable pageable){
+        List<ProductDTO> pageProducts = mergeList
+                .subList(pageable.getPageNumber() * pageable.getPageSize(),
+                        Math.min(pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize(), mergeList.size()));
+
+        return new PageImpl<>(pageProducts, pageable, mergeList.size());
     }
 }
