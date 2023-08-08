@@ -30,6 +30,8 @@ const Product = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentPage, setCurrentPage] = useState("")
   const [currentPageSearch, setCurrentPageSearch] = useState("")
+  const [sortedListHH, setSortedListHH] = useState([]);
+  const [sortDirection, setSortDirection] = useState("asc");
 
   // call api when load page
   useEffect(() => {
@@ -40,6 +42,11 @@ const Product = () => {
       getAllProducts();
     }
   }, [selectedOption]);
+
+  useEffect(() => {
+    const sortedList = _.orderBy(listHH, ["productName"], [sortDirection]);
+    setSortedListHH(sortedList);
+  }, [listHH, sortDirection]);
 
   // call api get all product by page
   const getProducts = async (page) => {
@@ -256,9 +263,9 @@ const Product = () => {
             </tr>
           </thead>
           <tbody>
-            {listHH &&
-              listHH.length > 0 &&
-              listHH.map((item, index) => {
+            {sortedListHH &&
+              sortedListHH.length > 0 &&
+              sortedListHH.map((item, index) => {
                 const currentIndex = startIndex + index;
                 const formattedProductName = formatProductName(
                   item.productName

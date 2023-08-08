@@ -5,30 +5,20 @@ import { toast } from "react-toastify";
 
 const ModalDeletePODetail = (props) => {
 
-    const { show, handleCloses, dataDeletePODetail, getProducts, currenPage } =
+    const { show, handleCloses, dataDeletePODetail } =
       props;
-    const confirmDelete = async () => {
-      let page;
-      if (currenPage) {
-        page = currenPage;
-      } else {
-        page = 0;
-      }
-      try {
-        let res = await deletePODetail(dataDeletePODetail.poDetailId);
-        console.log(res);
-        if (res && res.statusCode === 200) {
-          toast.success("Xóa thành công!!!");
-          handleCloses();
-          getProducts(page);
-        } else {
-          toast.error("Xóa không thành công!!");
-          handleCloses();
+    const confirmDelete = () => {
+      console.log(dataDeletePODetail);
+      if (Array.isArray(dataDeletePODetail)) {
+        const index = dataDeletePODetail.findIndex(
+          (i) => i.poDetailId === item.poDetailId
+        );
+        if (index !== -1) {
+          const newDataList = [...dataDeletePODetail];
+          newDataList.splice(index, 1);
+          localStorage.setItem("dataBarcode", JSON.stringify(newDataList));
+          setDataBarcode(newDataList);
         }
-      } catch (error) {
-        console.error(error);
-        toast.error("Đã xảy ra lỗi khi xóa người dùng!!");
-        handleCloses();
       }
     };
 
@@ -44,7 +34,7 @@ const ModalDeletePODetail = (props) => {
         keyboard={false}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Delete PO Detail</Modal.Title>
+          <Modal.Title>Delete Barcode</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="body-add-new">

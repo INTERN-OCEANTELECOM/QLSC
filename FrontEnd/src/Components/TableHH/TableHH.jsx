@@ -90,6 +90,13 @@ export const TableHH = () => {
   const [isExportButtonEnabledSN, setIsExportButtonEnabledSN] = useState(false);
   const [isExportButtonEnabledBC, setIsExportButtonEnabledBC] = useState(false);
   const [flag, setFlag] = useState(false)
+  const [show, setShow] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false); // State để kiểm soát việc hiển thị popup
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [showConfirmationNK, setShowConfirmationNK] = useState(false); // State để kiểm soát việc hiển thị popup
+  const [itemToNK, setItemToNK] = useState(null);
+  const [showConfirmationXK, setShowConfirmationXK] = useState(false); // State để kiểm soát việc hiển thị popup
+  const [itemToXK, setItemToXK] = useState(null);
   let dataEdit = []
 
   // call api when load page
@@ -664,18 +671,32 @@ export const TableHH = () => {
     minLength: 1,
   });
 
-  //delete barcode
   const handleDelete = (item) => {
-    const index = dataBarcode.findIndex(
-      (i) => i.poDetailId === item.poDetailId
-    );
-    if (index !== -1) {
-      const newDataList = [...dataBarcode];
-      newDataList.splice(index, 1);
-      localStorage.setItem("dataBarcode", JSON.stringify(newDataList));
-      setDataBarcode(newDataList);
-    }
+    // Lưu thông tin dữ liệu cần xóa và hiển thị popup xác nhận
+    setItemToDelete(item);
+    setShowConfirmation(true);
   };
+
+  const confirmDelete = () => {
+    if (itemToDelete) {
+      const index = dataBarcode.findIndex(
+        (i) => i.poDetailId === itemToDelete.poDetailId
+      );
+      if (index !== -1) {
+        const newDataList = [...dataBarcode];
+        newDataList.splice(index, 1);
+        localStorage.setItem("dataBarcode", JSON.stringify(newDataList));
+        setDataBarcode(newDataList);
+      }
+      setItemToDelete(null); // Đặt lại thông tin dữ liệu cần xóa
+    }
+    setShowConfirmation(false); // Đóng popup xác nhận
+  };
+
+  const cancelDelete = () => {
+    setItemToDelete(null); // Đặt lại thông tin dữ liệu cần xóa
+    setShowConfirmation(false); // Đóng popup xác nhận
+  };  
 
   // write nhập kho
   const writeNK = async (item) => {
@@ -1220,17 +1241,38 @@ export const TableHH = () => {
     }
   };
 
-    const handleWriteNKAll = async () => {
-      const modifiedList = localStorage.getItem("podetailId");
-      let res = await writeAllNK(modifiedList);
-      if (res && res.statusCode === 200) {
-        toast.success("Ghi thành công!!");
-      } else {
-        toast.error("Ghi không thành công!!");
-      }
+
+    const handleWriteNKAll = () => {
+      // Lưu thông tin dữ liệu cần xóa và hiển thị popup xác nhận
+      setItemToNK(item);
+      setShowConfirmationNK(true);
     };
 
-    const handleWriteXKAll = async () => {
+    const confirmNK = async() => {
+      
+        const modifiedList = localStorage.getItem("podetailId");
+          let res = await writeAllNK(modifiedList);
+          if (res && res.statusCode === 200) {
+            toast.success("Ghi thành công!!");
+          } else {
+            toast.error("Ghi không thành công!!");
+          }
+        
+      setShowConfirmationNK(false); // Đóng popup xác nhận
+    };
+
+    const cancelNK = () => {
+      // setItemToNK(null); // Đặt lại thông tin dữ liệu cần xóa
+      setShowConfirmationNK(false); // Đóng popup xác nhận
+    };
+
+    const handleWriteXKAll = () => {
+      // Lưu thông tin dữ liệu cần xóa và hiển thị popup xác nhận
+      setItemToXK(item);
+      setShowConfirmationXK(true);
+    };
+
+    const confirmXK = async () => {
       const modifiedList = localStorage.getItem("podetailId");
       let res = await writeAllXK(modifiedList);
       if (res && res.statusCode === 200) {
@@ -1238,7 +1280,24 @@ export const TableHH = () => {
       } else {
         toast.error("Ghi không thành công!!");
       }
+
+      setShowConfirmationXK(false); // Đóng popup xác nhận
     };
+
+    const cancelXK = () => {
+      // setItemToNK(null); // Đặt lại thông tin dữ liệu cần xóa
+      setShowConfirmationXK(false); // Đóng popup xác nhận
+    };
+
+    // const handleWriteXKAll = async () => {
+    //   const modifiedList = localStorage.getItem("podetailId");
+    //   let res = await writeAllXK(modifiedList);
+    //   if (res && res.statusCode === 200) {
+    //     toast.success("Ghi thành công!!");
+    //   } else {
+    //     toast.error("Ghi không thành công!!");
+    //   }
+    // };
 
 
   return (
@@ -1639,6 +1698,7 @@ export const TableHH = () => {
                 <th>Hạng mục SC</th>
                 <th>Ưu tiên SC</th>
                 <th>Cập nhật SC</th>
+                {/* <th>Nội dung SC</th> */}
                 <th>Số BBXK</th>
                 <th>Cập nhật XK</th>
                 <th>Cập nhật KCS</th>
@@ -1942,6 +2002,54 @@ export const TableHH = () => {
           </tbody>
         </table>
 
+        <Modal show={showConfirmation} onHide={cancelDelete}>
+          <Modal.Header closeButton>
+            <Modal.Title>Delete Barcode</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Bạn có chắc muốn xóa không!!</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cancelDelete}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={confirmDelete}>
+              Confirm
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={showConfirmationNK} onHide={cancelNK}>
+          <Modal.Header closeButton>
+            <Modal.Title>Ghi nhập kho tất cả</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Tất cả dữ liệu hợp lệ sẽ được update vào cột <b>Ngày nhập kho</b>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cancelNK}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={confirmNK}>
+              Confirm
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={showConfirmationXK} onHide={cancelXK}>
+          <Modal.Header closeButton>
+            <Modal.Title>Ghi xuất kho tất cả</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Tất cả dữ liệu hợp lệ sẽ được update vào cột <b>Cập nhật XK</b>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cancelXK}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={confirmXK}>
+              Confirm
+            </Button>
+          </Modal.Footer>
+        </Modal>
         {/* Loading */}
 
         {isLoading && (
@@ -1998,7 +2106,7 @@ export const TableHH = () => {
         />
 
         <ModalUpdatePoDetail
-          datae = {dataEdit}
+          datae={dataEdit}
           show={isShowEditPoDetail}
           handleCloses={handleCloses}
           dateEditPoDetail={dateEditPoDetail}
