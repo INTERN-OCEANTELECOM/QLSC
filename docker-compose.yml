@@ -24,7 +24,8 @@ services:
     networks:
       - networkDB
     volumes:
-      - qlsc-history:/mnt/d/data-qlsc
+      - D:\data-qlsc\data\history:/mnt/d/data-qlsc
+      - D:\data-qlsc\data\logs:/mnt/d/logs
 
   frontend:
     build:
@@ -44,7 +45,7 @@ services:
       - MYSQL_DATABASE=userdb
       - MYSQL_SERVICE_PORT=3306
     volumes:
-      - mysql_data:/var/lib/mysql
+      - D:\data-qlsc\database:/var/lib/mysql
     networks:
       - networkDB
 
