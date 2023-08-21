@@ -48,4 +48,13 @@ public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
             """)
     List<RepairHistory> findByPoDetailId(@Param("poDetailId") String poDetailId);
 
+
+    @Query("""
+                SELECT rh
+                FROM RepairHistory rh WHERE rh.poDetail.product.productId = :productId
+                AND rh.poDetail.po.poNumber = :poNumber
+            """)
+    List<RepairHistory> findByProductIdAndPoNumber(@Param("productId") String productId,
+                                                   @Param("poNumber") String poNumber);
+
 }

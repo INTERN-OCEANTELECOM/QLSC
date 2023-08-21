@@ -132,8 +132,8 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
             int amountInPO = poDetailRepository.countByProductIdAndPoNumber(poDetail.getProduct().getProductId(),
                     poDetail.getPo().getPoNumber());
             int countRepairIsOK = 0;
-            List<RepairHistory> repairHistories = repairHistoryRepository.findByPoDetailId(
-                    poDetail.getPoDetailId());
+            List<RepairHistory> repairHistories = repairHistoryRepository.findByProductIdAndPoNumber(
+                    poDetail.getProduct().getProductId(), poDetail.getPo().getPoNumber());
             countRepairIsOK = countSerialWithAllIsOK(repairHistories);
             poDetailResponse.setAmountInPo(amountInPO);
             poDetailResponse.setRemainingQuantity(amountInPO - countRepairIsOK);

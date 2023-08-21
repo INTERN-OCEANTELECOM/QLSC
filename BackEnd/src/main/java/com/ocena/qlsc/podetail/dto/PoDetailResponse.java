@@ -34,6 +34,6 @@ public class PoDetailResponse implements Serializable {
     private String bbbgNumberExport;
     private String note;
     private List<RepairHistoryResponse> repairHistories;
-    private int amountInPo;
-    private int remainingQuantity;
+    private Integer amountInPo;
+    private Integer remainingQuantity;
 }
