@@ -82,7 +82,6 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
                                     StringUtils.convertStringToList(searchKeywordDto.getKeyword().get(0).trim()) :
                                     StringUtils.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(0).trim());
 
-
         Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
 
         Page<ProductResponse> productResponsePage = resultPage.map(objects -> ProductResponse.builder()
@@ -125,15 +124,6 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
     public ListResponse<ProductResponse> getAllProduct() {
         List<ProductResponse> allProducts = getPagedProducts(0, Integer.MAX_VALUE).getData();
         return ResponseMapper.toListResponseSuccess(allProducts);
-    }
-
-
-    public Page<ProductDTO> mergeListToPageProductDTO(List<ProductDTO> mergeList, Pageable pageable){
-        List<ProductDTO> pageProducts = mergeList
-                .subList(pageable.getPageNumber() * pageable.getPageSize(),
-                        Math.min(pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize(), mergeList.size()));
-
-        return new PageImpl<>(pageProducts, pageable, mergeList.size());
     }
 
     public DataResponse<ProductResponse> createProduct(ProductRequest productRequest) {
