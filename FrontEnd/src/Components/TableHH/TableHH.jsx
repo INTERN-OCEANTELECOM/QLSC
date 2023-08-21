@@ -214,6 +214,7 @@ export const TableHH = () => {
       formData.append("file", file);
       setIsLoading(true);
       let response = await importPODetail(formData);
+      console.log(response);
       if (response && response.statusCode === 200) {
         toast.success("Dữ liệu đã được tải thành công!!");
         setListPoDetailImport(response.data);
@@ -228,7 +229,12 @@ export const TableHH = () => {
         setIsExportButtonEnabled(true);
         setFlag(true)
       } else {
-        toast.error("Dữ liệu đã được tải không thành công!");
+        if (response && response.status === 501) {
+          toast.error("Dữ liệu đã được tải không thành công!");
+          setData(response.data.data);
+          setIsShowNotify(true);
+        }else {
+          toast.error("Dữ liệu đã được tải không thành công!");
         setData(response.data);
         setIsShowNotify(true);
         setValue1("");
@@ -241,6 +247,7 @@ export const TableHH = () => {
         setIsExportButtonEnabled(false);
         setFlag(false)
       }
+    }
     } catch (error) {
       toast.error("Dữ liệu đã được tải không thành công!");
     } finally {
@@ -442,10 +449,11 @@ export const TableHH = () => {
       "Ngày nhập kho",
       "Hạng mục SC",
       "Ưu Tiên SC",
-      "Cập nhật SC",
+      "Tình trạng SC",
       "Số BBXK",
-      "Cập nhật KCS",
-      "Cập nhật BH",
+      "Ngày xuất kho",
+      "Tình trạng KCS",
+      "Thời hạn BH",
       "Ghi chú",
     ];
 
@@ -489,7 +497,7 @@ export const TableHH = () => {
                 return "Ưu tiên";
               }
             }
-            if (column === "Cập nhật SC") {
+            if (column === "Tình trạng SC") {
               if (item.repairStatus === 1) {
                 return "SC OK";
               } else if (item.repairStatus === 0) {
@@ -501,19 +509,19 @@ export const TableHH = () => {
             if (column === "Số BBXK") {
               return item.bbbgNumberExport;
             }
-            if (column === "Cập nhật XK") {
+            if (column === "Ngày XK") {
               if (item.exportPartner) {
                 return moment(item.exportPartner).format("DD/MM/YYYY");
               }
             }
-            if (column === "Cập nhật KCS") {
+            if (column === "Tình trạng KCS") {
               if (item.kcsVT === 0) {
                 return "FAIL";
               } else if (item.kcsVT === 1) {
                 return "PASS";
               }
             }
-            if (column === "Cập nhật BH") {
+            if (column === "Thời hạn BH") {
               if (item.warrantyPeriod) {
                 return moment(item.warrantyPeriod).format("DD/MM/YYYY");
               }
@@ -777,11 +785,11 @@ export const TableHH = () => {
       "Ngày nhập kho",
       "Hạng mục SC",
       "Ưu Tiên SC",
-      "Cập nhật SC",
+      "Tình trạng SC",
       "Số BBXK",
-      "Cập nhật XK",
-      "Cập nhật KCS",
-      "Cập nhật BH",
+      "Ngày XK",
+      "Tình trạng KCS",
+      "Thời hạn BH",
       "Ghi chú",
     ];
 
@@ -825,7 +833,7 @@ export const TableHH = () => {
                 return "Ưu tiên";
               }
             }
-            if (column === "Cập nhật SC") {
+            if (column === "Tình trạng SC") {
               if (item.repairStatus === 1) {
                 return "SC OK";
               } else if (item.repairStatus === 0) {
@@ -837,19 +845,19 @@ export const TableHH = () => {
             if (column === "Số BBXK") {
               return item.bbbgNumberExport;
             }
-            if (column === "Cập nhật XK") {
+            if (column === "Ngày XK") {
               if (item.exportPartner) {
                 return moment(item.exportPartner).format("DD/MM/YYYY");
               }
             }
-            if (column === "Cập nhật KCS") {
+            if (column === "Tình trạng KCS") {
               if (item.kcsVT === 0) {
                 return "FAIL";
               } else if (item.kcsVT === 1) {
                 return "PASS";
               }
             }
-            if (column === "Cập nhật BH") {
+            if (column === "Thời hạn BH") {
               if (item.warrantyPeriod) {
                 return moment(item.warrantyPeriod).format("DD/MM/YYYY");
               }
@@ -880,11 +888,11 @@ export const TableHH = () => {
       "Ngày nhập kho",
       "Hạng mục SC",
       "Ưu Tiên SC",
-      "Cập nhật SC",
+      "Tình trạng SC",
       "Số BBXK",
-      "Cập nhật XK",
-      "Cập nhật KCS",
-      "Cập nhật BH",
+      "Ngày XK",
+      "Tình trạng KCS",
+      "Thời hạn BH",
       "Ghi chú",
     ];
 
@@ -899,7 +907,9 @@ export const TableHH = () => {
       "0 - Trả hỏng",
       "",
       "",
+      "",
       "0 - Fail",
+      "",
       "",
       "",
     ];
@@ -915,7 +925,9 @@ export const TableHH = () => {
       "1 - SC OK  ",
       "",
       "",
+      "",
       "1 - PASS",
+      "",
       "",
       "",
     ];
@@ -929,6 +941,7 @@ export const TableHH = () => {
       "",
       "",
       "2 - Cháy nổ",
+      "",
       "",
       "",
       "",
@@ -1022,7 +1035,6 @@ export const TableHH = () => {
   };
 
   const handleExportSearch = async () => {
-    console.log(flag)
     let selectedColumns = [
       "Tên thiết bị",
       "Mã hàng hóa (*)",
@@ -1031,11 +1043,11 @@ export const TableHH = () => {
       "Ngày nhập kho",
       "Hạng mục SC",
       "Ưu Tiên SC",
-      "Cập nhật SC",
+      "Tình trạng SC",
       "Số BBXK",
-      "Cập nhật XK",
-      "Cập nhật KCS",
-      "Cập nhật BH",
+      "Ngày XK",
+      "Tình trạng KCS",
+      "Thời hạn BH",
       "Ghi chú",
     ];
 
@@ -1173,7 +1185,7 @@ export const TableHH = () => {
                 return "Ưu tiên SC";
               }
             }
-            if (column === "Cập nhật SC") {
+            if (column === "Tình trạng SC") {
               if (item.repairStatus === 1) {
                 return "SC OK";
               } else if (item.repairStatus === 0) {
@@ -1185,19 +1197,19 @@ export const TableHH = () => {
             if (column === "Số BBXK") {
               return item.bbbgNumberExport;
             }
-            if (column === "Cập nhật XK") {
+            if (column === "Ngày XK") {
               if (item.exportPartner) {
                 return moment(item.exportPartner).format("DD/MM/YYYY");
               }
             }
-            if (column === "Cập nhật KCS") {
+            if (column === "Tình trạng KCS") {
               if (item.kcsVT === 0) {
                 return "FAIL";
               } else if (item.kcsVT === 1) {
                 return "PASS";
               }
             }
-            if (column === "Cập nhật BH") {
+            if (column === "Thời hạn BH") {
               if (item.warrantyPeriod) {
                 return moment(item.warrantyPeriod).format("DD/MM/YYYY");
               }
@@ -1288,17 +1300,6 @@ export const TableHH = () => {
       // setItemToNK(null); // Đặt lại thông tin dữ liệu cần xóa
       setShowConfirmationXK(false); // Đóng popup xác nhận
     };
-
-    // const handleWriteXKAll = async () => {
-    //   const modifiedList = localStorage.getItem("podetailId");
-    //   let res = await writeAllXK(modifiedList);
-    //   if (res && res.statusCode === 200) {
-    //     toast.success("Ghi thành công!!");
-    //   } else {
-    //     toast.error("Ghi không thành công!!");
-    //   }
-    // };
-
 
   return (
     <>
@@ -1589,7 +1590,7 @@ export const TableHH = () => {
                     <button
                       className="btn btn-success label-export"
                       onClick={handleExportBarcode}
-                      disabled={!isExportButtonEnabledBC}
+                      // disabled={!isExportButtonEnabledBC}
                     >
                       <AiOutlineDownload className="icon-export" />
                       Export
@@ -1605,16 +1606,6 @@ export const TableHH = () => {
           <div className="my-1 add-new d-flex justify-content-between mt-3">
             <div className="col-3"></div>
             <div className="group-btn d-flex">
-              {/* button search */}
-              {/* <div className="search">
-                <button
-                  className="btn btn-primary label-search"
-                  onClick={() => handleSearch()}
-                >
-                  <AiOutlineSearch className="icon-search" />
-                  Search
-                </button>
-              </div> */}
               <div className="search">
                 <button
                   className="btn btn-primary label-search"
@@ -1681,327 +1672,334 @@ export const TableHH = () => {
         </div>
 
         {/* table */}
+        <div>
+          <table className="table-shadow  table-color  table-bordered table-hover">
+            <thead>
+              {(listPoDetail && listPoDetail.length > 0) ||
+              (listPoDetailSN && listPoDetailSN.length > 0) ||
+              (dataBarcode && dataBarcode.length > 0) ||
+              (listPoDetailImport && listPoDetailImport.length > 0) ? (
+                <tr>
+                  <th>Stt</th>
+                  <th>Mã hàng hóa (*)</th>
+                  <th>Tên thiết bị</th>
+                  <th>Số serial (*)</th>
+                  <th>Số PO (*)</th>
+                  <th>Ngày nhập kho</th>
+                  <th>Hạng mục SC</th>
+                  <th>Ưu tiên SC</th>
+                  <th>Tình trạng SC</th>
+                  <th>Số BBXK</th>
+                  <th>Ngày XK</th>
+                  <th>Tình trạng KCS</th>
+                  <th>Thời hạn BH</th>
+                  <th>Ghi chú</th>
+                  {dataBarcode && dataBarcode.length > 0 && (
+                    <th className="text-center">Action</th>
+                  )}
+                </tr>
+              ) : null}
+            </thead>
+            <tbody>
+              {/* search PO detail */}
+              {listPoDetail &&
+                listPoDetail.length > 0 &&
+                listPoDetail.map((item, index) => {
+                  // background color when priority is equal to 1
+                  const rowStyles = {
+                    backgroundColor: "#ffeeba", // Màu nền sáng
+                  };
+                  // convert this from long to date
+                  const timeExport = item.exportPartner;
+                  const currentIndex = startIndex + index;
+                  const time = item.importDate;
+                  const timeWarranty = item.warrantyPeriod;
+                  let dataWarranty;
+                  if (timeWarranty !== null && timeWarranty !== 0) {
+                    dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
+                  }
+                  let data;
+                  if (time !== null && time !== 0) {
+                    data = moment(time).format("DD/MM/YYYY");
+                  }
+                  let dataExportPartner;
+                  if (timeExport !== null && timeExport !== 0) {
+                    dataExportPartner = moment(timeExport).format("DD/MM/YYYY");
+                  }
+                  // check if priority === 1 then change color
+                  const rowStyle =
+                    item.priority === 1
+                      ? rowStyles
+                      : { backgroundColor: "#ffffff" };
+                  const formattedProductName = formatProductName(
+                    item.product.productName
+                  );
+                  return (
+                    <tr
+                      key={`sc-${currentIndex}`}
+                      onDoubleClick={() => handleEditPoDetail(item)}
+                      style={rowStyle}
+                      className="table-striped"
+                    >
+                      <td>{currentIndex + 1}</td>
+                      <td>{item.product.productId}</td>
+                      <td className="col-name-product">
+                        {formattedProductName}
+                      </td>
+                      <td>{item.serialNumber}</td>
+                      <td>{item.po.poNumber}</td>
+                      <td>{data}</td>
+                      <td>
+                        {item.repairCategory === 0 && "Hàng SC"}
+                        {item.repairCategory === 1 && "Hàng BH"}
+                      </td>
+                      <td>{item.priority === 1 && "Ưu tiên"}</td>
+                      <td>
+                        {item.repairStatus === 0 && "Trả hỏng"}
+                        {item.repairStatus === 1 && "SC OK"}
+                        {item.repairStatus === 2 && "Cháy nổ"}
+                      </td>
+                      <td className="col-bbxk">{item.bbbgNumberExport}</td>
+                      <td>{dataExportPartner}</td>
+                      <td>
+                        {item.kcsVT === 0 && "FAIL"}
+                        {item.kcsVT === 1 && "PASS"}
+                      </td>
+                      <td>{dataWarranty}</td>
+                      <td className="col-note">{item.note}</td>
+                    </tr>
+                  );
+                })}
 
-        <table className="table-shadow  table-color  table-bordered table-hover">
-          <thead>
-            {(listPoDetail && listPoDetail.length > 0) ||
-            (listPoDetailSN && listPoDetailSN.length > 0) ||
-            (dataBarcode && dataBarcode.length > 0) ||
-            (listPoDetailImport && listPoDetailImport.length > 0) ? (
-              <tr>
-                <th>Stt</th>
-                <th>Mã hàng hóa (*)</th>
-                <th>Tên thiết bị</th>
-                <th>Số serial (*)</th>
-                <th>Số PO (*)</th>
-                <th>Ngày nhập kho</th>
-                <th>Hạng mục SC</th>
-                <th>Ưu tiên SC</th>
-                <th>Cập nhật SC</th>
-                {/* <th>Nội dung SC</th> */}
-                <th>Số BBXK</th>
-                <th>Cập nhật XK</th>
-                <th>Cập nhật KCS</th>
-                <th>Cập nhật BH</th>
-                <th>Ghi chú</th>
-                {dataBarcode && dataBarcode.length > 0 && (
-                  <th className="text-center">Action</th>
-                )}
-              </tr>
-            ) : null}
-          </thead>
-          <tbody>
-            {/* search PO detail */}
-            {listPoDetail &&
-              listPoDetail.length > 0 &&
-              listPoDetail.map((item, index) => {
-                // background color when priority is equal to 1
-                const rowStyles = {
-                  backgroundColor: "#ffeeba", // Màu nền sáng
-                };
-                // convert this from long to date
-                const timeExport = item.exportPartner;
-                const currentIndex = startIndex + index;
-                const time = item.importDate;
-                const timeWarranty = item.warrantyPeriod;
-                let dataWarranty;
-                if (timeWarranty !== null) {
-                  dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
-                }
-                let data;
-                if (time !== null) {
-                  data = moment(time).format("DD/MM/YYYY");
-                }
-                let dataExportPartner;
-                if (timeExport !== null) {
-                  dataExportPartner = moment(timeExport).format("DD/MM/YYYY");
-                }
-                // check if priority === 1 then change color
-                const rowStyle =
-                  item.priority === 1
-                    ? rowStyles
-                    : { backgroundColor: "#ffffff" };
-                const formattedProductName = formatProductName(
-                  item.product.productName
-                );
-                return (
-                  <tr
-                    key={`sc-${currentIndex}`}
-                    onDoubleClick={() => handleEditPoDetail(item)}
-                    style={rowStyle}
-                    className="table-striped"
-                  >
-                    <td>{currentIndex + 1}</td>
-                    <td>{item.product.productId}</td>
-                    <td className="col-name-product">{formattedProductName}</td>
-                    <td>{item.serialNumber}</td>
-                    <td>{item.po.poNumber}</td>
-                    <td>{data}</td>
-                    <td>
-                      {item.repairCategory === 0 && "Hàng SC"}
-                      {item.repairCategory === 1 && "Hàng BH"}
-                    </td>
-                    <td>{item.priority === 1 && "Ưu tiên"}</td>
-                    <td>
-                      {item.repairStatus === 0 && "Trả hỏng"}
-                      {item.repairStatus === 1 && "SC OK"}
-                      {item.repairStatus === 2 && "Cháy nổ"}
-                    </td>
-                    <td className="col-bbxk">{item.bbbgNumberExport}</td>
-                    <td>{dataExportPartner}</td>
-                    <td>
-                      {item.kcsVT === 0 && "FAIL"}
-                      {item.kcsVT === 1 && "PASS"}
-                    </td>
-                    <td>{dataWarranty}</td>
-                    <td className="col-note">{item.note}</td>
-                  </tr>
-                );
-              })}
+              {listPoDetailImport &&
+                listPoDetailImport.length > 0 &&
+                listPoDetailImport.map((item, index) => {
+                  // background color when priority is equal to 1
+                  const rowStyles = {
+                    backgroundColor: "#ffeeba", // Màu nền sáng
+                  };
+                  // convert this from long to date
+                  const timeExport = item.exportPartner;
+                  const currentIndex = startIndex + index;
+                  const time = item.importDate;
+                  const timeWarranty = item.warrantyPeriod;
+                  let dataWarranty;
+                  if (timeWarranty !== null && timeWarranty !== 0) {
+                    dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
+                  }
+                  let data;
+                  if (time !== null && time !== 0) {
+                    data = moment(time).format("DD/MM/YYYY");
+                  }
+                  let dataExportPartner;
+                  if (timeExport !== null && timeExport !== 0) {
+                    dataExportPartner = moment(timeExport).format("DD/MM/YYYY");
+                  }
+                  // check if priority === 1 then change color
+                  const rowStyle =
+                    item.priority === 1
+                      ? rowStyles
+                      : { backgroundColor: "#ffffff" };
+                  const formattedProductName = formatProductName(
+                    item.product.productName
+                  );
+                  return (
+                    <tr
+                      key={`sc-${currentIndex}`}
+                      // onDoubleClick={() => handleEditPoDetail(item)}
+                      style={rowStyle}
+                      className="table-striped"
+                    >
+                      <td>{currentIndex + 1}</td>
+                      <td>{item.product.productId}</td>
+                      <td className="col-name-product">
+                        {formattedProductName}
+                      </td>
+                      <td>{item.serialNumber}</td>
+                      <td>{item.po.poNumber}</td>
+                      <td>{data}</td>
+                      <td>
+                        {item.repairCategory === 0 && "Hàng SC"}
+                        {item.repairCategory === 1 && "Hàng BH"}
+                      </td>
+                      <td>{item.priority === 1 && "Ưu tiên"}</td>
+                      <td>
+                        {item.repairStatus === 0 && "Trả hỏng"}
+                        {item.repairStatus === 1 && "SC OK"}
+                        {item.repairStatus === 2 && "Cháy nổ"}
+                      </td>
+                      <td className="col-bbxk">{item.bbbgNumberExport}</td>
+                      <td>{dataExportPartner}</td>
+                      <td>
+                        {item.kcsVT === 0 && "FAIL"}
+                        {item.kcsVT === 1 && "PASS"}
+                      </td>
+                      <td>{dataWarranty}</td>
+                      <td className="col-note">{item.note}</td>
+                    </tr>
+                  );
+                })}
 
-            {listPoDetailImport &&
-              listPoDetailImport.length > 0 &&
-              listPoDetailImport.map((item, index) => {
-                // background color when priority is equal to 1
-                const rowStyles = {
-                  backgroundColor: "#ffeeba", // Màu nền sáng
-                };
-                // convert this from long to date
-                const timeExport = item.exportPartner;
-                const currentIndex = startIndex + index;
-                const time = item.importDate;
-                const timeWarranty = item.warrantyPeriod;
-                let dataWarranty;
-                if (timeWarranty !== null) {
-                  dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
-                }
-                let data;
-                if (time !== null) {
-                  data = moment(time).format("DD/MM/YYYY");
-                }
-                let dataExportPartner;
-                if (timeExport !== null) {
-                  dataExportPartner = moment(timeExport).format("DD/MM/YYYY");
-                }
-                // check if priority === 1 then change color
-                const rowStyle =
-                  item.priority === 1
-                    ? rowStyles
-                    : { backgroundColor: "#ffffff" };
-                const formattedProductName = formatProductName(
-                  item.product.productName
-                );
-                return (
-                  <tr
-                    key={`sc-${currentIndex}`}
-                    // onDoubleClick={() => handleEditPoDetail(item)}
-                    style={rowStyle}
-                    className="table-striped"
-                  >
-                    <td>{currentIndex + 1}</td>
-                    <td>{item.product.productId}</td>
-                    <td className="col-name-product">{formattedProductName}</td>
-                    <td>{item.serialNumber}</td>
-                    <td>{item.po.poNumber}</td>
-                    <td>{data}</td>
-                    <td>
-                      {item.repairCategory === 0 && "Hàng SC"}
-                      {item.repairCategory === 1 && "Hàng BH"}
-                    </td>
-                    <td>{item.priority === 1 && "Ưu tiên"}</td>
-                    <td>
-                      {item.repairStatus === 0 && "Trả hỏng"}
-                      {item.repairStatus === 1 && "SC OK"}
-                      {item.repairStatus === 2 && "Cháy nổ"}
-                    </td>
-                    <td className="col-bbxk">{item.bbbgNumberExport}</td>
-                    <td>{dataExportPartner}</td>
-                    <td>
-                      {item.kcsVT === 0 && "FAIL"}
-                      {item.kcsVT === 1 && "PASS"}
-                    </td>
-                    <td>{dataWarranty}</td>
-                    <td className="col-note">{item.note}</td>
-                  </tr>
-                );
-              })}
+              {/* S/N check PO Detail */}
+              {listPoDetailSN &&
+                listPoDetailSN.length > 0 &&
+                listPoDetailSN.map((item, index) => {
+                  // background color when priority is equal to 1
+                  const rowStyles = {
+                    backgroundColor: "#ffeeba", // Màu nền sáng
+                  };
+                  // convert this from long to date
+                  const timeExport = item.exportPartner;
+                  const currentIndex = startIndex + index;
+                  const time = item.importDate;
+                  const timeWarranty = item.warrantyPeriod;
+                  let dataWarranty;
+                  if (timeWarranty !== null && timeWarranty !== 0) {
+                    dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
+                  }
+                  let data;
+                  if (time !== null && time !== 0) {
+                    data = moment(time).format("DD/MM/YYYY");
+                  }
+                  let dataExportPartner;
+                  if (timeExport !== null && timeExport !== 0) {
+                    dataExportPartner = moment(timeExport).format("DD/MM/YYYY");
+                  }
+                  // check if priority === 1 then change color
+                  const rowStyle =
+                    item.priority === 1
+                      ? rowStyles
+                      : { backgroundColor: "#ffffff" };
 
-            {/* S/N check PO Detail */}
-            {listPoDetailSN &&
-              listPoDetailSN.length > 0 &&
-              listPoDetailSN.map((item, index) => {
-                // background color when priority is equal to 1
-                const rowStyles = {
-                  backgroundColor: "#ffeeba", // Màu nền sáng
-                };
-                // convert this from long to date
-                const timeExport = item.exportPartner;
-                const currentIndex = startIndex + index;
-                const time = item.importDate;
-                const timeWarranty = item.warrantyPeriod;
-                let dataWarranty;
-                if (timeWarranty !== null) {
-                  dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
-                }
-                let data;
-                if (time !== null) {
-                  data = moment(time).format("DD/MM/YYYY");
-                }
-                let dataExportPartner;
-                if (timeExport !== null) {
-                  dataExportPartner = moment(timeExport).format("DD/MM/YYYY");
-                }
-                // check if priority === 1 then change color
-                const rowStyle =
-                  item.priority === 1
-                    ? rowStyles
-                    : { backgroundColor: "#ffffff" };
+                  const formattedProductName = formatProductName(
+                    item.product.productName
+                  );
+                  return (
+                    <tr
+                      key={`sc-${currentIndex}`}
+                      // onDoubleClick={() => handleEditPoDetail(item)}
+                      style={rowStyle}
+                      className="table-striped"
+                    >
+                      <td>{currentIndex + 1}</td>
+                      <td>{item.product.productId}</td>
+                      <td className="col-name-product">
+                        {formattedProductName}
+                      </td>
+                      <td>{item.serialNumber}</td>
+                      <td>{item.po.poNumber}</td>
+                      <td>{data}</td>
+                      <td>
+                        {item.repairCategory === 0 && "Hàng SC"}
+                        {item.repairCategory === 1 && "Hàng BH"}
+                      </td>
+                      <td>{item.priority === 1 && "Ưu tiên"}</td>
+                      <td>
+                        {item.repairStatus === 0 && "Trả hỏng"}
+                        {item.repairStatus === 1 && "SC OK"}
+                        {item.repairStatus === 2 && "Cháy nổ"}
+                      </td>
+                      <td className="col-bbxk">{item.bbbgNumberExport}</td>
+                      <td>{dataExportPartner}</td>
+                      <td>
+                        {item.kcsVT === 0 && "FAIL"}
+                        {item.kcsVT === 1 && "PASS"}
+                      </td>
+                      <td>{dataWarranty}</td>
+                      <td className="col-note">{item.note}</td>
+                    </tr>
+                  );
+                })}
 
-                const formattedProductName = formatProductName(
-                  item.product.productName
-                );
-                return (
-                  <tr
-                    key={`sc-${currentIndex}`}
-                    // onDoubleClick={() => handleEditPoDetail(item)}
-                    style={rowStyle}
-                    className="table-striped"
-                  >
-                    <td>{currentIndex + 1}</td>
-                    <td>{item.product.productId}</td>
-                    <td className="col-name-product">{formattedProductName}</td>
-                    <td>{item.serialNumber}</td>
-                    <td>{item.po.poNumber}</td>
-                    <td>{data}</td>
-                    <td>
-                      {item.repairCategory === 0 && "Hàng SC"}
-                      {item.repairCategory === 1 && "Hàng BH"}
-                    </td>
-                    <td>{item.priority === 1 && "Ưu tiên"}</td>
-                    <td>
-                      {item.repairStatus === 0 && "Trả hỏng"}
-                      {item.repairStatus === 1 && "SC OK"}
-                      {item.repairStatus === 2 && "Cháy nổ"}
-                    </td>
-                    <td className="col-bbxk">{item.bbbgNumberExport}</td>
-                    <td>{dataExportPartner}</td>
-                    <td>
-                      {item.kcsVT === 0 && "FAIL"}
-                      {item.kcsVT === 1 && "PASS"}
-                    </td>
-                    <td>{dataWarranty}</td>
-                    <td className="col-note">{item.note}</td>
-                  </tr>
-                );
-              })}
+              {/* Barcode check */}
+              {dataBarcode &&
+                dataBarcode.length > 0 &&
+                dataBarcode.map((item, index) => {
+                  const timeExport = item.exportPartner;
+                  const time = item.importDate;
+                  const timeWarranty = item.warrantyPeriod;
+                  let dataWarranty = "";
+                  let data = "";
+                  let dataExportPartner = "";
+                  if (timeWarranty) {
+                    dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
+                  }
+                  if (time) {
+                    data = moment(time).format("DD/MM/YYYY");
+                  }
+                  if (timeExport) {
+                    dataExportPartner = moment(timeExport).format("DD/MM/YYYY");
+                  }
 
-            {/* Barcode check */}
-            {dataBarcode &&
-              dataBarcode.length > 0 &&
-              dataBarcode.map((item, index) => {
-                const timeExport = item.exportPartner;
-                const time = item.importDate;
-                const timeWarranty = item.warrantyPeriod;
-                let dataWarranty = "";
-                let data = "";
-                let dataExportPartner = "";
-                if (timeWarranty) {
-                  dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
-                }
-                if (time) {
-                  data = moment(time).format("DD/MM/YYYY");
-                }
-                if (timeExport) {
-                  dataExportPartner = moment(timeExport).format("DD/MM/YYYY");
-                }
+                  const formattedProductName = formatProductName(
+                    item.product.productName
+                  );
 
-                const formattedProductName = formatProductName(
-                  item.product.productName
-                );
+                  const reverseIndex = dataBarcode.length - index;
 
-                const reverseIndex = dataBarcode.length - index;
-
-                return (
-                  <tr
-                    key={`sc-${index}`}
-                    style={rowStyle(item)}
-                    className="table-striped"
-                  >
-                    <td>{reverseIndex}</td>
-                    <td>{item.product.productId}</td>
-                    <td className="col-name-product">{formattedProductName}</td>
-                    <td>{item.serialNumber}</td>
-                    <td>{item.po.poNumber}</td>
-                    <td>{data}</td>
-                    <td>
-                      {item.repairCategory === 0 && "Hàng SC"}
-                      {item.repairCategory === 1 && "Hàng BH"}
-                    </td>
-                    <td>{item.priority === 1 && "Ưu tiên"}</td>
-                    <td>
-                      {item.repairStatus === 0 && "Trả hỏng"}
-                      {item.repairStatus === 1 && "SC OK"}
-                      {item.repairStatus === 2 && "Cháy nổ"}
-                    </td>
-                    <td className="col-bbxk">{item.bbbgNumberExport}</td>
-                    <td>{dataExportPartner}</td>
-                    <td>
-                      {item.kcsVT === 0 && "FAIL"}
-                      {item.kcsVT === 1 && "PASS"}
-                    </td>
-                    <td>{dataWarranty}</td>
-                    <td className="col-note">{item.note}</td>
-                    <td className="col-barcode-action">
-                      {localStorage.getItem("role") === "ROLE_ADMIN" ||
-                      localStorage.getItem("role") === "ROLE_MANAGER" ? (
-                        <>
-                          <button
-                            className="btn btn-primary btn-sm "
-                            onClick={() => writeNK(item)}
-                          >
-                            Ghi NK
-                          </button>
-                          <button
-                            className="btn btn-warning mx-1 btn-sm"
-                            onClick={() => writeXK(item)}
-                          >
-                            Ghi XK
-                          </button>
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleDelete(item)}
-                          >
-                            Del
-                          </button>
-                        </>
-                      ) : null}
-                    </td>
-                  </tr>
-                );
-              })}
-          </tbody>
-        </table>
-
+                  return (
+                    <tr
+                      key={`sc-${index}`}
+                      style={rowStyle(item)}
+                      className="table-striped"
+                    >
+                      <td>{reverseIndex}</td>
+                      <td>{item.product.productId}</td>
+                      <td className="col-name-product">
+                        {formattedProductName}
+                      </td>
+                      <td>{item.serialNumber}</td>
+                      <td>{item.po.poNumber}</td>
+                      <td>{data}</td>
+                      <td>
+                        {item.repairCategory === 0 && "Hàng SC"}
+                        {item.repairCategory === 1 && "Hàng BH"}
+                      </td>
+                      <td>{item.priority === 1 && "Ưu tiên"}</td>
+                      <td>
+                        {item.repairStatus === 0 && "Trả hỏng"}
+                        {item.repairStatus === 1 && "SC OK"}
+                        {item.repairStatus === 2 && "Cháy nổ"}
+                      </td>
+                      <td className="col-bbxk">{item.bbbgNumberExport}</td>
+                      <td>{dataExportPartner}</td>
+                      <td>
+                        {item.kcsVT === 0 && "FAIL"}
+                        {item.kcsVT === 1 && "PASS"}
+                      </td>
+                      <td>{dataWarranty}</td>
+                      <td className="col-note">{item.note}</td>
+                      <td className="col-barcode-action">
+                        {localStorage.getItem("role") === "ROLE_ADMIN" ||
+                        localStorage.getItem("role") === "ROLE_MANAGER" ? (
+                          <>
+                            <button
+                              className="btn btn-primary btn-sm "
+                              onClick={() => writeNK(item)}
+                            >
+                              Ghi NK
+                            </button>
+                            <button
+                              className="btn btn-warning mx-1 btn-sm"
+                              onClick={() => writeXK(item)}
+                            >
+                              Ghi XK
+                            </button>
+                            <button
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleDelete(item)}
+                            >
+                              Del
+                            </button>
+                          </>
+                        ) : null}
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
+        </div>
         <Modal show={showConfirmation} onHide={cancelDelete}>
           <Modal.Header closeButton>
             <Modal.Title>Delete Barcode</Modal.Title>

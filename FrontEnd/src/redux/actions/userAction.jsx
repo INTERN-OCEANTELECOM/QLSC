@@ -75,8 +75,7 @@ export const handleLoginRedux = (email, password) => {
             }
           if (
             res &&
-            res.statusCode === 204 &&
-            res.statusMessage === "YOUR ACCOUNT IS TEMPORARILY LOCKED"
+            res.data.statusCode === 403 
           ) {
             localStorage.setItem("timelock", res.data);
             dispatch({

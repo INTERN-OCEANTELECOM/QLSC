@@ -156,6 +156,9 @@
         td {
           padding: 3px 3px 3px 5px;
         }
+        &:hover{
+            background-color: #ccc;
+          }
       }
     }
 }
@@ -180,7 +183,7 @@
 }
 
 .col-note {
-  max-width: 250px;
+  max-width: 220px;
   overflow: hidden;
   word-wrap: break-word;
 }
@@ -304,7 +307,7 @@
 }
 
 .col-name-product {
-  max-width: 220px;
+  max-width: 200px;
 }
 
 .productid {

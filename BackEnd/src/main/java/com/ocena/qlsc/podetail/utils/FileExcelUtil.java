@@ -1,10 +1,11 @@
 package com.ocena.qlsc.podetail.utils;
 
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
+import com.ocena.qlsc.common.constants.message.StatusCode;
+import com.ocena.qlsc.common.constants.message.StatusMessage;
+import com.ocena.qlsc.common.error.exception.InvalidHeaderException;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.common.response.ResponseMapper;
-import com.ocena.qlsc.common.util.DateUtil;
+import com.ocena.qlsc.common.util.DateUtils;
 import com.ocena.qlsc.podetail.constants.ImportErrorType;
 import com.ocena.qlsc.podetail.constants.RegexConstants;
 import org.apache.poi.ss.usermodel.*;
@@ -58,7 +59,9 @@ public class FileExcelUtil {
     }
 
     public static Object getFieldsNameFromHeader(Iterator<Row> rowIterator) {
+        LinkedList<ErrorResponseImport> listErrorResponse = new LinkedList<>();
         List<String> fieldList = new ArrayList<>();
+        String message;
         if (rowIterator.hasNext()) {
             Row row = rowIterator.next();
             List<String> validFields = new ArrayList<>(RegexConstants.FIELDS_REGEX_MAP.keySet());
@@ -67,7 +70,9 @@ public class FileExcelUtil {
             for (int i = 0; i < row.getLastCellNum(); i++) {
                 String fieldsName = row.getCell(i).getStringCellValue();
                 if (fieldList.stream().anyMatch(field -> field.equals(fieldsName))) {
-                    return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (i + 1) + " bị trùng với cột khác");
+                    message = String.format("Cột Header thứ %s bị trùng tên với cột khác", i + 1);
+                    listErrorResponse.add(new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, message));
+                    continue;
                 }
 
 
@@ -80,12 +85,18 @@ public class FileExcelUtil {
                     }
                 }
 
-                if (!isHeaderValid)
-                    return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (i + 1) + " không đúng");
+                if (!isHeaderValid) {
+                    message = String.format("Cột Header thứ %s không đúng", i + 1);
+                    listErrorResponse.add(new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, message));
+                }
             }
+            if (!listErrorResponse.isEmpty())
+                throw new InvalidHeaderException(listErrorResponse);
 
-            if (!fieldList.containsAll(RegexConstants.requiredFeilds)) {
-                return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Header bắt buộc phải có Mã HH - Số PO - Số Serial");
+            if (!fieldList.containsAll(RegexConstants.REQUIRED_FIELDS)) {
+                message = "Header bắt buộc phải có Mã HH - Số PO - Số Serial";
+                listErrorResponse.add(new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, message));
+                throw new InvalidHeaderException(listErrorResponse);
             }
         }
         return fieldList;
@@ -130,12 +141,9 @@ public class FileExcelUtil {
     }
 
     public static boolean isLastedRow(Row row) {
-        if ((row.getCell(0) == null || row.getCell(0).getCellType() == CellType.BLANK) &&
+        return ((row.getCell(0) == null || row.getCell(0).getCellType() == CellType.BLANK) &&
                 (row.getCell(1) == null || row.getCell(1).getCellType() == CellType.BLANK) &&
-                (row.getCell(2) == null || row.getCell(2).getCellType() == CellType.BLANK)) {
-            return true;
-        }
-        return false;
+                (row.getCell(2) == null || row.getCell(2).getCellType() == CellType.BLANK));
     }
 
     public static String getCellValueToString(Object rowCell, Object colIndex) {
@@ -159,7 +167,7 @@ public class FileExcelUtil {
         }
         CellType cellType = row.getCell(col).getCellType();
         if (cellType == CellType.STRING) {
-            return DateUtil.getDateFormatValid(row.getCell(col).getStringCellValue());
+            return DateUtils.getDateFormatValid(row.getCell(col).getStringCellValue());
         } else {
             return row.getCell(col).getDateCellValue().getTime();
         }

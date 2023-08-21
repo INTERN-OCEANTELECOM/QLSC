@@ -19,7 +19,7 @@ public class EmailService {
     /**
      * Method for sending simple e-mail message.
      */
-    public String sendSimpleMessage(String email, Integer OTP)
+    public String  sendSimpleMessage(String email, Integer OTP)
     {
         // Create a message to return the status
         String message;

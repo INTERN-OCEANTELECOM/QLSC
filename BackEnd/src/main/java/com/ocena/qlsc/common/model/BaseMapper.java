@@ -1,11 +1,11 @@
 package com.ocena.qlsc.common.model;
 
-public interface BaseMapper<E, D>{
-    D entityToDto(E entity);
+public interface BaseMapper<E, Q, R>{
+    R entityToDto(E entity);
 
-    E dtoToEntity(D dto);
+    E dtoToEntity(Q dto);
 
-    void entityToDto(E entity, D dto);
+    void entityToDto(E entity, R dto);
 
-    void dtoToEntity(D dto, E entity);
+    void dtoToEntity(Q dto, E entity);
 }

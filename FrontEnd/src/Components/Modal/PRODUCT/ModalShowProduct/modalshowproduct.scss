@@ -2,3 +2,31 @@
 .modal-xl {
     --bs-modal-width: 50%;
 }
+
+.form-product {
+    width: 685px;
+}
+
+.form-input {
+    width: 350px;
+}
+
+.form-img {
+    width: 250px;
+}
+
+.image-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 150px;
+  border: 2px dashed #ccc;
+  cursor: pointer;
+}
+
+.image-placeholder {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}

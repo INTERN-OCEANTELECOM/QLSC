@@ -3,10 +3,8 @@ package com.ocena.qlsc.user.model;
 import com.ocena.qlsc.common.model.BaseModel;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.util.List;
-import java.util.UUID;
 
 @Builder
 @Entity
@@ -14,13 +12,21 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "user")
+@Table(
+        name = "user",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "email", name = "uq_user_email")
+        },
+        indexes = {
+                @Index(columnList = "email", name = "idx_user_email")
+        }
+)
 public class User extends BaseModel {
 
     @Column(length = 250)
     private String password;
 
-    @Column(length = 140, nullable = false, unique = true)
+    @Column(length = 140)
     private String email;
 
     @Column(name = "full_name", length = 150)

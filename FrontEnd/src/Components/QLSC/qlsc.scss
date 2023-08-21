@@ -1,0 +1,462 @@
+.add-new {
+  .group-btn {
+    .import {
+      margin-right: 4px;
+
+      .label-import {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .icon-import {
+          padding-right: 3px;
+        }
+      }
+    }
+
+    .update {
+      margin-right: 5px;
+
+      .label-export {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .icon-export {
+          margin-right: 3px;
+        }
+      }
+    }
+
+    .search {
+      margin-right: 4px;
+
+      .label-search {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .icon-search {
+          margin-right: 2px;
+        }
+      }
+    }
+  }
+}
+
+.tables-qlsc {
+  margin: 70px 15px;
+  font-size: 14px;
+
+  .table-action {
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0px 2px rgba(0, 0, 0, 0.2);
+    height: 115px;
+  }
+}
+
+.btn-qlsc {
+  font-size: 14px;
+}
+
+.form-select {
+  font-size: 14px;
+}
+
+.form-control{
+  font-size: 14px;
+}
+
+
+.table-shadow {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-top: 10px;
+
+  .highlighted-row {
+    background-color: #fbdb7a; /* Màu nền sáng */
+    color: #fbdb7a;
+  }
+}
+
+.custom-modal {
+  height: 700px;
+}
+
+.custom-modal .modal-dialog {
+  max-height: 400px;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .loading {
+    margin-left: 5px;
+  }
+}
+
+.form-select-size {
+  width: 10%;
+  margin-top: -16px;
+  margin-left: 10px;
+}
+
+.hide {
+  display: none;
+}
+
+.table-color {
+      font-size: 12px;
+    --bs-table-color-type: initial;
+    --bs-table-bg-type: initial;
+    --bs-table-color-state: initial;
+    --bs-table-bg-state: initial; 
+    --bs-table-border-color: #dee2e6;
+    --bs-table-accent-bg: transparent;
+    --bs-table-striped-color: #212529;
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.05);
+    --bs-table-active-color: #212529;
+    --bs-table-active-bg: rgba(0, 0, 0, 0.1);
+    --bs-table-hover-color: #212529;
+    --bs-table-hover-bg: rgba(0, 0, 0, 0.075);
+    width: 100%;
+    margin-bottom: 1rem;
+    vertical-align: top;
+    border-color: var(--bs-table-border-color);
+
+    thead {
+      tr {
+        th {
+          padding: 5px;
+          background-color: #ffff;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        td {
+          padding: 3px 3px 3px 5px;
+        }
+      }
+    }
+}
+
+.btn-group-sm>.btn, .btn-sm {
+    --bs-btn-padding-y: 1px;
+    --bs-btn-padding-x: 8px;
+    --bs-btn-font-size: -11.125rem;
+    --bs-btn-border-radius: var(--bs-border-radius-sm);
+}
+
+.btn-edit {
+  margin-right: 3px;
+}
+
+.col-bbxk {
+  max-width: 250px;
+}
+
+.btn-action {
+  width: 100px;
+}
+
+.col-note {
+  max-width: 220px;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+// .custom-datepicker {
+//    font-size: 16px; /* Tùy chỉnh kích thước font chữ */
+//   width: 200px;
+// }
+
+.react-datepicker__month-container {
+  width: 220px;
+  font-size: 14px;
+}
+
+.autosuggest-container {
+  position: relative;
+}
+
+.react-autosuggest__suggestions-container {
+  position: absolute;
+  z-index: 99;
+  background-color: white;
+  box-shadow: 0 0px 2px rgba(0, 0, 0, 0.2);
+  width: 200px;
+  border-radius: 5px;
+  /* padding-top: 10px; */
+}
+
+.first-autosuggest .react-autosuggest__suggestions-container {
+  top: 150px; /* Vị trí của ô tìm kiếm thứ nhất */
+}
+
+.second-autosuggest .react-autosuggest__suggestions-container {
+  top: 250px; /* Vị trí của ô tìm kiếm thứ hai */
+}
+
+.react-autosuggest__suggestions-container ul {
+  list-style-type: none;
+  padding-left: 0rem;
+}
+
+.react-autosuggest__suggestions-container ul  li{
+  padding: 3px 10px;
+  width: 100%;
+}
+
+.react-autosuggest__suggestion:hover {
+  background-color: #f5f5f5; /* Màu nền khi hover */
+  color: #333; /* Màu chữ khi hover */
+}
+
+@media (max-width: 770px) {
+  .row>* {
+    flex-shrink: 0;
+    width: 50%;
+    max-width: 100%;
+    padding-right: calc(var(--bs-gutter-x) * .5);
+    padding-left: calc(var(--bs-gutter-x) * .5);
+    margin-top: var(--bs-gutter-y);
+  }
+
+  .tables .table-action {
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0px 2px rgba(0, 0, 0, 0.2);
+      height: 520px;
+  }
+
+  .col-3 {
+      flex: 0 0 auto;
+      width: 15%;
+  }
+}
+
+@media (min-width: 768px){
+.col-md-2 {
+    flex: 0 0 auto;
+    width: 11.666667%;
+}
+.col-md-3 {
+    flex: 0 0 auto;
+    width: 16%;
+}
+}
+
+.row-search-qlsc {
+  padding-right: 20px;
+  padding-left: 10px;
+  // border-bottom: 1px solid #26262624;
+  // border-right: 1px solid #26262624;
+  width: 100%;
+}
+
+.row-export {
+  padding-left: 20px;
+  padding-right: 20px;
+  // border-right: 1px solid #26262624;
+  // border-bottom: 1px solid #26262624;
+  width: 25%;
+}
+
+.row-barcode {
+  padding-left: 20px;
+  border-bottom: 1px solid #26262624;
+  width: 25%;
+}
+
+.row-sn {
+  padding-left: 20px;
+  padding-right: 20px;
+  border-right: 1px solid #26262624;
+  border-bottom: 1px solid #26262624;
+
+  width: 15%;
+}
+
+.col-barcode-action {
+  text-align: center;
+  width: 175px;
+}
+
+.col-name-product {
+  max-width: 200px;
+}
+
+.productid {
+  margin-left: 10px;
+}
+
+.poNumber {
+  margin-left: 10px;
+}
+
+.repariStatus {
+  margin-left: 15px;
+}
+
+.bbxk {
+  margin-left: 35px;
+}
+
+.w-product {
+  width: 35%;
+}
+
+.w-serial {
+  width: 35%;
+}
+
+.w-po {
+  width: 30%;
+}
+
+
+.table-history-qlsc {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  .table-qlsc {
+    box-shadow: 0 0px 2px rgba(0, 0, 0, 0.2);
+    font-size: 12px;
+    height: 300px; /* Điều chỉnh chiều cao của bảng */
+    overflow-y: scroll;
+
+    .table-header-qlsc {
+      position: sticky;
+      top: -0.5px; /* Điều chỉnh giá trị này để tương ứng với chiều cao của phần tử .btn-sncheck */
+      background-color: white;
+      z-index: 1;
+      overflow: hidden;
+    }
+  }
+}
+
+.table-update-qlsc {
+  box-shadow: 0 0px 2px rgba(0, 0, 0, 0.2);
+  font-size: 12px;
+}
+
+.w-repair {
+  width: 100%
+}
+
+.no-border-input {
+  border: none;
+  outline: none;
+  padding: 0;
+  background-color: transparent;
+  width: 100%;
+}
+
+.col-button-qlsc {
+  width: 90px;
+}
+
+.table-repair {
+      font-size: 12px;
+    --bs-table-color-type: initial;
+    --bs-table-bg-type: initial;
+    --bs-table-color-state: initial;
+    --bs-table-bg-state: initial; 
+    --bs-table-border-color: #dee2e6;
+    --bs-table-accent-bg: transparent;
+    --bs-table-striped-color: #212529;
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.05);
+    --bs-table-active-color: #212529;
+    --bs-table-active-bg: rgba(0, 0, 0, 0.1);
+    --bs-table-hover-color: #212529;
+    --bs-table-hover-bg: rgba(0, 0, 0, 0.075);
+    width: 100%;
+    margin-bottom: 1rem;
+    vertical-align: top;
+    border-color: var(--bs-table-border-color);
+
+    thead {
+      tr {
+        th {
+          padding: 5px;
+          background-color: #ffff;
+        }
+      }
+    }
+    tbody {
+      tr {
+        td {
+          padding: 3px 3px 3px 5px;
+        }
+
+        &:hover{
+            background-color: #ccc;
+          }
+      }
+    }
+}
+
+.highlight-row {
+  background-color: #f8ffd1; /* Màu nền sáng nhẹ */
+  /* Các quy tắc CSS khác nếu cần */
+}
+
+.col-action-repair {
+  width: 170px;
+}
+
+/* Định dạng cho ô input */
+.productid .form-control {
+  position: relative; /* Để giữ cho gợi ý nằm trên ô input */
+}
+
+/* Định dạng cho danh sách gợi ý */
+.suggestions-list {
+  position: absolute;
+  z-index: 2; /* Đảm bảo gợi ý hiển thị trên các phần tử khác */
+  background-color: white;
+  border: 1px solid #ccc;
+  width: 500px; /* Độ rộng bằng với ô input */
+  padding: 0;
+  margin-top: 2px; /* Khoảng cách giữa gợi ý và ô input */
+  list-style-type: none;
+  max-height: 500px; /* Giới hạn chiều cao của danh sách gợi ý */
+  overflow-y: auto; /* Cho phép cuộn nếu danh sách quá dài */
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Định dạng cho các mục gợi ý trong danh sách */
+.suggestions-list li {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.suggestions-list li:hover {
+  background-color: #f0f0f0;
+}
+
+.input-group-text {
+  padding: 5px 2px;
+}

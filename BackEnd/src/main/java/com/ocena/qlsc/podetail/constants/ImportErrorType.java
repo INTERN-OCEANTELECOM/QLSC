@@ -7,5 +7,5 @@ public interface ImportErrorType {
     public static final String HEADER_DATA_WRONG = "Header nhập không đúng";
     public static final String DATA_SUCCESS = "Import thành công";
     public static final String FILE_NOT_FORMAT = "File không đúng định dạng";
-    public static final String NOT_PERMISSION = "Chỉ cập nhật các trường được cấp";
+    public static final String EXCEEDED_QUANTITY = "Vượt quá số lượng khai báo";
 }

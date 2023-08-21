@@ -110,7 +110,7 @@ const deleteUser = (email) => {
 // api update user
 const updateUser = (email, fullName, phoneNumber, roles) => {
   return axioss.put(
-    `/user/update?email=${localStorage.getItem("emailEdit")}`,
+    `/user/update/${localStorage.getItem("emailEdit")}`,
     {
       email,
       fullName,
@@ -277,12 +277,13 @@ const getAllPoDetail = () => {
 };
 
 // api update product
-const updateProduct = (productId, productName) => {
+const updateProduct = (productId, productName, imagesBase64) => {
   return axioss.put(
     `/product/update/${productId}`,
-    { productId, productName },
+    { productId, productName, imagesBase64 },
     {
       headers: {
+        // "Content-Type": "multipart/form-data",
         email: `${localStorage.getItem("email")}`,
       },
     }
@@ -290,12 +291,17 @@ const updateProduct = (productId, productName) => {
 };
 
 // api add product
-const addProduct = (productId, productName) => {
+const addProduct = (productId, productName, imagesBase64) => {
   return axioss.post(
     "/product/add",
-    { productId, productName },
+    {
+      productId,
+      productName,
+      imagesBase64: Array.isArray(imagesBase64) ? imagesBase64 : [imagesBase64],
+    },
     {
       headers: {
+        // "Content-Type": "multipart/form-data",
         email: `${localStorage.getItem("email")}`,
       },
     }
@@ -385,7 +391,7 @@ const importPODetail = (file) => {
       email: localStorage.getItem("email"),
     },
   };
-  return axioss.post("/po-detail/import", file, config);
+  return axioss.post("/po-detail/upload/import", file, config);
 }
 
 // api update status po-detail
@@ -396,7 +402,7 @@ const updateStatusPoDetail = (file) => {
       email: localStorage.getItem("email"),
     },
   };
-  return axioss.post("/po-detail/update", file, config);
+  return axioss.post("/po-detail/upload/update", file, config);
 }
 
 // api delete po detail
@@ -482,6 +488,58 @@ const writeAllXK = (list) => {
   });
 }
 
+const getImages = (id) => { 
+  return axioss.get(`/product/get-by-id?id=${id}`, {
+    headers: {
+      email: `${localStorage.getItem("email")}`,
+    },
+  });
+}
+
+const saveAllRepair = (repariHistory) => {
+  return axioss.post("/repair-history/add-all", repariHistory, {
+    headers: {
+      email: `${localStorage.getItem("email")}`,
+    },
+  });
+}
+
+const searchRepairHistory = (keyword, property, pageIndex, pageSize) => {
+  return axioss.post(
+    "/repair-history/search-by-list-keywords",
+    {
+      keyword: Array.isArray(keyword) ? keyword : [keyword],
+      property,
+      pageIndex,
+      pageSize,
+    },
+    {
+      headers: {
+        email: `${localStorage.getItem("email")}`,
+      },
+    }
+  );
+};
+
+const relateRepairHistory = (poDetailId, id) => {
+  return axioss.get(
+    `/repair-history/get-related-data?poDetailId=${poDetailId}&id=${id}`,
+    {
+      headers: {
+        email: `${localStorage.getItem("email")}`,
+      },
+    }
+  );
+};
+
+const getProductName = () => {
+  return axioss.get("/product/get-all-product-name", {
+    headers: {
+      email: `${localStorage.getItem("email")}`,
+    },
+  });
+}
+
 export {
   fecthAll,
   notify,
@@ -520,4 +578,9 @@ export {
   downloadHistory,
   writeAllNK,
   writeAllXK,
+  getImages,
+  saveAllRepair,
+  searchRepairHistory,
+  relateRepairHistory,
+  getProductName,
 };

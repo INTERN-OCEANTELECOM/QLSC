@@ -8,43 +8,51 @@ import com.ocena.qlsc.common.util.ApiResources;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
-public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
-    protected abstract BaseService<E, D> getBaseService();
+import java.util.List;
+
+public abstract class BaseApiImpl<E, Q, R> implements BaseApi<E, Q, R> {
+    protected abstract BaseService<E, Q, R> getBaseService();
 
     @Override
     @PostMapping(ApiResources.ADD)
-    public DataResponse<D> add(@RequestBody D objectDTO) {
+    public DataResponse<R> add(@RequestBody Q objectDTO) {
         return this.getBaseService().create(objectDTO);
     }
 
     @Override
+    @PostMapping(ApiResources.ADD_ALL)
+    public DataResponse<R> addAll(List<Q> listDto) {
+        return this.getBaseService().addAll(listDto);
+    }
+
+    @Override
     @PutMapping(ApiResources.UPDATE)
-    public DataResponse<D> update(@RequestBody D objectDTO,
+    public DataResponse<R> update(@RequestBody Q objectDTO,
                                   @PathVariable("key") String key) {
         return this.getBaseService().update(key, objectDTO);
     }
 
     @Override
     @GetMapping(ApiResources.GET_BY_ID)
-    public DataResponse<D> getById(@RequestParam String id) {
+    public DataResponse<R> getById(@RequestParam String id) {
         return this.getBaseService().getById(id);
     }
 
     @Override
     @PutMapping(ApiResources.DELETE)
-    public DataResponse<D> delete(@PathVariable("id") String id) {
+    public DataResponse<R> delete(@PathVariable("id") String id) {
         return this.getBaseService().delete(id);
     }
 
     @Override
     @GetMapping(ApiResources.GET_ALL)
-    public ListResponse<D> getAll() {
+    public ListResponse<R> getAll() {
         return this.getBaseService().getAll();
     }
 
     @Override
     @GetMapping(ApiResources.GET_BY_IDS)
-    public ListResponse<D> getByIds(@RequestParam String ids) {
+    public ListResponse<R> getByIds(@RequestParam String ids) {
         return this.getBaseService().getByIds(ids);
     }
 
@@ -56,13 +64,13 @@ public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
 
     @Override
     @PostMapping(ApiResources.SEARCH_BY_KEYWORD)
-    public ListResponse<D> searchByKeyword(@Valid @RequestBody SearchKeywordDto searchKeywordDto) {
+    public ListResponse<R> searchByKeyword(@Valid @RequestBody SearchKeywordDto searchKeywordDto) {
         return this.getBaseService().searchByKeyword(searchKeywordDto);
     }
 
     @Override
     @GetMapping(ApiResources.GET_ALL_BY_PAGE)
-    public ListResponse<D> getAllByPage(int page, int size) {
+    public ListResponse<R> getAllByPage(int page, int size) {
         return this.getBaseService().getAllByPage(page, size);
     }
 }

@@ -27,6 +27,14 @@ public interface ProductRepository extends BaseRepository<Product> {
 
     Optional<Product> findByProductId(String productId);
 
-    @Query("select p.productId, p.productName, count(pd.product.productId) from Product p LEFT JOIN PoDetail pd on p.productId = pd.product.productId group by p.productId, p.productName")
+    @Query(""" 
+                select p.productId, p.productName, count(pd.product.productId) 
+                from Product p LEFT JOIN PoDetail pd on p.productId = pd.product.productId 
+                group by p.productId, p.productName
+           """)
     Page<Object[]> getProductPageable(Pageable pageable);
+
+    @Query("select distinct p.productName from Product p")
+    List<String> getAllProductName();
+
 }

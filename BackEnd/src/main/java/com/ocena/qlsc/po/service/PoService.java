@@ -1,21 +1,27 @@
 package com.ocena.qlsc.po.service;
 
-import com.ocena.qlsc.user.util.TimeConstants;
+import com.ocena.qlsc.common.error.exception.DataAlreadyExistException;
+import com.ocena.qlsc.common.error.exception.FunctionLimitedTimeException;
+import com.ocena.qlsc.common.error.exception.InvalidTimeException;
+import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
+import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
+import com.ocena.qlsc.common.constants.message.StatusCode;
+import com.ocena.qlsc.common.constants.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.po.dto.PoDTO;
+import com.ocena.qlsc.po.dto.PoRequest;
+import com.ocena.qlsc.po.dto.PoResponse;
 import com.ocena.qlsc.po.mapper.PoMapper;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
-import com.ocena.qlsc.podetail.enums.KSCVT;
-import com.ocena.qlsc.podetail.enums.RepairStatus;
+import com.ocena.qlsc.podetail.enumrate.KcsVT;
+import com.ocena.qlsc.podetail.enumrate.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,78 +35,61 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService {
-
+public class PoService extends BaseServiceImpl<Po, PoRequest, PoResponse> implements IPoService {
     @Autowired
     PoRepository poRepository;
-
     @Autowired
     PoMapper poMapper;
-
     @Override
     protected BaseRepository<Po> getBaseRepository() {
         return poRepository;
     }
-
     @Override
-    protected BaseMapper<Po, PoDTO> getBaseMapper() {
+    protected BaseMapper<Po, PoRequest, PoResponse> getBaseMapper() {
         return poMapper;
     }
-
     @Override
     protected Function<String, Optional<Po>> getFindByFunction() {
         return poRepository::findByPoNumber;
     }
-
     @Override
     protected Class<Po> getEntityClass() {
         return Po.class;
     }
-
     @Override
-    protected Page<PoDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    public Logger getLogger() {
+        return super.getLogger();
+    }
+    @Override
+    protected Page<PoResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return poRepository.searchPO(
                 searchKeywordDto.getKeyword().get(0),
                 pageable).map(po -> poMapper.entityToDto(po));
     }
-
     @Override
     protected List<Po> getListSearchResults(String keyword) {
         return null;
     }
 
-    @Override
-    public List<String> validationRequest(Object object) {
-        return super.validationRequest(object);
-    }
-
-    public DataResponse<PoDTO> validateAddPO(PoDTO poDTO) {
-        if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
-        }
-        return null;
-    }
-
-
-    public DataResponse<PoDTO> validateUpdatePo(PoDTO poDTO, String key) {
-        if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
+    public void validateUpdatePo(PoRequest poRequest, String key) {
+        if (poRequest.getBeginAt() != null && poRequest.getEndAt() != null && poRequest.getBeginAt() > poRequest.getEndAt()) {
+            throw new InvalidTimeException("Invalid Time");
         }
 
-        Optional<Po> optionalOldPo = poRepository.findByPoNumber(key);
-        Optional<Po> optionalNewPo = poRepository.findByPoNumber(poDTO.getPoNumber());
-
-
-        if (optionalOldPo.get().getCreated() + TimeConstants.PO_UPDATE_TIME < System.currentTimeMillis()
-                && (!optionalOldPo.get().getPoNumber().equals(poDTO.getPoNumber())
-                || !optionalOldPo.get().getContractNumber().equals(poDTO.getContractNumber()))) {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 24 HOURS");
+        Optional<Po> optionalPo = poRepository.findByPoNumber(key);
+        if(optionalPo.isEmpty()) {
+            throw new ResourceNotFoundException("Not Found");
         }
+        Po oldPo = optionalPo.get();
 
-        if (optionalNewPo.isPresent() && !optionalNewPo.get().getPoNumber().equals(key)){
-            return ResponseMapper.toDataResponse(null, StatusCode.BAD_REQUEST, "NEW PO NUMBER ALREADY EXISTS");
+        if (oldPo.getCreated() + TimeConstants.PO_UPDATE_TIME < System.currentTimeMillis()
+                && (!oldPo.getPoNumber().equals(poRequest.getPoNumber())
+                || !oldPo.getContractNumber().equals(poRequest.getContractNumber()))) {
+            throw new FunctionLimitedTimeException("Execution time over");
         }
-        return null;
+        if (poRepository.existsByPoNumber(poRequest.getPoNumber()) && !poRequest.getPoNumber().equals(key)){
+            throw new DataAlreadyExistException(poRequest.getPoNumber() + " already exist");
+        }
     }
 
     /**
@@ -135,7 +124,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     public static Map<String, Long> getCountsByRepairStatus(List<PoDetail> list, RepairStatus repairStatus) {
         return getCountsByProperty(list, PoDetail::getRepairStatus, repairStatus, (short) 0, (short) 1, (short) 2, (short) -1);
     }
-    public static Map<String, Long> getCountsByKSCVT(List<PoDetail> list, KSCVT kscvt) {
+    public static Map<String, Long> getCountsByKSCVT(List<PoDetail> list, KcsVT kscvt) {
         return getCountsByProperty(list, PoDetail::getKcsVT, kscvt, (short) 0, (short) 1, (short) -1);
     }
 
@@ -178,7 +167,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
 
 
             resultsMap.put("TRANG_THAI_SC", getCountsByRepairStatus(listPoDetail, RepairStatus.SC_XONG));
-            resultsMap.put("KSC_VT", getCountsByKSCVT(listPoDetail, KSCVT.PASS));
+            resultsMap.put("KSC_VT", getCountsByKSCVT(listPoDetail, KcsVT.PASS));
             resultsMap.put("BAO_HANH", getCountsByWarrantyPeriod(listPoDetail));
             resultsMap.put("XUAT_KHO", getCountsByExportPartner(listPoDetail));
             return ResponseMapper.toDataResponse(resultsMap, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);

@@ -160,25 +160,17 @@ const ModalUpdatePo = (props) => {
           } else {
             getAllPo(page);
           }
-        } else if (res && res.statusCode === 205) {
-          if (
-            res.statusMessage ===
-            "YOU CAN ONLY UPDATE WITHIN THE FIRST 24 HOURS"
-          ) {
+        } else if (res && res.statusCode === 204) {
+          
             setIsValidate(
               "Bạn chỉ được phép chỉnh PO và số Hợp đồng trong 24h!!"
-            );
-          } else {
-            setIsValidate("");
-          }
+            ); 
         } else if (
           res &&
-          res.statusCode === 400 &&
-          res.statusMessage === "NEW PO NUMBER ALREADY EXISTS"
+          res.data.statusCode === 501 
         ) {
-          setIsValidate("Số PO đã tồn tại");
-          setPo(dataPo.poNumber);
-        } else if (res && res.data.statusCode === 501) {
+          if (res.data.data === "Dữ liệu đã tồn tại") 
+          {
           setIsValidate("");
           handleClose();
           toast.error(
@@ -186,6 +178,11 @@ const ModalUpdatePo = (props) => {
           );
           setPo(dataPo.poNumber);
         } else {
+            setIsValidate(res.data.data);
+            setPo(dataPo.poNumber);
+        }
+            
+        }  else {
           setIsValidate("");
           handleClose();
           toast.error("Cập nhật không thành công!!");

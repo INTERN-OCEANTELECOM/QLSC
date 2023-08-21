@@ -1,7 +1,7 @@
 package com.ocena.qlsc.user_history.utils;
 
-import com.ocena.qlsc.common.util.DateUtil;
-import com.ocena.qlsc.common.util.StringUtil;
+import com.ocena.qlsc.common.util.DateUtils;
+import com.ocena.qlsc.common.util.StringUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Calendar;
 
 public class FileUtil {
 
@@ -43,7 +42,7 @@ public class FileUtil {
     }
 
     private static Path createDirectoryByMMYYYY() {
-        String formattedDate = DateUtil.getCurrentDateByMMYYYY();
+        String formattedDate = DateUtils.getCurrentDateByMMYYYY();
 
         // Create path to upload folder
         final String UPLOAD_DIR = EXCEL_DIRECTORY + "/" + formattedDate;
@@ -64,9 +63,9 @@ public class FileUtil {
             Path uploadPath = createDirectoryByMMYYYY();
             String fileName = "";
             if(action.contains("Import")) {
-                fileName = "import " + DateUtil.getCurrentDateByDDMMYYYY() + ".xlsx";
+                fileName = "import " + DateUtils.getCurrentDateByDDMMYYYYhhmm() + ".xlsx";
             } else if(action.contains("Update")) {
-                fileName = "update " + DateUtil.getCurrentDateByDDMMYYYY() + ".xlsx";
+                fileName = "update " + DateUtils.getCurrentDateByDDMMYYYYhhmm() + ".xlsx";
             }
             Path filePath = uploadPath.resolve(fileName);
             file.transferTo(filePath.toFile());
@@ -74,8 +73,8 @@ public class FileUtil {
             // Save Path to History
             String filePathString = filePath.toString();
             System.out.println("path " + filePathString);
-            return URLEncoder.encode(StringUtil.cutSubString(filePathString, "/mnt/d/data-qlsc/"), StandardCharsets.UTF_8);
-//            return URLEncoder.encode(StringUtil.cutSubString(filePathString, "D:/data-qlsc/"), StandardCharsets.UTF_8);
+            return URLEncoder.encode(StringUtils.cutSubString(filePathString, "/mnt/d/data-qlsc/"), StandardCharsets.UTF_8);
+//            return URLEncoder.encode(StringUtils.cutSubString(filePathString, "D:/data-qlsc/"), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -1,14 +1,14 @@
 package com.ocena.qlsc.podetail.model;
 
 import com.ocena.qlsc.common.model.BaseModel;
-import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.product.model.Product;
+import com.ocena.qlsc.repair_history.model.RepairHistory;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.util.UUID;
+import java.util.List;
 
 @Entity
 @Setter
@@ -16,9 +16,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "product_order_detal")
-public class PoDetail extends BaseModel implements Serializable {
-    @Column(name = "po_detail_id", unique = true)
+@Table(
+        name = "product_order_detail",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "po_detail_id", name = "uq_po_detail_po_detail_id")
+        }
+)
+public class PoDetail extends BaseModel {
+    @Column(name = "po_detail_id")
     private String poDetailId;
     @Column(name = "serial_number")
     private String serialNumber;
@@ -42,12 +47,14 @@ public class PoDetail extends BaseModel implements Serializable {
     private String bbbgNumberExport;
     @Column(length = 401)
     private String note;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
     private Product product;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "po_number", referencedColumnName = "po_number")
     private Po po;
+    @OneToMany(mappedBy = "poDetail", cascade = CascadeType.ALL)
+    private List<RepairHistory> repairHistories;
 
     @Override
     public String toString() {

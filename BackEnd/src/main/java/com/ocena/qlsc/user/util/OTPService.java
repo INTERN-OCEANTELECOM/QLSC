@@ -65,7 +65,6 @@ public class OTPService {
      */
     public boolean validateOTP(String key, Integer otpNumber) {
         // Create a message to return the status
-        String message = "Invalid OTP";
         boolean isValid = false;
 
         try {

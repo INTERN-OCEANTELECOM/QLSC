@@ -1,7 +1,7 @@
 package com.ocena.qlsc.common.response;
 
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
+import com.ocena.qlsc.common.constants.message.StatusCode;
+import com.ocena.qlsc.common.constants.message.StatusMessage;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

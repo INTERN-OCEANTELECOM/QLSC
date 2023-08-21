@@ -33,4 +33,7 @@ public interface PoRepository extends BaseRepository<Po> {
             "p.poNumber LIKE %:keyword% OR :keyword IS NULL")
     Page<Po> searchPO(@Param("keyword") String keyword,
                       Pageable pageable);
+
+    boolean existsByPoNumber(String poNumber);
+
 }

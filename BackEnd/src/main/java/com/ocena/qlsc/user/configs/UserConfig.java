@@ -13,7 +13,6 @@ public class UserConfig {
     public LocalValidatorFactoryBean validatorFactory() {
         return new LocalValidatorFactoryBean();
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

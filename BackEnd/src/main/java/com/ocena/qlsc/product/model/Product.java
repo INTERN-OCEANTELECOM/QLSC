@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Builder
@@ -21,14 +22,31 @@ import java.util.Objects;
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "product")
-public class Product extends BaseModel implements Serializable{
-    @Column(name = "product_id", unique = true, length = 100)
+@Table(
+        name = "product",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "product_id", name = "uq_product_productId")
+        },
+        indexes = {
+                @Index(columnList = "product_id", name = "idx_product_product_id")
+        }
+)
+public class Product extends BaseModel {
+    @Column(name = "product_id", length = 100)
     private String productId;
 
     @Column(name = "product_name", length = 500)
     private String productName;
-    public Product(String productId) {
-        this.productId = productId;
-    }
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImage> images;
+
+//    @Override
+//    public String toString() {
+//        return "Product{" +
+//                "productId='" + productId + '\'' +
+//                ", productName='" + productName + '\'' +
+//                ", images=" + images +
+//                '}';
+//    }
 }

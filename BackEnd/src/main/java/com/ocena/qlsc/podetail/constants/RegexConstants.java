@@ -15,15 +15,15 @@ public final class RegexConstants {
 
     public static final String REGEX_IMPORT_DATE = "(?i)\\s*NG(?:[ÀA]|\\p{L})Y\\s*NH(?:[ÂAẬ]|\\p{L})P\\s*KH(?:[OÔ]|\\p{L})\\s*";
 
-    public static final String REGEX_REPAIR_STATUS = "(?i)\\s*C(?:[ẬAÂ]|\\p{L})P\\s*NH(?:[ÂAẬ]|\\p{L})T\\s*SC\\s*";
+    public static final String REGEX_REPAIR_STATUS = "(?i)\\s*T(?:[IÌ]|\\p{L})NH\\s*TR(?:[AẠ]|\\p{L})NG\\s*SC\\s*";
 
     public static final String REGEX_PRODUCT_NAME = "(?i)\\s*T(?:[ÊE]|\\p{L})N\\s*THI(?:[ÊEẾ]|\\p{L})T\\s*B(?:[ỊI]|\\p{L})\\s*";
 
-    public static final String REGEX_EXPORT_PARTNER = "(?i)\\s*C(?:[ẬAÂ]|\\p{L})P\\s*NH(?:[ÂAẬ]|\\p{L})T\\s*XK\\s*";
+    public static final String REGEX_EXPORT_PARTNER = "(?i)\\s*NG(?:[AÀ]|\\p{L})Y\\s*XK\\s*";
 
-    public static final String REGEX_KCSVT = "(?i)\\s*C(?:[ẬAÂ]|\\p{L})P\\s*NH(?:[ÂAẬ]|\\p{L})T\\s*KCS\\s*";
+    public static final String REGEX_KCSVT = "(?i)\\s*T(?:[ÌI]|\\p{L})NH\\s*TR(?:[ẠA]|\\p{L})NG\\s*KCS\\s*";
 
-    public static final String REGEX_WARRANTY_PERIOD = "(?i)\\s*C(?:[ẬAÂ]|\\p{L})P\\s*NH(?:[ÂAẬ]|\\p{L})T\\s*BH\\s*";
+    public static final String REGEX_WARRANTY_PERIOD = "(?i)\\s*TH(?:[OỜƠ]|\\p{L})I\\s*H(?:[ẠA]|\\p{L})N\\s*BH\\s*";
 
     public static final String REGEX_PRIORITY = "(?i)\\s*(?:ƯU]|\\p{L})U\\s*TI(?:[EÊ]|\\p{L})N\\s*SC\\s*";
 
@@ -62,9 +62,10 @@ public final class RegexConstants {
         put(REGEX_NOTE, "note");
     }};
 
-    public static final List<String> requiredFeilds = new ArrayList<>(Arrays.asList("productId", "poNumber", "serialNumber"));
+    public static final List<String> REQUIRED_FIELDS = new ArrayList<>(Arrays.asList("productId", "poNumber", "serialNumber"));
 
-    public static final HashMap<Integer, String> searchSerialNumbers = new HashMap<>() {
+    public static final List<String> UNREQUIRED_FIELDS = new ArrayList<>(Arrays.asList("productName"));
+    public static final HashMap<Integer, String> SEARCH_SERIAL_NUMBER = new HashMap<>() {
         {
             put(0, REGEX_SERIAL_NUMBER);
         }

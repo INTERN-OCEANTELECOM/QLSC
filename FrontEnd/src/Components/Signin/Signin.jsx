@@ -46,7 +46,11 @@ const Signin = () => {
   // display permissions
   useEffect(() => {
     if (account && account.auth === true && account.status === 2) {
+      if(localStorage.getItem("role") === "ROLE_REPAIRMAN") {
+        navigate("/quan-li-sua-chua");
+      }else {
       navigate("/");
+      }
     } else if (account && account.auth === true && account.status === 1) {
       navigate("/admin");
     } else if (account && account.auth === true && account.status === 3) {
@@ -58,6 +62,8 @@ const Signin = () => {
     } else if (account && account.auth === false && account.status === 0) {
       navigate("/reset-password");
       account.status = 2;
+    } else if(account && account.auth === true && account.status === 5) {
+      navigate("/quan-li-sua-chua");
     }
   }, [account]);
 

@@ -14,6 +14,7 @@ import Product from "../Components/Product/Product.jsx";
 import NotFound from "./NotFound.jsx";
 import BarCodeCheck from "../Components/BarCodeCheck/BarCodeCheck.jsx";
 import SNCheck from "../Components/SN Check/SNCheck.jsx";
+import QLSC from "../Components/QLSC/QLSC.jsx";
 
 const AppRoutes = () => {
   return (
@@ -39,6 +40,7 @@ const AppRoutes = () => {
           />
           <Route path="barcode-check" element={<BarCodeCheck />} />
           <Route path="sn-check" element={<SNCheck />} />
+          <Route path="quan-li-sua-chua" element={<QLSC />} />
         </Route>
         <Route path="signin" element={<Signin />} />
         <Route path="admin" element={<Admin />} />

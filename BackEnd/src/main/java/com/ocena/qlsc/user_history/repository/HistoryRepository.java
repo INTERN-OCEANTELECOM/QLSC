@@ -1,7 +1,6 @@
 package com.ocena.qlsc.user_history.repository;
 
 import com.ocena.qlsc.common.repository.BaseRepository;
-import com.ocena.qlsc.user_history.dto.HistoryDTO;
 import com.ocena.qlsc.user_history.model.History;
 import org.springframework.stereotype.Repository;
 
