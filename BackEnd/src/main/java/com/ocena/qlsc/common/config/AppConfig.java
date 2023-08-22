@@ -29,7 +29,8 @@ public class AppConfig {
                 .setSkipNullEnabled(true)
                 .setPropertyCondition(context -> {
                     if (context.getSource() == null
-                            && (context.getDestinationType().equals(Long.class))) {
+                            && (context.getDestinationType().equals(Long.class)
+                            || context.getDestinationType().equals(Short.class))) {
                         return false; // skip map
                     }
                     return true;
