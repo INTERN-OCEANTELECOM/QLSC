@@ -30,8 +30,7 @@ public class DateUtils {
     public static String getCurrentDateByDDMMYYYYhhmmss(Long longTime) {
         // Định dạng ngày giờ thành chuỗi "dd/MM/yyyy hh:mm:ss"
         final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        TimeZone localTimeZone = TimeZone.getDefault();
-        dateFormat.setTimeZone(localTimeZone);
+        dateFormat.setTimeZone(TimeZone.getDefault());
         return dateFormat.format(new Date(longTime));
     }
 

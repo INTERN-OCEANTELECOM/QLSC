@@ -162,7 +162,7 @@ public class HistoryService {
         historyDescription.setKey(key);
         String details = historyDescription.getDetailsDescription(comparisonResults.getFieldNames(), null, comparisonResults.getNewValues());
         historyDescription.setDetails(details);
-        save(Action.RECEPTION.getValue(), ObjectName.RepairHistory, historyDescription.getDescription(), "", null);
+        save(Action.CREATE.getValue(), ObjectName.RepairHistory, historyDescription.getDescription(), "", null);
     }
 
     public void updateHistory(Class<?> clazz, String key, Object oldObject, Object newObject) {
