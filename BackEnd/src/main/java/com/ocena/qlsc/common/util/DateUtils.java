@@ -27,11 +27,12 @@ public class DateUtils {
         return dateFormat.format(getNowDate());
     }
 
-    public static String getCurrentDateByDDMMYYYYhhmmss(Long longTime) {
+    public static String convertLongToLocalTime(Long longTime) {
         // Định dạng ngày giờ thành chuỗi "dd/MM/yyyy hh:mm:ss"
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getDefault());
-        return dateFormat.format(new Date(longTime));
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(longTime), zoneId)
+                .format(formatter);
     }
 
     public static String convertObjectToDateFormat(Object obj){

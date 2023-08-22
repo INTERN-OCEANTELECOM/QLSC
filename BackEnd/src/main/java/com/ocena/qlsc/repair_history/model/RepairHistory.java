@@ -55,7 +55,7 @@ public class RepairHistory extends BaseModel {
         if(isUpdated) {
             return String.format("S/N: <%s>; PoNumber: <%s>; TG Tiep Nhan: <%s>",
                     this.poDetail.getSerialNumber(), this.getPoDetail().getPo().getPoNumber(),
-                    DateUtils.getCurrentDateByDDMMYYYYhhmmss(this.repairDate));
+                    DateUtils.convertLongToLocalTime(this.repairDate));
         } else {
             List<String> podetailIds = StringUtils.splitDashToList(this.poDetail.getPoDetailId());
             return String.format("PoNumber: <%s>; ProductId: <%s>; S/N: <%s>",
