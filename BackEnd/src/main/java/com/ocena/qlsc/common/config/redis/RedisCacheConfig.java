@@ -1,4 +1,4 @@
-package com.ocena.qlsc.common.config;
+package com.ocena.qlsc.common.config.redis;
 
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;

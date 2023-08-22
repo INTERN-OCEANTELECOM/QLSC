@@ -63,7 +63,7 @@ public class PoService extends BaseServiceImpl<Po, PoRequest, PoResponse> implem
     @Override
     protected Page<PoResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return poRepository.searchPO(
-                searchKeywordDto.getKeyword().get(0),
+                searchKeywordDto.getKeyword().get(0).trim(),
                 pageable).map(po -> poMapper.entityToDto(po));
     }
     @Override

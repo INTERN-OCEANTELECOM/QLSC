@@ -1,4 +1,4 @@
-package com.ocena.qlsc.common.config;
+package com.ocena.qlsc.common.config.app;
 
 import com.ocena.qlsc.common.annotation.ApiShow;
 import io.swagger.v3.oas.models.OpenAPI;

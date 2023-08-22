@@ -188,7 +188,6 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
 
         // If the object is invalid, return a list of error messages
         if((result.hasErrors())) {
-
             return result.getFieldErrors()
                     .stream()
                     .map(FieldError::getDefaultMessage)

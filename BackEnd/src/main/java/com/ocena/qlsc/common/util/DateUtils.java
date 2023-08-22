@@ -8,6 +8,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class DateUtils {
     public static @NotNull Date getNowDate() {
@@ -28,7 +29,9 @@ public class DateUtils {
 
     public static String getCurrentDateByDDMMYYYYhhmmss(Long longTime) {
         // Định dạng ngày giờ thành chuỗi "dd/MM/yyyy hh:mm:ss"
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        TimeZone localTimeZone = TimeZone.getDefault();
+        dateFormat.setTimeZone(localTimeZone);
         return dateFormat.format(new Date(longTime));
     }
 

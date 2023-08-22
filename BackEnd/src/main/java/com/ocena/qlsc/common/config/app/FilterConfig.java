@@ -1,4 +1,4 @@
-package com.ocena.qlsc.common.config;
+package com.ocena.qlsc.common.config.app;
 
 
 import com.ocena.qlsc.common.util.ApiResources;
