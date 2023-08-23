@@ -730,7 +730,7 @@ const QLSC = () => {
               <div className="my-1 add-new d-flex justify-content-between mt-3">
                 <div className="col-3">
                   {localStorage.getItem("role") === "ROLE_ADMIN" ||
-                    (localStorage.getItem("role") === "ROLE_MANAGER" && (
+                    localStorage.getItem("role") === "ROLE_MANAGER" ? (
                       <div className="d-flex justify-content-center align-items-center w-repair ">
                         <Form.Label className="me-2 ms-2">Repairman</Form.Label>
                         <InputGroup
@@ -754,7 +754,7 @@ const QLSC = () => {
                           </InputGroup.Text>
                         </InputGroup>
                       </div>
-                    ))}
+                    ) : null}
                 </div>
                 <div className="group-btn d-flex">
                   {/* button search */}
