@@ -13,7 +13,7 @@ import ModalShowPOStatistical from "../Modal/PO/ModalShow/ModalShowPOStatistical
 import logo from "../../assets/logo_28-06-2017_LogoOceanTelecomtailieupng-removebg-preview.png";
 import { useSelector } from "react-redux";
 import _ from "lodash";
-import { Form } from "react-bootstrap";
+import { Alert, Form } from "react-bootstrap";
 import ReactPaginate from "react-paginate";
 
 const PO = () => {
@@ -153,222 +153,250 @@ const PO = () => {
   };
 
   return (
-    <div className="po-tables">
-      {user && user.auth && (
-        <div className="my-3 add-new d-flex justify-content-between">
-          <div className="col-6 d-flex">
-            <div className="col-6">
-              <div className="btn-search input-group w-100">
-                <input
-                  className="form-control"
-                  placeholder="Search..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={(e) => handlePressEnter(e)}
-                />
-                <button
-                  className="btn2 btn-primary2"
-                  onClick={() => handleSearch()}
-                >
-                  <AiOutlineSearch />
-                </button>
+    <>
+      {localStorage.getItem("role") !== "ROLE_QLSC" ? (
+        <>
+          <div className="po-tables">
+            {user && user.auth && (
+              <div className="my-3 add-new d-flex justify-content-between">
+                <div className="col-6 d-flex">
+                  <div className="col-6">
+                    <div className="btn-search input-group w-100">
+                      <input
+                        className="form-control"
+                        placeholder="Search..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        onKeyDown={(e) => handlePressEnter(e)}
+                      />
+                      <button
+                        className="btn2 btn-primary2"
+                        onClick={() => handleSearch()}
+                      >
+                        <AiOutlineSearch />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="update-po col-2 mx-2">
+                    <button
+                      className="btn2 btn-primary2  "
+                      onClick={() => handleReset()}
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
+                <div className="group-btn d-flex justify-content-between">
+                  {localStorage.getItem("role") === "ROLE_MANAGER" ||
+                  localStorage.getItem("role") === "ROLE_QLPO"  ||
+                  localStorage.getItem("role") === "ROLE_ADMIN" ? (
+                    <>
+                      <div className="update-po">
+                        <button
+                          className="btn btn-success"
+                          onClick={() => setIsShowAddPO(true)}
+                        >
+                          <AiFillFileAdd />
+                          Add New PO
+                        </button>
+                      </div>
+                    </>
+                  ) : null}
+                </div>
               </div>
-            </div>
-            <div className="update-po col-2 mx-2">
-              <button
-                className="btn2 btn-primary2  "
-                onClick={() => handleReset()}
-              >
-                Reset
-              </button>
-            </div>
-          </div>
-          <div className="group-btn d-flex justify-content-between">
-            {localStorage.getItem("role") === "ROLE_MANAGER" ||
-            localStorage.getItem("role") === "ROLE_ADMIN" ? (
+            )}
+            {localStorage.getItem("role") ? (
               <>
-                <div className="update-po">
-                  <button
-                    className="btn btn-success"
-                    onClick={() => setIsShowAddPO(true)}
+                <Table
+                  striped
+                  bordered
+                  hover
+                  className="shadow-sm bg-white rounded"
+                >
+                  <thead>
+                    <tr className="header-table">
+                      <th>Stt</th>
+                      <th>Số hợp đồng</th>
+                      <th>Số PO </th>
+                      <th>Số lượng</th>
+                      <th className="col-date">Ngày bắt đầu</th>
+                      <th className="col-date">Ngày kết thúc</th>
+                      <th className="col-date">Ngày hết hạn bảo lãnh THHĐ</th>
+                      <th className="col-date">
+                        Ngày hết hạn bảo lãnh bảo hành
+                      </th>
+                      <th>Ghi chú</th>
+                      {user && user.auth && <th>Action</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedListPo &&
+                      sortedListPo.length > 0 &&
+                      sortedListPo.map((item, index) => {
+                        const currentIndex = startIndex + index;
+                        const timeBegin = item.beginAt;
+                        let dataBegin;
+                        const timeEnd = item.endAt;
+                        let datEnd;
+                        const time = item.contractWarrantyExpirationDate;
+                        let dataTime;
+                        if (time !== null) {
+                          dataTime = moment(time).format("DD/MM/YYYY");
+                        }
+                        const timeWarranty = item.warrantyExpirationDate;
+                        let dataWarranty;
+                        if (timeWarranty !== null) {
+                          dataWarranty =
+                            moment(timeWarranty).format("DD/MM/YYYY");
+                        }
+                        if (timeBegin !== null) {
+                          dataBegin = moment(timeBegin).format("DD/MM/YYYY");
+                        }
+
+                        if (timeEnd !== null) {
+                          datEnd = moment(timeEnd).format("DD/MM/YYYY");
+                        }
+                        return (
+                          <tr
+                            key={`po-${currentIndex}`}
+                            onDoubleClick={() => handleShowPo(item)}
+                          >
+                            <td className="item-table ">{currentIndex + 1}</td>
+                            <td className="item-table ">
+                              {item.contractNumber}
+                            </td>
+                            <td
+                              className="col-po"
+                              onClick={() => handleGetPoNumber(item.poNumber)}
+                            >
+                              {item.poNumber}
+                            </td>
+                            <td className="item-table ">{item.quantity}</td>
+                            <td className="item-table ">{dataBegin}</td>
+                            <td className="item-table ">{datEnd}</td>
+                            <td className="item-table ">{dataTime}</td>
+                            <td className="item-table ">{dataWarranty}</td>
+                            <td className="col-note">{item.note}</td>
+                            <td className="col-action">
+                              {localStorage.getItem("role") ===
+                                "ROLE_MANAGER" ||
+                              localStorage.getItem("role") === "ROLE_ADMIN" ||
+                              localStorage.getItem("role") === "ROLE_QLPO" ? (
+                                <>
+                                  <button
+                                    className="btn btn-warning btn-sm btn-respon"
+                                    onClick={() => handleUpdatePO(item)}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    className="btn btn-primary mx-2 btn-sm"
+                                    onClick={() => handleViewPo(item)}
+                                  >
+                                    View
+                                  </button>
+                                </>
+                              ) : null}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </Table>
+
+                <div className="page-size ">
+                  <ReactPaginate
+                    breakLabel="..."
+                    nextLabel="next >"
+                    onPageChange={handlePageClick}
+                    pageRangeDisplayed={5}
+                    pageCount={totalProducts}
+                    previousLabel="< previous"
+                    pageClassName="page-item"
+                    pageLinkClassName="page-link"
+                    previousClassName="page-item"
+                    previousLinkClassName="page-link"
+                    nextClassName="page-item"
+                    nextLinkClassName="page-link"
+                    breakClassName="page-item"
+                    breakLinkClassName="page-link"
+                    containerClassName="pagination"
+                    activeClassName="active"
+                    renderOnZeroPageCount={null}
+                  />
+
+                  <Form.Select
+                    aria-label="Default select example"
+                    className="form-select-size"
+                    onChange={(event) => setSelectedOption(event.target.value)}
+                    value={selectedOption}
                   >
-                    <AiFillFileAdd />
-                    Add New PO
-                  </button>
+                    <option value="50">50 / Trang</option>
+                    <option value="75">75 / Trang</option>
+                    <option value="100">100 / Trang</option>
+                    <option value="150">150 / Trang</option>
+                  </Form.Select>
                 </div>
               </>
-            ) : null}
-          </div>
-        </div>
-      )}
-      {localStorage.getItem("role") ? (
-        <>
-          <Table striped bordered hover className="shadow-sm bg-white rounded">
-            <thead>
-              <tr className="header-table">
-                <th>Stt</th>
-                <th>Số hợp đồng</th>
-                <th>Số PO </th>
-                <th>Số lượng</th>
-                <th className="col-date">Ngày bắt đầu</th>
-                <th className="col-date">Ngày kết thúc</th>
-                <th className="col-date">Ngày hết hạn bảo lãnh THHĐ</th>
-                <th className="col-date">Ngày hết hạn bảo lãnh bảo hành</th>
-                <th>Ghi chú</th>
-                {user && user.auth && <th>Action</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {sortedListPo &&
-                sortedListPo.length > 0 &&
-                sortedListPo.map((item, index) => {
-                  const currentIndex = startIndex + index;
-                  const timeBegin = item.beginAt;
-                  let dataBegin;
-                  const timeEnd = item.endAt;
-                  let datEnd;
-                  const time = item.contractWarrantyExpirationDate;
-                  let dataTime;
-                  if (time !== null) {
-                    dataTime = moment(time).format("DD/MM/YYYY");
-                  }
-                  const timeWarranty = item.warrantyExpirationDate;
-                  let dataWarranty;
-                  if (timeWarranty !== null) {
-                    dataWarranty = moment(timeWarranty).format("DD/MM/YYYY");
-                  }
-                  if (timeBegin !== null) {
-                    dataBegin = moment(timeBegin).format("DD/MM/YYYY");
-                  }
+            ) : (
+              <>
+                <div>
+                  <img src={logo} className="logo-ocean" />
+                  <div className="title">
+                    <h1 className="title-welcom">
+                      Chào mừng bạn đến với OCEAN QLSC
+                    </h1>
+                    <h4 className="title-sign">
+                      Vui lòng đăng nhập để xem chi tiết:{" "}
+                      <Link className="sign-account" to="/signin">
+                        Đăng nhập ngay
+                      </Link>
+                    </h4>
+                  </div>
+                </div>
+              </>
+            )}
 
-                  if (timeEnd !== null) {
-                    datEnd = moment(timeEnd).format("DD/MM/YYYY");
-                  }
-                  return (
-                    <tr
-                      key={`po-${currentIndex}`}
-                      onDoubleClick={() => handleShowPo(item)}
-                    >
-                      <td className="item-table ">{currentIndex + 1}</td>
-                      <td className="item-table ">{item.contractNumber}</td>
-                      <td
-                        className="col-po"
-                        onClick={() => handleGetPoNumber(item.poNumber)}
-                      >
-                        {item.poNumber}
-                      </td>
-                      <td className="item-table ">{item.quantity}</td>
-                      <td className="item-table ">{dataBegin}</td>
-                      <td className="item-table ">{datEnd}</td>
-                      <td className="item-table ">{dataTime}</td>
-                      <td className="item-table ">{dataWarranty}</td>
-                      <td className="col-note">{item.note}</td>
-                      <td className="col-action">
-                        {localStorage.getItem("role") === "ROLE_MANAGER" ||
-                        localStorage.getItem("role") === "ROLE_ADMIN" ? (
-                          <>
-                            <button
-                              className="btn btn-warning btn-sm btn-respon"
-                              onClick={() => handleUpdatePO(item)}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              className="btn btn-primary mx-2 btn-sm"
-                              onClick={() => handleViewPo(item)}
-                            >
-                              View
-                            </button>
-                          </>
-                        ) : null}
-                      </td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </Table>
-
-          <div className="page-size ">
-            <ReactPaginate
-              breakLabel="..."
-              nextLabel="next >"
-              onPageChange={handlePageClick}
-              pageRangeDisplayed={5}
-              pageCount={totalProducts}
-              previousLabel="< previous"
-              pageClassName="page-item"
-              pageLinkClassName="page-link"
-              previousClassName="page-item"
-              previousLinkClassName="page-link"
-              nextClassName="page-item"
-              nextLinkClassName="page-link"
-              breakClassName="page-item"
-              breakLinkClassName="page-link"
-              containerClassName="pagination"
-              activeClassName="active"
-              renderOnZeroPageCount={null}
+            {/* Modal  */}
+            <ModelAddPO
+              show={isShowAddPO}
+              handleClose={handleClose}
+              getAllPo={getAllPo}
             />
 
-            <Form.Select
-              aria-label="Default select example"
-              className="form-select-size"
-              onChange={(event) => setSelectedOption(event.target.value)}
-              value={selectedOption}
-            >
-              <option value="50">50 / Trang</option>
-              <option value="75">75 / Trang</option>
-              <option value="100">100 / Trang</option>
-              <option value="150">150 / Trang</option>
-            </Form.Select>
+            <ModalUpdatePo
+              show={isShowUpdate}
+              handleClose={handleClose}
+              dataPo={dataPo}
+              getAllPo={getAllPo}
+              currentPage={currentPage}
+              handleSearch={handleSearch}
+              search={search}
+              currentPageSearch={currentPageSearch}
+            />
+
+            <ModalShowPO
+              show={isShowPODetail}
+              handleClose={handleClose}
+              dataPo={dataPo}
+            />
+
+            <ModalShowPOStatistical
+              show={statistical}
+              handleClose={handleClose}
+              dataStatistical={dataStatistical}
+            />
           </div>
         </>
       ) : (
         <>
-          <div>
-            <img src={logo} className="logo-ocean" />
-            <div className="title">
-              <h1 className="title-welcom">Chào mừng bạn đến với OCEAN QLSC</h1>
-              <h4 className="title-sign">
-                Vui lòng đăng nhập để xem chi tiết:{" "}
-                <Link className="sign-account" to="/signin">
-                  Đăng nhập ngay
-                </Link>
-              </h4>
-            </div>
-          </div>
+          <Alert variant="danger" className=" error-login">
+            <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+            <p>Bạn không có quyền truy cập</p>
+          </Alert>
         </>
       )}
-
-      {/* Modal  */}
-      <ModelAddPO
-        show={isShowAddPO}
-        handleClose={handleClose}
-        getAllPo={getAllPo}
-      />
-
-      <ModalUpdatePo
-        show={isShowUpdate}
-        handleClose={handleClose}
-        dataPo={dataPo}
-        getAllPo={getAllPo}
-        currentPage={currentPage}
-        handleSearch={handleSearch}
-        search={search}
-        currentPageSearch={currentPageSearch}
-      />
-
-      <ModalShowPO
-        show={isShowPODetail}
-        handleClose={handleClose}
-        dataPo={dataPo}
-      />
-
-      <ModalShowPOStatistical
-        show={statistical}
-        handleClose={handleClose}
-        dataStatistical={dataStatistical}
-      />
-    </div>
+    </>
   );
 };
 

@@ -1,6 +1,5 @@
 package com.ocena.qlsc.user.service.user;
 
-import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.constants.message.StatusCode;
 import com.ocena.qlsc.common.constants.message.StatusMessage;
 import com.ocena.qlsc.common.error.exception.LockAccessException;
@@ -9,7 +8,7 @@ import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
-import com.ocena.qlsc.common.service.BaseServiceImpl;
+import com.ocena.qlsc.common.service.BaseServiceAdapter;
 import com.ocena.qlsc.common.util.SystemUtils;
 import com.ocena.qlsc.user.dto.role.RoleResponse;
 import com.ocena.qlsc.user.dto.user.UserRequest;
@@ -41,7 +40,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService extends BaseServiceImpl<User, UserRequest, UserResponse> implements IUserService {
+public class UserService extends BaseServiceAdapter<User, UserRequest, UserResponse> implements IUserService {
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -78,14 +77,6 @@ public class UserService extends BaseServiceImpl<User, UserRequest, UserResponse
     @Override
     public Logger getLogger() {
         return super.getLogger();
-    }
-
-    protected Page<UserResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        return null;
-    }
-    @Override
-    protected List<User> getListSearchResults(String keyword) {
-        return null;
     }
 
     /**

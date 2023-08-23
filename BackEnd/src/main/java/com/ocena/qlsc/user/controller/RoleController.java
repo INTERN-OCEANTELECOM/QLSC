@@ -31,8 +31,6 @@ public class RoleController extends BaseApiImpl<Role, RoleRequest, RoleResponse>
         return super.getAll();
     }
 
-    /* User for Swagger*/
-
     @Override
     @ApiShow
     public DataResponse<RoleResponse> add(RoleRequest roleRequest) {

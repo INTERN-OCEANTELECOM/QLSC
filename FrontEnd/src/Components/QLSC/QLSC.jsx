@@ -7,7 +7,7 @@ import "./qlsc.scss";
 import { toast } from "react-toastify";
 import _ from "lodash";
 import moment from "moment";
-import { Modal, Button, Row, InputGroup, Spinner } from "react-bootstrap";
+import { Modal, Button, Row, InputGroup, Spinner, Alert } from "react-bootstrap";
 import {
   fecthAllPoDetail,
   getAllPoDetail,
@@ -443,7 +443,7 @@ const QLSC = () => {
 
   const handlePressEnter = (event) => {
     if (event && event.key === "Enter") {
-      handleSearchHistoryRepair(0);
+      handleSearchHistoryRepair();
     }
   };
 
@@ -608,476 +608,538 @@ const QLSC = () => {
 
   
   return (
-    <div className="tables-qlsc">
-      <div className="table-action">
-        <div className="d-flex">
-          {/* search po-detail */}
-          <div className="row-search-qlsc">
-            <Row className="mb-2">
-              <div className="d-flex ">
-                <div className="d-flex justify-content-center align-items-center w-product">
-                  <Form.Label className="me-1">Tên thiết bị</Form.Label>
-                  <Form.Group
-                    as={Col}
-                    controlId="validationCustom01"
-                    className="productid"
-                  >
-                    <Form.Control
-                      required
-                      ref={inputRef}
-                      type="text"
-                      value={productName !== null ? productName : null}
-                      onChange={handleInputChangeName}
-                      onKeyDown={(e) => handlePressEnter(e)}
-                      placeholder="Tên thiết bị"
-                    />
-                    {suggestionsName.length > 0 && (
-                      <ul className="suggestions-list">
-                        {suggestionsName.map((suggestion, index) => (
-                          <li
-                            key={index}
-                            onClick={() => handleSuggestionClick(suggestion)}
+    <>
+      {localStorage.getItem("role") !== "ROLE_QLPO" ? (
+        <>
+          <div className="tables-qlsc">
+            <div className="table-action">
+              <div className="d-flex">
+                {/* search po-detail */}
+                <div className="row-search-qlsc">
+                  <Row className="mb-2">
+                    <div className="d-flex ">
+                      <div className="d-flex justify-content-center align-items-center w-product">
+                        <Form.Label className="me-1">Tên thiết bị</Form.Label>
+                        <Form.Group
+                          as={Col}
+                          controlId="validationCustom01"
+                          className="productid"
+                        >
+                          <Form.Control
+                            required
+                            ref={inputRef}
+                            type="text"
+                            value={productName !== null ? productName : null}
+                            onChange={handleInputChangeName}
+                            onKeyDown={(e) => handlePressEnter(e)}
+                            placeholder="Tên thiết bị"
+                          />
+                          {suggestionsName.length > 0 && (
+                            <ul className="suggestions-list">
+                              {suggestionsName.map((suggestion, index) => (
+                                <li
+                                  key={index}
+                                  onClick={() =>
+                                    handleSuggestionClick(suggestion)
+                                  }
+                                >
+                                  {suggestion}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </Form.Group>
+                      </div>
+                      <div className="d-flex justify-content-center align-items-center w-product ">
+                        <Form.Label className="me-2 ms-4">Số serial</Form.Label>
+                        <Form.Group
+                          as={Col}
+                          controlId="validationCustom01"
+                          className="poNumber"
+                        >
+                          <Form.Control
+                            required
+                            type="text"
+                            value={serialNumber !== null ? serialNumber : null}
+                            onChange={(event) => {
+                              const value = event.target.value;
+                              setSerialNumber(value !== "" ? value : null);
+                            }}
+                            onKeyDown={(e) => handlePressEnter(e)}
+                            placeholder="Số serial"
+                          />
+                        </Form.Group>
+                      </div>
+                      <div className="d-flex justify-content-center align-items-center w-product">
+                        <Form.Label className="me-1 ms-3">Số PO</Form.Label>
+                        <Form.Group
+                          as={Col}
+                          controlId="validationCustom01"
+                          className="poNumber"
+                        >
+                          <Autosuggest
+                            suggestions={suggestions}
+                            onSuggestionsFetchRequested={
+                              onSuggestionsFetchRequested
+                            }
+                            onSuggestionsClearRequested={
+                              onSuggestionsClearRequested
+                            }
+                            onSuggestionSelected={onSuggestionSelected}
+                            getSuggestionValue={getSuggestionValue}
+                            renderSuggestion={renderSuggestion}
+                            inputProps={{
+                              ...inputProps1,
+                              className: "form-control second-autosuggest", // Thêm lớp CSS cho ô tìm kiếm thứ hai
+                            }}
+                          />
+                        </Form.Group>
+                      </div>
+                      <div className="d-flex justify-content-center align-items-center w-product">
+                        <Form.Label className="me-1 ms-3">KQ SC</Form.Label>
+                        <Form.Group
+                          as={Col}
+                          controlId="validationCustom03"
+                          className="repariStatus"
+                        >
+                          <Form.Select
+                            aria-label="Default select example"
+                            className="me-5"
+                            value={
+                              repairError === null ? "Tất cả" : repairError
+                            }
+                            onChange={(event) => {
+                              const value = event.target.value;
+                              setRepairError(value === "Tất cả" ? null : value);
+                            }}
                           >
-                            {suggestion}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </Form.Group>
-                </div>
-                <div className="d-flex justify-content-center align-items-center w-product ">
-                  <Form.Label className="me-2 ms-4">Số serial</Form.Label>
-                  <Form.Group
-                    as={Col}
-                    controlId="validationCustom01"
-                    className="poNumber"
-                  >
-                    <Form.Control
-                      required
-                      type="text"
-                      value={serialNumber !== null ? serialNumber : null}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        setSerialNumber(value !== "" ? value : null);
-                      }}
-                      onKeyDown={(e) => handlePressEnter(e)}
-                      placeholder="Số serial"
-                    />
-                  </Form.Group>
-                </div>
-                <div className="d-flex justify-content-center align-items-center w-product">
-                  <Form.Label className="me-1 ms-3">Số PO</Form.Label>
-                  <Form.Group
-                    as={Col}
-                    controlId="validationCustom01"
-                    className="poNumber"
-                  >
-                    <Autosuggest
-                      suggestions={suggestions}
-                      onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-                      onSuggestionsClearRequested={onSuggestionsClearRequested}
-                      onSuggestionSelected={onSuggestionSelected}
-                      getSuggestionValue={getSuggestionValue}
-                      renderSuggestion={renderSuggestion}
-                      inputProps={{
-                        ...inputProps1,
-                        className: "form-control second-autosuggest", // Thêm lớp CSS cho ô tìm kiếm thứ hai
-                      }}
-                    />
-                  </Form.Group>
-                </div>
-                <div className="d-flex justify-content-center align-items-center w-product">
-                  <Form.Label className="me-1 ms-3">KQ SC</Form.Label>
-                  <Form.Group
-                    as={Col}
-                    controlId="validationCustom03"
-                    className="repariStatus"
-                  >
-                    <Form.Select
-                      aria-label="Default select example"
-                      className="me-5"
-                      value={repairError === null ? "Tất cả" : repairError}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        setRepairError(value === "Tất cả" ? null : value);
-                      }}
-                    >
-                      <option>Tất cả</option>
-                      <option value="DANG_SC">Đang SC</option>
-                      <option value="CHAY_NO">Cháy nổ</option>
-                      <option value="OK">SC OK</option>
-                      <option value="FAIL">FAIL</option>
-                    </Form.Select>
-                  </Form.Group>
+                            <option>Tất cả</option>
+                            <option value="DANG_SC">Đang SC</option>
+                            <option value="CHAY_NO">Cháy nổ</option>
+                            <option value="OK">SC OK</option>
+                            <option value="FAIL">FAIL</option>
+                          </Form.Select>
+                        </Form.Group>
+                      </div>
+                    </div>
+                  </Row>
                 </div>
               </div>
-            </Row>
-          </div>
-        </div>
 
-        {/* button */}
-        <div className="my-1 add-new d-flex justify-content-between mt-3">
-          <div className="col-3">
-            <div className="d-flex justify-content-center align-items-center w-repair ">
-              <Form.Label className="me-2 ms-2">Repairman</Form.Label>
-              <InputGroup
-                as={Col}
-                controlId="validationCustom01"
-                className="poNumber d-flex"
-              >
-                <Form.Control
-                  required
-                  type="text"
-                  value={repairPerson !== null ? repairPerson : ""}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setRepairPerson(value !== "" ? value : null);
-                  }}
-                  onKeyDown={(e) => handlePressEnter(e)}
-                  placeholder="Repairman"
-                />
-                <InputGroup.Text id="basic-addon2">
-                  @daiduongtelecom.com
-                </InputGroup.Text>
-              </InputGroup>
-            </div>
-          </div>
-          <div className="group-btn d-flex">
-            {/* button search */}
-            <div className="search">
-              <button
-                className="btn btn-primary label-search"
-                onClick={() => handleSearchHistoryRepair()}
-              >
-                <AiOutlineSearch className="icon-search" />
-                Search
-              </button>
-            </div>
-            <div className="search">
-              <button
-                className="btn btn-primary label-search"
-                onClick={() => handleReset()}
-              >
-                Reset
-              </button>
-            </div>
+              {/* button */}
+              <div className="my-1 add-new d-flex justify-content-between mt-3">
+                <div className="col-3">
+                  {localStorage.getItem("role") === "ROLE_ADMIN" ||
+                    (localStorage.getItem("role") === "ROLE_MANAGER" && (
+                      <div className="d-flex justify-content-center align-items-center w-repair ">
+                        <Form.Label className="me-2 ms-2">Repairman</Form.Label>
+                        <InputGroup
+                          as={Col}
+                          controlId="validationCustom01"
+                          className="poNumber d-flex"
+                        >
+                          <Form.Control
+                            required
+                            type="text"
+                            value={repairPerson !== null ? repairPerson : ""}
+                            onChange={(event) => {
+                              const value = event.target.value;
+                              setRepairPerson(value !== "" ? value : null);
+                            }}
+                            onKeyDown={(e) => handlePressEnter(e)}
+                            placeholder="Repairman"
+                          />
+                          <InputGroup.Text id="basic-addon2">
+                            @daiduongtelecom.com
+                          </InputGroup.Text>
+                        </InputGroup>
+                      </div>
+                    ))}
+                </div>
+                <div className="group-btn d-flex">
+                  {/* button search */}
+                  <div className="search">
+                    <button
+                      className="btn btn-primary label-search"
+                      onClick={() => handleSearchHistoryRepair()}
+                    >
+                      <AiOutlineSearch className="icon-search" />
+                      Search
+                    </button>
+                  </div>
+                  <div className="search">
+                    <button
+                      className="btn btn-primary label-search"
+                      onClick={() => handleReset()}
+                    >
+                      Reset
+                    </button>
+                  </div>
 
-            <div className="update">
-              <button
-                className="btn btn-success label-export"
-                onClick={handleExportSearch}
-                disabled={!isExportButtonEnabled}
-              >
-                <AiOutlineDownload className="icon-export" />
-                Export
-              </button>
+                  <div className="update">
+                    <button
+                      className="btn btn-success label-export"
+                      onClick={handleExportSearch}
+                      disabled={!isExportButtonEnabled}
+                    >
+                      <AiOutlineDownload className="icon-export" />
+                      Export
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <div className="table-history-qlsc">
-        <div>
-          <div className="mt-2">
-            <h6>Lịch sử SC</h6>
-          </div>
-          <div className="table-qlsc">
-            <Table striped bordered hover>
-              <thead>
-                <tr className="table-header-qlsc">
-                  <th>Ngày SC</th>
-                  <th>SL PO</th>
-                  <th>SL Còn lại</th>
-                  <th>Sản phẩm sửa chữa</th>
-                  <th>Số serial</th>
-                  <th>Số PO</th>
-                  <th>Lỗi chính trước SC</th>
-                  <th>Khối SC</th>
-                  <th>Linh kiện SC</th>
-                  <th>KQ SC</th>
-                  <th>Repairman</th>
-                  <th className="text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {listPoDetail &&
-                  listPoDetail.length > 0 &&
-                  listPoDetail.map((item, index) => {
-                    let data;
-                    if (item.repairHistories.repairDate) {
-                      data = moment(item.repairHistories.repairDate).format(
-                        "DD/MM/YYYY HH:mm"
-                      );
-                    } else {
-                      data = null;
-                    }
-                    const formattedProductName = formatProductName(
-                      item.product.productName
-                    );
-                    let nameRepair;
-                    if (item.repairHistories.creator) {
-                      nameRepair = item.repairHistories.creator.replace(
-                        "@daiduongtelecom.com",
-                        ""
-                      );
-                    } else {
-                      nameRepair = null;
-                    }
-                    return (
-                      <tr key={`scc-${index}`}>
-                        <td>{data}</td>
-                        <td>{item.amountInPo}</td>
-                        <td>{item.remainingQuantity}</td>
-                        <td className="col-name-product">
-                          {formattedProductName}
-                        </td>
-                        <td>{item.serialNumber}</td>
-                        <td>{item.po.poNumber}</td>
-                        <td>{item.repairHistories.repairError}</td>
-                        <td>{item.repairHistories.module}</td>
-                        <td>{item.repairHistories.accessory}</td>
-                        <td>{item.repairHistories.repairResults}</td>
-                        <td>{nameRepair}</td>
-                        <td className="col-button-qlsc">
-                           {localStorage.getItem("role") === "ROLE_ADMIN" ||
-                            localStorage.getItem("role") === "ROLE_REPAIRMAN" ?
-                          <button
-                            className="btn btn-primary btn-sm"  
-                            onClick={() => handleReceive(item)}
-                          >
-                            Tiếp nhận
-                          </button>
-                          : null }
-                          {/* <button className="btn btn-warning btn-sm ms-2">
+            <div className="table-history-qlsc">
+              <div>
+                <div className="mt-2">
+                  <h6>Lịch sử SC</h6>
+                </div>
+                <div className="table-qlsc">
+                  <Table striped bordered hover>
+                    <thead>
+                      <tr className="table-header-qlsc">
+                        <th>Ngày SC</th>
+                        <th>SL PO</th>
+                        <th>SL Còn lại</th>
+                        <th>Sản phẩm sửa chữa</th>
+                        <th>Số serial</th>
+                        <th>Số PO</th>
+                        <th>Lỗi chính trước SC</th>
+                        <th>Khối SC</th>
+                        <th>Linh kiện SC</th>
+                        <th>KQ SC</th>
+                        <th>User Action</th>
+                        <th className="text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {listPoDetail &&
+                        listPoDetail.length > 0 &&
+                        listPoDetail.map((item, index) => {
+                          let data;
+                          if (item.repairHistories.repairDate) {
+                            data = moment(
+                              item.repairHistories.repairDate
+                            ).format("DD/MM/YYYY HH:mm");
+                          } else {
+                            data = null;
+                          }
+                          const formattedProductName = formatProductName(
+                            item.product.productName
+                          );
+                          let nameRepair;
+                          if (item.repairHistories.creator) {
+                            nameRepair = item.repairHistories.creator.replace(
+                              "@daiduongtelecom.com",
+                              ""
+                            );
+                          } else {
+                            nameRepair = null;
+                          }
+                          return (
+                            <tr key={`scc-${index}`}>
+                              <td className="col-date">{data}</td>
+                              <td className="col-po-amount">
+                                {item.amountInPo}
+                              </td>
+                              <td className="col-po-remain">
+                                {item.remainingQuantity}
+                              </td>
+                              <td className="col-name-product">
+                                {formattedProductName}
+                              </td>
+                              <td>{item.serialNumber}</td>
+                              <td>{item.po.poNumber}</td>
+                              <td className="col-name-product">
+                                {item.repairHistories.repairError}
+                              </td>
+                              <td className="col-name-product">
+                                {item.repairHistories.module}
+                              </td>
+                              <td className="col-name-product">
+                                {item.repairHistories.accessory}
+                              </td>
+                              <td>{item.repairHistories.repairResults}</td>
+                              <td className="col-repairman">{nameRepair}</td>
+                              <td className="col-button-qlsc">
+                                {localStorage.getItem("role") ===
+                                  "ROLE_ADMIN" ||
+                                localStorage.getItem("role") === "ROLE_QLSC" ||
+                                localStorage.getItem("role") ===
+                                  "ROLE_MANAGER" ? (
+                                  <button
+                                    className="btn btn-primary btn-sm"
+                                    onClick={() => handleReceive(item)}
+                                  >
+                                    Tiếp nhận
+                                  </button>
+                                ) : null}
+                                {/* <button className="btn btn-warning btn-sm ms-2">
                             Edit
                           </button> */}
-                        </td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </Table>
-          </div>
-        </div>
-        <div className="mt-3">
-          <div className="d-flex justify-content-between mb-2 align-items-center">
-            <h6>Cập nhật hoạt động SC</h6>
-            <div>
-              {localStorage.getItem("role") === "ROLE_ADMIN" ||
-                localStorage.getItem("role") === "ROLE_REPAIRMAN" ?
-                <>
-              <button className="btn btn-primary" onClick={saveAll}>
-                Save All
-              </button>
-              {/* <button className="btn btn-primary ms-2" onClick={saveAll}>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </Table>
+                </div>
+              </div>
+              <div className="mt-3">
+                <div className="d-flex justify-content-between mb-2 align-items-center">
+                  <h6>Cập nhật hoạt động SC</h6>
+                  <div>
+                    {localStorage.getItem("role") === "ROLE_ADMIN" ||
+                    localStorage.getItem("role") === "ROLE_QLSC" ||
+                    localStorage.getItem("role") === "ROLE_MANAGER" ? (
+                      <>
+                        <button className="btn btn-primary" onClick={saveAll}>
+                          Save All
+                        </button>
+                        {/* <button className="btn btn-primary ms-2" onClick={saveAll}>
                 Thêm dòng
               </button> */}
-              <button className="btn btn-warning ms-2" onClick={cancel}>
-                Cancel
-              </button>
-              </>
-               : null}
-            </div>
-          </div>
-          <div className="table-update-qlsc">
-            <table className="table-shadow  table-repair  table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th>Ngày SC</th>
-                  <th>SL PO</th>
-                  <th>SL Còn lại</th>
-                  <th>Sản phẩm sửa chữa</th>
-                  <th>Số serial</th>
-                  <th>Số PO</th>
-                  <th>Lỗi chính trước SC</th>
-                  <th>Khối SC</th>
-                  <th>Linh kiện SC</th>
-                  <th>KQ SC</th>
-                  <th>Repairman</th>
-                  <th className="text-center col-action-repair">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {showReceiveRow &&
-                  listRepair &&
-                  listRepair.length > 0 &&
-                  listRepair.map((item, index) => {
-                    const time = item.repairDate;
-                    const data = moment(time).format("DD/MM/YYYY HH:mm");
-                    const isIndexZero = index === 0;
-                    let isUserAllowedToEdit =
-                      localStorage.getItem("email") === item.creator;
-                    if (item.creator === null || item.creator === "") {
-                      isUserAllowedToEdit = true;
-                    } else if (localStorage.getItem("email") === item.creator) {
-                      isUserAllowedToEdit = true;
-                    } else {
-                      isUserAllowedToEdit = false;
-                    }
-                    return (
-                      <tr
-                        key={`scu-${index}`}
-                        className={isIndexZero ? "highlight-row" : ""}
-                      >
-                        <td>{data}</td>
-                        <td>{item.amountInPo}</td>
-                        <td>{item.remainingQuantity}</td>
-                        <td className="col-name-product">
-                          {formatProductName(item.poDetail.product.productName)}
-                        </td>
-                        <td>{item.serialNumber}</td>
-                        <td>{item.po.poNumber}</td>
-                        {isUserAllowedToEdit ? (
-                          <>
-                            <td>
-                              <input
-                                type="text"
-                                className="no-border-input"
-                                value={item.repairError}
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    index,
-                                    "repairError",
-                                    e.target.value
-                                  )
-                                }
-                                list={`suggestions-${index}`} // Add a list attribute
-                              />
-                              {/* Add datalist for suggestions */}
-                              <datalist id={`suggestions-${index}`}>
-                                {previousData.map((data, idx) => (
-                                  <option
-                                    key={`suggestion-${idx}`}
-                                    value={data}
-                                  />
-                                ))}
-                              </datalist>
-                            </td>
-                            <td>
-                              <input
-                                type="text"
-                                className="no-border-input"
-                                value={item.module}
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    index,
-                                    "module",
-                                    e.target.value
-                                  )
-                                }
-                                list={`suggestions-${index}`} // Add a list attribute
-                              />
-                            </td>
-                            <td>
-                              <input
-                                type="text"
-                                className="no-border-input"
-                                value={item.accessory}
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    index,
-                                    "accessory",
-                                    e.target.value
-                                  )
-                                }
-                                list={`suggestions-${index}`}
-                              />
-                            </td>
-                            <td>
-                              <select
-                                className="no-border-input"
-                                aria-label="Default select example"
-                                value={item.repairResults}
-                                onChange={(event) =>
-                                  handleInputChange(
-                                    index,
-                                    "repairResults",
-                                    event.target.value
-                                  )
-                                }
-                              >
-                                <option value="DANG_SC">Đang SC</option>
-                                <option value="OK">SC OK</option>
-                                <option value="CHAY_NO">Cháy nổ</option>
-                                <option value="FAIL">FAIL</option>
-                              </select>
-                            </td>
-                          </>
-                        ) : (
-                          // Hiển thị các ô không thể chỉnh sửa
-                          <>
-                            <td>{item.repairError}</td>
-                            <td>{item.module}</td>
-                            <td>{item.accessory}</td>
-                            <td>{item.repairResults}</td>
-                          </>
-                        )}
-                        <td>
-                          {item.creator.replace("@daiduongtelecom.com", "")}
-                        </td>
-                        <td>
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleDeleteRow(index)}
-                          >
-                            Xóa dòng
-                          </button>
-                          <button
-                            className="btn btn-primary btn-sm ms-1"
-                            onClick={() => handleAddRow(item)}
-                          >
-                            Thêm dòng
-                          </button>
-                        </td>
+                        <button
+                          className="btn btn-warning ms-2"
+                          onClick={cancel}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="table-update-qlsc">
+                  <table className="table-shadow  table-repair  table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <th>Ngày SC</th>
+                        <th>SL PO</th>
+                        <th>SL Còn lại</th>
+                        <th>Sản phẩm sửa chữa</th>
+                        <th>Số serial</th>
+                        <th>Số PO</th>
+                        <th>Lỗi chính trước SC</th>
+                        <th>Khối SC</th>
+                        <th>Linh kiện SC</th>
+                        <th>KQ SC</th>
+                        <th>User Action</th>
+                        <th className="text-center col-action-repair">
+                          Action
+                        </th>
                       </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                      {showReceiveRow &&
+                        listRepair &&
+                        listRepair.length > 0 &&
+                        listRepair.map((item, index) => {
+                          const time = item.repairDate;
+                          const data = moment(time).format("DD/MM/YYYY HH:mm");
+                          const isIndexZero = index === 0;
+                          let isUserAllowedToEdit =
+                            localStorage.getItem("email") === item.creator;
+                          if (item.creator === null || item.creator === "") {
+                            isUserAllowedToEdit = true;
+                          } else if (
+                            localStorage.getItem("email") === item.creator
+                          ) {
+                            isUserAllowedToEdit = true;
+                          } else {
+                            isUserAllowedToEdit = false;
+                          }
+                          return (
+                            <tr
+                              key={`scu-${index}`}
+                              className={isIndexZero ? "highlight-row" : ""}
+                            >
+                              <td>{data}</td>
+                              <td className="col-po-amount">
+                                {item.amountInPo}
+                              </td>
+                              <td className="col-po-remain">
+                                {item.remainingQuantity}
+                              </td>
+                              <td className="col-name-product">
+                                {formatProductName(
+                                  item.poDetail.product.productName
+                                )}
+                              </td>
+                              <td>{item.serialNumber}</td>
+                              <td>{item.po.poNumber}</td>
+                              {isUserAllowedToEdit ? (
+                                <>
+                                  <td>
+                                    <input
+                                      type="text"
+                                      className="no-border-input"
+                                      value={item.repairError}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          index,
+                                          "repairError",
+                                          e.target.value
+                                        )
+                                      }
+                                      list={`suggestions-${index}`} // Add a list attribute
+                                    />
+                                    {/* Add datalist for suggestions */}
+                                    <datalist id={`suggestions-${index}`}>
+                                      {previousData.map((data, idx) => (
+                                        <option
+                                          key={`suggestion-${idx}`}
+                                          value={data}
+                                        />
+                                      ))}
+                                    </datalist>
+                                  </td>
+                                  <td>
+                                    <input
+                                      type="text"
+                                      className="no-border-input"
+                                      value={item.module}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          index,
+                                          "module",
+                                          e.target.value
+                                        )
+                                      }
+                                      list={`suggestions-${index}`} // Add a list attribute
+                                    />
+                                  </td>
+                                  <td>
+                                    <input
+                                      type="text"
+                                      className="no-border-input"
+                                      value={item.accessory}
+                                      onChange={(e) =>
+                                        handleInputChange(
+                                          index,
+                                          "accessory",
+                                          e.target.value
+                                        )
+                                      }
+                                      list={`suggestions-${index}`}
+                                    />
+                                  </td>
+                                  <td>
+                                    <select
+                                      className="no-border-input"
+                                      aria-label="Default select example"
+                                      value={item.repairResults}
+                                      onChange={(event) =>
+                                        handleInputChange(
+                                          index,
+                                          "repairResults",
+                                          event.target.value
+                                        )
+                                      }
+                                    >
+                                      <option value="DANG_SC">Đang SC</option>
+                                      <option value="OK">SC OK</option>
+                                      <option value="CHAY_NO">Cháy nổ</option>
+                                      <option value="FAIL">FAIL</option>
+                                    </select>
+                                  </td>
+                                </>
+                              ) : (
+                                // Hiển thị các ô không thể chỉnh sửa
+                                <>
+                                  <td className="col-display-non-input">
+                                    {item.repairError}
+                                  </td>
+                                  <td className="col-display-non-input">
+                                    {item.module}
+                                  </td>
+                                  <td className="col-display-non-input">
+                                    {item.accessory}
+                                  </td>
+                                  <td className="col-display-non-input-1">
+                                    {item.repairResults}
+                                  </td>
+                                </>
+                              )}
+                              <td className="col-repairman">
+                                {item.creator.replace(
+                                  "@daiduongtelecom.com",
+                                  ""
+                                )}
+                              </td>
+                              <td>
+                                <button
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => handleDeleteRow(index)}
+                                >
+                                  Xóa dòng
+                                </button>
+                                <button
+                                  className="btn btn-primary btn-sm ms-1"
+                                  onClick={() => handleAddRow(item)}
+                                >
+                                  Thêm dòng
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <Modal show={showSaveAll} onHide={handleClose}>
+              <Modal.Header closeButton>
+                <Modal.Title>Save all</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>Bạn có chắc muốn lưu tất cả không?</Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>
+                  Close
+                </Button>
+                <Button variant="primary" onClick={saveAllRepairHistory}>
+                  Save All
+                </Button>
+              </Modal.Footer>
+            </Modal>
+
+            <Modal show={showCancel} onHide={handleClose}>
+              <Modal.Header closeButton>
+                <Modal.Title>Cancel</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>Bạn có chắc muốn hủy không?</Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>
+                  Close
+                </Button>
+                <Button variant="primary" onClick={handleCancel}>
+                  Confirm
+                </Button>
+              </Modal.Footer>
+            </Modal>
+
+            {isLoading && (
+              <div className="loading-overlay">
+                <div className="loading-spinner">
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                  <span className="loading">Đang tải...</span>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
-
-      <Modal show={showSaveAll} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Save all</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Bạn có chắc muốn lưu tất cả không?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={saveAllRepairHistory}>
-            Save All
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal show={showCancel} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Cancel</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Bạn có chắc muốn hủy không?</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleCancel}>
-            Confirm
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {isLoading && (
-        <div className="loading-overlay">
-          <div className="loading-spinner">
-            <Spinner animation="border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </Spinner>
-            <span className="loading">Đang tải...</span>
-          </div>
-        </div>
+        </>
+      ) : (
+        <>
+          <Alert variant="danger" className=" error-login">
+            <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+            <p>Bạn không có quyền truy cập</p>
+          </Alert>
+        </>
       )}
-    </div>
+    </>
   );
 };
 

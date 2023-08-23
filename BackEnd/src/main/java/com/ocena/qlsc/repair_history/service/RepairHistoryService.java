@@ -6,7 +6,7 @@ import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
-import com.ocena.qlsc.common.service.BaseServiceImpl;
+import com.ocena.qlsc.common.service.BaseServiceAdapter;
 import com.ocena.qlsc.common.util.SystemUtils;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.mapper.PoDetailMapper;
@@ -32,7 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> implements IRepairHistoryService {
+public class RepairHistoryService extends BaseServiceAdapter<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> implements IRepairHistoryService {
 
     @Autowired
     RepairHistoryRepository repairHistoryRepository;
@@ -210,15 +210,5 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
                     }).collect(Collectors.toList());
         }
         return ResponseMapper.toListResponseSuccess(resultList);
-    }
-
-    @Override
-    protected Page<RepairHistoryResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        return null;
-    }
-
-    @Override
-    protected List<RepairHistory> getListSearchResults(String keyword) {
-        return null;
     }
 }

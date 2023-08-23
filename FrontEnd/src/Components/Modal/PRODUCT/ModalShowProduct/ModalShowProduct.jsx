@@ -436,7 +436,8 @@ const ModalShowProduct = (props) => {
             Close
           </Button>
           {localStorage.getItem("role") === "ROLE_MANAGER" ||
-          localStorage.getItem("role") === "ROLE_ADMIN" ? (
+          localStorage.getItem("role") === "ROLE_ADMIN" ||
+          localStorage.getItem("role") === "ROLE_QLPO" ? (
             <>
               <Button variant="primary" onClick={handleUpdateProduct}>
                 Save Changes

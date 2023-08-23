@@ -89,7 +89,8 @@ export const Header = () => {
               window.location.pathname === "/barcode-check" ||
               window.location.pathname === "/quan-li-sua-chua") && (
               <>
-                {localStorage.getItem("role") === "ROLE_ADMIN" ? (
+                {localStorage.getItem("role") === "ROLE_ADMIN" ||
+                localStorage.getItem("role") === "ROLE_MANAGER" ? (
                   <Nav className="me-auto nav-bar">
                     <NavLink to="/" className="nav-link">
                       Hợp đồng
@@ -106,7 +107,8 @@ export const Header = () => {
                   </Nav>
                 ) : null}
 
-                {localStorage.getItem("role") === "ROLE_REPAIRMAN" ? (
+                {localStorage.getItem("role") === "ROLE_QLSC" ||
+                localStorage.getItem("role") === "ROLE_KCSANALYST" ? (
                   <Nav className="me-auto nav-bar">
                     <NavLink to="/quan-li-sua-chua" className="nav-link">
                       QLSC
@@ -114,7 +116,7 @@ export const Header = () => {
                   </Nav>
                 ) : null}
 
-                {localStorage.getItem("role") === "ROLE_MANAGER" ? (
+                {localStorage.getItem("role") === "ROLE_QLPO" ? (
                   <Nav className="me-auto nav-bar">
                     <NavLink to="/" className="nav-link">
                       Hợp đồng
@@ -127,43 +129,45 @@ export const Header = () => {
                     </NavLink>
                   </Nav>
                 ) : null}
-                <Nav className="user-name ">
-                  {user && user.email ? (
-                    <span className="nav-link">{user.email}</span>
-                  ) : (
-                    <RxAvatar className="icon-avatar" />
-                  )}
-                </Nav>
-                <Nav>
-                  <div className="nav-link"></div>
-                  {user && user.auth === true ? (
-                    <>
-                      <Dropdown>
-                        <Dropdown.Toggle variant="" id="dropdown-basic">
-                          <AiOutlineSetting className="icon-avatar" />
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                          <Dropdown.Item onClick={handleGetUser}>
-                            Cập nhật tài khoản
-                          </Dropdown.Item>
-                          <Dropdown.Item href="/reset-password">
-                            Đổi mật khẩu
-                          </Dropdown.Item>
-                        </Dropdown.Menu>
-                      </Dropdown>
-                      <NavDropdown.Item
-                        onClick={() => handleLogout()}
-                        className="nav-link"
-                      >
-                        Đăng xuất
-                      </NavDropdown.Item>
-                    </>
-                  ) : (
-                    <NavLink to="/signin" className="nav-link">
-                      Đăng nhập
-                    </NavLink>
-                  )}
-                </Nav>
+                <div className="d-flex align-items-center ms-auto">
+                  <Nav className="user-name ">
+                    {user && user.email ? (
+                      <span className="nav-link">{user.email}</span>
+                    ) : (
+                      <RxAvatar className="icon-avatar" />
+                    )}
+                  </Nav>
+                  <Nav>
+                    <div className="nav-link"></div>
+                    {user && user.auth === true ? (
+                      <>
+                        <Dropdown>
+                          <Dropdown.Toggle variant="" id="dropdown-basic">
+                            <AiOutlineSetting className="icon-avatar" />
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu>
+                            <Dropdown.Item onClick={handleGetUser}>
+                              Cập nhật tài khoản
+                            </Dropdown.Item>
+                            <Dropdown.Item href="/reset-password">
+                              Đổi mật khẩu
+                            </Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
+                        <NavDropdown.Item
+                          onClick={() => handleLogout()}
+                          className="nav-link"
+                        >
+                          Đăng xuất
+                        </NavDropdown.Item>
+                      </>
+                    ) : (
+                      <NavLink to="/signin" className="nav-link">
+                        Đăng nhập
+                      </NavLink>
+                    )}
+                  </Nav>
+                </div>
               </>
             )}
           </Navbar.Collapse>

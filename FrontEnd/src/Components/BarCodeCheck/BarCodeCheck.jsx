@@ -446,7 +446,8 @@ const BarCodeCheck = () => {
                     <td className="col-note">{item.note}</td>
                     <td className="col-barcode-action">
                       {localStorage.getItem("role") === "ROLE_ADMIN" ||
-                      localStorage.getItem("role") === "ROLE_MANAGER" ? (
+                      localStorage.getItem("role") === "ROLE_MANAGER" ||
+                      localStorage.getItem("role") === "ROLE_QLPO" ? (
                         <>
                           <button
                             className="btn btn-primary btn-sm "

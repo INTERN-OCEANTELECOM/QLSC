@@ -177,7 +177,7 @@ public class FileExcelUtil {
         Row row = (Row) rowCell;
         int col = (int) colIndex;
         if(row.getCell(col) == null || row.getCell(col).getCellType() == CellType.BLANK) {
-            return -1;
+            return -2;
         }
         CellType cellType = row.getCell(col).getCellType();
         if (cellType == CellType.NUMERIC) {
@@ -186,7 +186,7 @@ public class FileExcelUtil {
             try {
                 return Short.parseShort(row.getCell(col).getStringCellValue());
             } catch (NumberFormatException e) {
-                return -1;
+                return -2;
             }
         }
     }

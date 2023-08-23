@@ -16,6 +16,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class PoDetailRequest {
     private String id;
     private String poDetailId;

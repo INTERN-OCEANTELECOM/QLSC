@@ -124,9 +124,11 @@ const Diary = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <NavLink to="/admin" className="nav-link">
-                Quản lý User
-              </NavLink>
+              {localStorage.getItem("role") === "ROLE_ADMIN" ? (
+                <NavLink to="/admin" className="nav-link">
+                  Quản lý User
+                </NavLink>
+              ): null}
               <NavLink to="/history" className="nav-link">
                 Nhật ký
               </NavLink>
@@ -157,7 +159,8 @@ const Diary = () => {
       </div>
       {/* button add, search */}
       {/* check role */}
-      {localStorage.getItem("role") === "ROLE_ADMIN" ? (
+      {localStorage.getItem("role") === "ROLE_ADMIN" ||
+      localStorage.getItem("role") === "ROLE_MANAGER" ? (
         <div className="diary">
           <div className="d-flex justify-content-start align-items-center">
             <div className="d-flex justify-content-center align-items-center ">

@@ -136,16 +136,19 @@ const ModalUpdateUser = (props) => {
                         Admin
                       </Dropdown.Item>
                       <Dropdown.Item onClick={() => handleRole(1)}>
-                        Manager
+                        QLPO
                       </Dropdown.Item>
                       <Dropdown.Item onClick={() => handleRole(2)}>
                         User
                       </Dropdown.Item>
                       <Dropdown.Item onClick={() => handleRole(3)}>
-                        Repair
+                        QLSC
                       </Dropdown.Item>
                       <Dropdown.Item onClick={() => handleRole(4)}>
                         KCS
+                      </Dropdown.Item>
+                      <Dropdown.Item onClick={() => handleRole(5)}>
+                        Manager
                       </Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>

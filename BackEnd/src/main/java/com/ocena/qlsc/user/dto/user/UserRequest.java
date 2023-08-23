@@ -26,5 +26,6 @@ public class UserRequest implements Serializable {
     @Size(min = 8, message = "Password phải có ít nhất 8 ký tự")
     @Pattern(regexp = "^\\S*$", message = "Password phải không chứa khoảng trắng")
     private String password;
+    private String status;
     private List<RoleRequest> roles;
 }

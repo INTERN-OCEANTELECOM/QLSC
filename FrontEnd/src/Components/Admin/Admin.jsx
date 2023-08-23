@@ -138,9 +138,11 @@ const Admin = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <NavLink to="/admin" className="nav-link">
-                Quản lý User
-              </NavLink>
+              {localStorage.getItem("role") === "ROLE_ADMIN" ? (
+                <NavLink to="/admin" className="nav-link">
+                  Quản lý User
+                </NavLink>
+              ) : null}
               <NavLink to="/history" className="nav-link">
                 Nhật ký
               </NavLink>
@@ -227,12 +229,17 @@ const Admin = () => {
                       manager
                     </NavDropdown.Item>
                     <NavDropdown.Item
-                      onClick={() => handleRoleSelect("ROLE_MANAGER")}
+                      onClick={() => handleRoleSelect("ROLE_QLSC")}
                     >
-                      repair
+                      QLSC
                     </NavDropdown.Item>
                     <NavDropdown.Item
-                      onClick={() => handleRoleSelect("ROLE_MANAGER")}
+                      onClick={() => handleRoleSelect("ROLE_QLPO")}
+                    >
+                      QLPO
+                    </NavDropdown.Item>
+                    <NavDropdown.Item
+                      onClick={() => handleRoleSelect("ROLE_KSCANALYST")}
                     >
                       kcs
                     </NavDropdown.Item>

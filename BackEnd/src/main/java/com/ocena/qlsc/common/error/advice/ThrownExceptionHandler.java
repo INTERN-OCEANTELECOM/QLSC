@@ -85,8 +85,17 @@ public class ThrownExceptionHandler {
 
     @ExceptionHandler({FileUploadException.class})
     public ResponseEntity<DataResponse<?>> handleFileUploadException(final RuntimeException e) {
+        logger.error(e.getMessage());
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ExceptionHandler({MethodNotOverrideException.class})
+    public ResponseEntity<DataResponse<?>> handleMethodNotOverrideException(final RuntimeException e) {
+        logger.error(e.getMessage());
+        DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
+                StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

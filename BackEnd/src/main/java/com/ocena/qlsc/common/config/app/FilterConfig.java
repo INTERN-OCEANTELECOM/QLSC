@@ -67,10 +67,7 @@ public class FilterConfig extends GenericFilterBean {
                 if (path.equals("/user/delete")
                         || path.equals("/user/add")
                         || path.equals("/user/get-all")
-                        || path.equals("/po-detail/deleteByID")
-                        || path.equals("/role/get-all")
-                        || path.equals("/history/get-all")
-                        || path.equals("/history/get-by-created")){
+                        || path.equals("/role/get-all")){
                     if (!"ROLE_ADMIN".equals(role.getRoleName())) {
                         httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                         return;
@@ -79,15 +76,12 @@ public class FilterConfig extends GenericFilterBean {
                         || path.startsWith("/po-detail")
                         || path.startsWith("/po")
                         || path.startsWith("/product")
-                        || path.startsWith("/repair-history")) {
-                    if ("ROLE_USER".equals(role.getRoleName())) {
-                        httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
-                        return;
-                    }
-
-                    if (("ROLE_REPAIRMAN".equals(role.getRoleName()) && !(path.startsWith("/repair-history") || path.startsWith("/po-detail/update")))
+                        || path.startsWith("/repair-history")
+                        || path.startsWith("/history")) {
+                    if (("ROLE_USER".equals(role.getRoleName())
+                            ||("ROLE_QLSC".equals(role.getRoleName()) && !(path.startsWith("/repair-history")))
                             || ("ROLE_KCSANALYST".equals(role.getRoleName()) && !path.startsWith("/kcs-history"))
-                            || ("ROLE_MANAGER".equals(role.getRoleName()) && path.startsWith("/repair-history"))){
+                            || ("ROLE_QLPO".equals(role.getRoleName()) && (path.startsWith("/repair-history") || path.startsWith("/history"))))){
                         httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                         return;
                     }

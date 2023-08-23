@@ -44,6 +44,13 @@ export const handleLoginRedux = (email, password) => {
               data: { email },
             });
             localStorage.setItem("role", res.data.roles[0].roleName);
+          } else if (res.data.roles[0].roleName === "ROLE_QLPO") {
+            localStorage.setItem("email", email);
+            dispatch({
+              type: FETCH_USER_SUCCESS_USER,
+              data: { email },
+            });
+            localStorage.setItem("role", res.data.roles[0].roleName);
           } else if (res.data.roles[0].roleName === "ROLE_USER") {
             localStorage.setItem("email", email);
             dispatch({
@@ -51,7 +58,7 @@ export const handleLoginRedux = (email, password) => {
               data: { email },
             });
             localStorage.setItem("role", res.data.roles[0].roleName);
-          } else if (res.data.roles[0].roleName === "ROLE_REPAIRMAN") {
+          } else if (res.data.roles[0].roleName === "ROLE_QLSC") {
             localStorage.setItem("email", email);
             dispatch({
               type: FETCH_USER_SUCCESS_USER,

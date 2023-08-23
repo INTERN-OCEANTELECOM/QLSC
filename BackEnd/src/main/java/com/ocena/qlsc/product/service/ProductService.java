@@ -8,7 +8,7 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
-import com.ocena.qlsc.common.service.BaseServiceImpl;
+import com.ocena.qlsc.common.service.BaseServiceAdapter;
 import com.ocena.qlsc.common.util.StringUtils;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 import com.ocena.qlsc.product.dto.product.ProductRequest;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class ProductService extends BaseServiceImpl<Product, ProductRequest, ProductResponse> implements IProductService {
+public class ProductService extends BaseServiceAdapter<Product, ProductRequest, ProductResponse> implements IProductService {
     @Autowired
     ProductRepository productRepository;
     @Autowired
@@ -77,37 +77,32 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
      */
     @Override
     protected Page<ProductResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-//        List<String> listKeywords = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0).trim());
         List<String> listKeywords = StringUtils.containsAlphabeticCharacters(searchKeywordDto.getKeyword().get(0).trim()) ?
                                     StringUtils.convertStringToList(searchKeywordDto.getKeyword().get(0).trim()) :
                                     StringUtils.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(0).trim());
 
-        Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
+        if(!listKeywords.isEmpty()) {
+            pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        }
 
+        Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
         Page<ProductResponse> productResponsePage = resultPage.map(objects -> ProductResponse.builder()
                 .productId(objects[0].toString())
                 .productName(objects[1].toString())
                 .amount(Integer.valueOf(objects[2].toString()))
                 .build());
 
-        if(!listKeywords.isEmpty()) {
-            productResponsePage = productResponsePage
-                    .stream()
-                    .filter(productResponse -> listKeywords.stream()
-                            .anyMatch(key -> productResponse.getProductId().contains(key) ||
-                            productResponse.getProductName().contains(key)))
-                    .collect(Collectors.collectingAndThen(Collectors.toList(),
-                            list -> new PageImpl<>(list, pageable, list.size())));
+        if(listKeywords.stream().allMatch(str -> str.isEmpty() || str == null) || listKeywords.isEmpty()) {
+            return productResponsePage;
         }
 
-        return productResponsePage;
+        List<ProductResponse> filteredList = productResponsePage.getContent().stream()
+                .filter(productResponse -> listKeywords.stream()
+                        .anyMatch(key -> productResponse.getProductId().contains(key) ||
+                                productResponse.getProductName().contains(key)))
+                .collect(Collectors.toList());
+        return new PageImpl<>(filteredList, pageable, filteredList.size());
     }
-
-    @Override
-    protected List<Product> getListSearchResults(String keyword) {
-        return null;
-    }
-
 
     public ListResponse<ProductResponse> getPagedProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);

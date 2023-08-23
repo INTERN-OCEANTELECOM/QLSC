@@ -12,7 +12,7 @@ import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
-import com.ocena.qlsc.common.service.BaseServiceImpl;
+import com.ocena.qlsc.common.service.BaseServiceAdapter;
 import com.ocena.qlsc.po.dto.PoRequest;
 import com.ocena.qlsc.po.dto.PoResponse;
 import com.ocena.qlsc.po.mapper.PoMapper;
@@ -35,7 +35,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoService extends BaseServiceImpl<Po, PoRequest, PoResponse> implements IPoService {
+public class PoService extends BaseServiceAdapter<Po, PoRequest, PoResponse> implements IPoService {
     @Autowired
     PoRepository poRepository;
     @Autowired
@@ -65,10 +65,6 @@ public class PoService extends BaseServiceImpl<Po, PoRequest, PoResponse> implem
         return poRepository.searchPO(
                 searchKeywordDto.getKeyword().get(0).trim(),
                 pageable).map(po -> poMapper.entityToDto(po));
-    }
-    @Override
-    protected List<Po> getListSearchResults(String keyword) {
-        return null;
     }
 
     public void validateUpdatePo(PoRequest poRequest, String key) {

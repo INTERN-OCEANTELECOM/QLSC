@@ -381,7 +381,8 @@ const ModalUpdatePoDetail = (props) => {
                           customInput={<Form.Control />}
                           disabled={
                             localStorage.getItem("role") !== "ROLE_ADMIN" &&
-                            localStorage.getItem("role") !== "ROLE_MANAGER"
+                            localStorage.getItem("role") !== "ROLE_MANAGER" &&
+                            localStorage.getItem("role") !== "ROLE_QLPO"
                           }
                         />
                       </Form.Group>
@@ -400,7 +401,8 @@ const ModalUpdatePoDetail = (props) => {
                           aria-label="Default select example"
                           disabled={
                             localStorage.getItem("role") !== "ROLE_ADMIN" &&
-                            localStorage.getItem("role") !== "ROLE_MANAGER"
+                            localStorage.getItem("role") !== "ROLE_MANAGER" &&
+                            localStorage.getItem("role") !== "ROLE_QLPO"
                           }
                           value={repairCategory}
                           onChange={(event) => {
@@ -432,7 +434,8 @@ const ModalUpdatePoDetail = (props) => {
                           aria-label="Default select example111"
                           disabled={
                             localStorage.getItem("role") !== "ROLE_ADMIN" &&
-                            localStorage.getItem("role") !== "ROLE_MANAGER"
+                            localStorage.getItem("role") !== "ROLE_MANAGER" &&
+                            localStorage.getItem("role") !== "ROLE_QLPO"
                           }
                           value={prioritize}
                           onChange={(event) => {
@@ -470,7 +473,8 @@ const ModalUpdatePoDetail = (props) => {
                           disabled={
                             localStorage.getItem("role") !== "ROLE_ADMIN" &&
                             localStorage.getItem("role") !== "ROLE_MANAGER" &&
-                            localStorage.getItem("role") !== "ROLE_REPAIRMAN"
+                            localStorage.getItem("role") !== "ROLE_QLSC" &&
+                            localStorage.getItem("role") !== "ROLE_QLPO"
                           }
                         >
                           <option value="-1">Chưa cập nhật</option>
@@ -498,7 +502,8 @@ const ModalUpdatePoDetail = (props) => {
                           onChange={(e) => setBbbgPartner(e.target.value)}
                           disabled={
                             localStorage.getItem("role") !== "ROLE_ADMIN" &&
-                            localStorage.getItem("role") !== "ROLE_MANAGER"
+                            localStorage.getItem("role") !== "ROLE_MANAGER" &&
+                            localStorage.getItem("role") !== "ROLE_QLPO"
                           }
                         />
                       </Form.Group>
@@ -524,7 +529,8 @@ const ModalUpdatePoDetail = (props) => {
                           customInput={<Form.Control />}
                           disabled={
                             localStorage.getItem("role") !== "ROLE_ADMIN" &&
-                            localStorage.getItem("role") !== "ROLE_MANAGER"
+                            localStorage.getItem("role") !== "ROLE_MANAGER" &&
+                            localStorage.getItem("role") !== "ROLE_QLPO"
                           }
                         />
                       </Form.Group>
@@ -544,7 +550,9 @@ const ModalUpdatePoDetail = (props) => {
                           disabled={
                             localStorage.getItem("role") !== "ROLE_ADMIN" &&
                             localStorage.getItem("role") !== "ROLE_MANAGER" &&
-                            localStorage.getItem("role") !== "ROLE_KCSANALYST"
+                            localStorage.getItem("role") !==
+                              "ROLE_KCSANALYST" &&
+                            localStorage.getItem("role") !== "ROLE_QLPO"
                           }
                           value={kcsVT}
                           onChange={(event) => {
@@ -577,7 +585,8 @@ const ModalUpdatePoDetail = (props) => {
                           customInput={<Form.Control />}
                           disabled={
                             localStorage.getItem("role") !== "ROLE_ADMIN" &&
-                            localStorage.getItem("role") !== "ROLE_MANAGER"
+                            localStorage.getItem("role") !== "ROLE_MANAGER" &&
+                            localStorage.getItem("role") !== "ROLE_QLPO"
                           }
                         />
                       </Form.Group>
@@ -629,7 +638,8 @@ const ModalUpdatePoDetail = (props) => {
             >
               Save Changes
             </Button>
-            {localStorage.getItem("role") === "ROLE_ADMIN" ? (
+            {localStorage.getItem("role") === "ROLE_ADMIN" ||
+            localStorage.getItem("role") === "ROLE_MANAGER" ? (
               <Button variant="danger" onClick={confirmDelete}>
                 Delete
               </Button>

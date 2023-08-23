@@ -9,7 +9,7 @@ import "./tablehh.scss";
 import { toast } from "react-toastify";
 import _ from "lodash";
 import moment from "moment";
-import { Modal, Button, Row, InputGroup } from "react-bootstrap";
+import { Modal, Button, Row, InputGroup, Alert } from "react-bootstrap";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import {
   checkBarcode,
@@ -1303,6 +1303,8 @@ export const TableHH = () => {
 
   return (
     <>
+    {localStorage.getItem("role") !== "ROLE_QLSC" ? 
+    <>
       <div className="tables">
         <div className="table-action">
           <div className="d-flex">
@@ -1971,7 +1973,8 @@ export const TableHH = () => {
                       <td className="col-note">{item.note}</td>
                       <td className="col-barcode-action">
                         {localStorage.getItem("role") === "ROLE_ADMIN" ||
-                        localStorage.getItem("role") === "ROLE_MANAGER" ? (
+                        localStorage.getItem("role") === "ROLE_MANAGER" ||
+                        localStorage.getItem("role") === "ROLE_QLPO" ? (
                           <>
                             <button
                               className="btn btn-primary btn-sm "
@@ -2184,6 +2187,14 @@ export const TableHH = () => {
           </Modal>
         </div>
       </div>
+      </> : 
+      <>
+        <Alert variant="danger" className=" error-login">
+          <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+          <p>Bạn không có quyền truy cập</p>
+        </Alert>
+      </>
+      }
     </>
   );
 };

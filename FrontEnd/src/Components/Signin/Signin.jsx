@@ -46,7 +46,7 @@ const Signin = () => {
   // display permissions
   useEffect(() => {
     if (account && account.auth === true && account.status === 2) {
-      if(localStorage.getItem("role") === "ROLE_REPAIRMAN") {
+      if(localStorage.getItem("role") === "ROLE_QLSC") {
         navigate("/quan-li-sua-chua");
       }else {
       navigate("/");

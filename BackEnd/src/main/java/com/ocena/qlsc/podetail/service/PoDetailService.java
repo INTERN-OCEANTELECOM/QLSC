@@ -4,6 +4,7 @@ import com.ocena.qlsc.common.error.exception.DataAlreadyExistException;
 import com.ocena.qlsc.common.error.exception.InvalidHeaderException;
 import com.ocena.qlsc.common.error.exception.NotPermissionException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
+import com.ocena.qlsc.common.service.BaseServiceAdapter;
 import com.ocena.qlsc.common.util.CacheUtils;
 import com.ocena.qlsc.common.util.ReflectionUtils;
 import com.ocena.qlsc.common.util.StringUtils;
@@ -22,7 +23,6 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
-import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.util.SystemUtils;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
@@ -56,7 +56,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, PoDetailResponse> implements IPoDetailService {
+public class PoDetailService extends BaseServiceAdapter<PoDetail, PoDetailRequest, PoDetailResponse> implements IPoDetailService {
     @Autowired
     PoDetailMapper poDetailMapper;
     @Autowired
@@ -130,11 +130,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
 
         return new PageImpl<>(mergeList, pageable, mergeList.size())
                 .map(poDetail -> poDetailMapper.entityToDto(poDetail));
-    }
-
-    @Override
-    protected List<PoDetail> getListSearchResults(String keyword) {
-        return null;
     }
 
     public ListResponse<PoDetailResponse> getByPO(String poNumber) {
@@ -464,6 +459,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         String poDetailId = poDetailDto.getPo().getPoNumber() + "-" + poDetailDto.getProduct().getProductId() + "-"
                 + poDetailDto.getSerialNumber();
         poDetailDto.setPoDetailId(poDetailId);
+        System.out.println(poDetailDto);
 
         // Validate the PO detail object and return it if it is valid
         List<String> resultError = validationRequest(poDetailDto);
@@ -498,9 +494,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         List<String> updateableFieldsForRepairRole = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber","repairStatus"));
 
         for (Role role : userRoles) {
-            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
+            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_QLPO.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
                     || (role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()) && fieldList.containsAll(updateableFieldsForKCSRole)
-                    || (role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()) && fieldList.containsAll(updateableFieldsForRepairRole)))){
+                    || (role.getRoleName().equals(RoleUser.ROLE_QLSC.name()) && fieldList.containsAll(updateableFieldsForRepairRole)))){
                 return true;
             }
         }

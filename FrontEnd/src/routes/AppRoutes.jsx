@@ -38,8 +38,8 @@ const AppRoutes = () => {
               </PrivateRoutes>
             }
           />
-          <Route path="barcode-check" element={<BarCodeCheck />} />
-          <Route path="sn-check" element={<SNCheck />} />
+          {/* <Route path="barcode-check" element={<BarCodeCheck />} />
+          <Route path="sn-check" element={<SNCheck />} /> */}
           <Route path="quan-li-sua-chua" element={<QLSC />} />
         </Route>
         <Route path="signin" element={<Signin />} />

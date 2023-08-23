@@ -5,7 +5,7 @@ import {  utils, writeFile } from "xlsx";
 import ReactPaginate from "react-paginate";
 import "./product.scss";
 import _ from "lodash";
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button, Alert } from "react-bootstrap";
 import { fecthAll, getAllProduct, searchProduct } from "../../service/service";
 import {  FaFileExport } from "react-icons/fa";
 import { AiOutlineSearch } from "react-icons/ai";
@@ -190,206 +190,223 @@ const Product = () => {
 
   return (
     <>
-      <div className="product">
-        {/* button */}
+      {localStorage.getItem("role") !== "ROLE_QLSC" ? (
+        <>
+          <div className="product">
+            {/* button */}
 
-        <div className="my-3 add-new d-flex justify-content-between flex-wrap">
-          <div className="col-6 d-flex">
-            <div className="col-6">
-              <div className="btn-search input-group w-100">
-                <input
-                  className="form-control"
-                  placeholder="Search..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={(e) => handlePressEnter(e)}
-                />
-                <button
-                  className="btn1 btn-primary1"
-                  onClick={() => handleSearch()}
-                >
-                  <AiOutlineSearch />
-                </button>
-              </div>
-            </div>
-            <div className="update-po col-2 mx-2">
-              <button
-                className="btn1 btn-primary1 btn-reset "
-                onClick={() => handleReset()}
-              >
-                Reset
-              </button>
-            </div>
-          </div>
-
-          <div className="group-btn d-flex">
-            {localStorage.getItem("role") === "ROLE_MANAGER" ||
-            localStorage.getItem("role") === "ROLE_ADMIN" ? (
-              <>
-                <div className="import">
+            <div className="my-3 add-new d-flex justify-content-between flex-wrap">
+              <div className="col-6 d-flex">
+                <div className="col-6">
+                  <div className="btn-search input-group w-100">
+                    <input
+                      className="form-control"
+                      placeholder="Search..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      onKeyDown={(e) => handlePressEnter(e)}
+                    />
+                    <button
+                      className="btn1 btn-primary1"
+                      onClick={() => handleSearch()}
+                    >
+                      <AiOutlineSearch />
+                    </button>
+                  </div>
+                </div>
+                <div className="update-po col-2 mx-2">
                   <button
-                    htmlFor="test"
-                    className="btn btn-danger label-import"
-                    onClick={() => setIsShowAddProduct(true)}
+                    className="btn1 btn-primary1 btn-reset "
+                    onClick={() => handleReset()}
                   >
-                    <FaFileImport className="icon-import" />
-                    Add new
+                    Reset
                   </button>
                 </div>
-              </>
-            ) : null}
-            <div className="export">
-              <button
-                htmlFor="test"
-                className="btn btn-success label-import export-btn"
-                onClick={handleExport}
+              </div>
+
+              <div className="group-btn d-flex">
+                {localStorage.getItem("role") === "ROLE_MANAGER" ||
+                localStorage.getItem("role") === "ROLE_ADMIN" ||
+                localStorage.getItem("role") === "ROLE_QLPO" ? (
+                  <>
+                    <div className="import">
+                      <button
+                        htmlFor="test"
+                        className="btn btn-danger label-import"
+                        onClick={() => setIsShowAddProduct(true)}
+                      >
+                        <FaFileImport className="icon-import" />
+                        Add new
+                      </button>
+                    </div>
+                  </>
+                ) : null}
+                <div className="export">
+                  <button
+                    htmlFor="test"
+                    className="btn btn-success label-import export-btn"
+                    onClick={handleExport}
+                  >
+                    <FaFileExport className="icon-export" />
+                    Export
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* table */}
+
+            <Table
+              striped
+              bordered
+              hover
+              className="table-shadow responsive-table"
+            >
+              <thead>
+                <tr>
+                  <th>Stt</th>
+                  <th>Mã thiết bị</th>
+                  <th>Tên thiết bị</th>
+                  <th className="col-amount">Thống kê SL</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedListHH &&
+                  sortedListHH.length > 0 &&
+                  sortedListHH.map((item, index) => {
+                    const currentIndex = startIndex + index;
+                    const formattedProductName = formatProductName(
+                      item.productName
+                    );
+                    return (
+                      <tr
+                        key={`sc-${currentIndex}`}
+                        onDoubleClick={() => handleShowProductDetail(item)}
+                      >
+                        <td>{currentIndex + 1}</td>
+                        <td>{item.productId}</td>
+                        <td>{formattedProductName}</td>
+                        <td className="col-amount-sl">{item.amount}</td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </Table>
+
+            {/* Phân trang */}
+
+            <div className="page-size ">
+              <ReactPaginate
+                breakLabel="..."
+                nextLabel="next >"
+                onPageChange={handlePageClick}
+                pageRangeDisplayed={5}
+                pageCount={totalProducts}
+                previousLabel="< previous"
+                pageClassName="page-item"
+                pageLinkClassName="page-link"
+                previousClassName="page-item"
+                previousLinkClassName="page-link"
+                nextClassName="page-item"
+                nextLinkClassName="page-link"
+                breakClassName="page-item"
+                breakLinkClassName="page-link"
+                containerClassName="pagination"
+                activeClassName="active"
+                renderOnZeroPageCount={null}
+              />
+
+              <Form.Select
+                aria-label="Default select example"
+                className="form-select-size"
+                onChange={(event) => setSelectedOption(event.target.value)}
+                value={selectedOption}
               >
-                <FaFileExport className="icon-export" />
-                Export
-              </button>
+                <option value="50">50 / Trang</option>
+                <option value="75">75 / Trang</option>
+                <option value="100">100 / Trang</option>
+              </Form.Select>
+            </div>
+
+            {/* Modal */}
+
+            <ModalAddProduct
+              show={isShowAddProduct}
+              handleCloses={handleCloses}
+              getProducts={getProducts}
+              currentPage={currentPage}
+            />
+
+            <ModalShowProduct
+              show={isShowProductDetail}
+              handleClose={handleCloses}
+              dataDetail={dataDetail}
+              getProducts={getProducts}
+              currentPage={currentPage}
+              search={search}
+              handleSearch={handleSearch}
+              currentPageSearch={currentPageSearch}
+            />
+
+            <div
+              className="modal show "
+              style={{ display: "block", position: "initial" }}
+            >
+              <Modal
+                show={isShowNotify}
+                onHide={handleCloses}
+                size="lg"
+                centered
+                scrollable
+                className="custom-modal"
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title className="text-center">Thông báo</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <Table striped bordered hover>
+                    <thead>
+                      <tr>
+                        <th>Loại lỗi</th>
+                        <th>Số hàng </th>
+                        <th>Mô tả lỗi </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data &&
+                        data.length > 0 &&
+                        data.map((item, index) => {
+                          return (
+                            <tr key={`sc-${index}`}>
+                              <td>{item.type}</td>
+                              <td>{item.position}</td>
+                              <td>{item.errorDescription}</td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </Table>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloses}>
+                    Close
+                  </Button>
+                  <Button variant="primary" onClick={handleExportNotify}>
+                    Export
+                  </Button>
+                </Modal.Footer>
+              </Modal>
             </div>
           </div>
-        </div>
-
-        {/* table */}
-
-        <Table striped bordered hover className="table-shadow responsive-table">
-          <thead>
-            <tr>
-              <th>Stt</th>
-              <th>Mã thiết bị</th>
-              <th>Tên thiết bị</th>
-              <th className="col-amount">Thống kê SL</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedListHH &&
-              sortedListHH.length > 0 &&
-              sortedListHH.map((item, index) => {
-                const currentIndex = startIndex + index;
-                const formattedProductName = formatProductName(
-                  item.productName
-                );
-                return (
-                  <tr
-                    key={`sc-${currentIndex}`}
-                    onDoubleClick={() => handleShowProductDetail(item)}
-                  >
-                    <td>{currentIndex + 1}</td>
-                    <td>{item.productId}</td>
-                    <td>{formattedProductName}</td>
-                    <td className="col-amount-sl">{item.amount}</td>
-                  </tr>
-                );
-              })}
-          </tbody>
-        </Table>
-
-        {/* Phân trang */}
-
-        <div className="page-size ">
-          <ReactPaginate
-            breakLabel="..."
-            nextLabel="next >"
-            onPageChange={handlePageClick}
-            pageRangeDisplayed={5}
-            pageCount={totalProducts}
-            previousLabel="< previous"
-            pageClassName="page-item"
-            pageLinkClassName="page-link"
-            previousClassName="page-item"
-            previousLinkClassName="page-link"
-            nextClassName="page-item"
-            nextLinkClassName="page-link"
-            breakClassName="page-item"
-            breakLinkClassName="page-link"
-            containerClassName="pagination"
-            activeClassName="active"
-            renderOnZeroPageCount={null}
-          />
-
-          <Form.Select
-            aria-label="Default select example"
-            className="form-select-size"
-            onChange={(event) => setSelectedOption(event.target.value)}
-            value={selectedOption}
-          >
-            <option value="50">50 / Trang</option>
-            <option value="75">75 / Trang</option>
-            <option value="100">100 / Trang</option>
-          </Form.Select>
-        </div>
-
-        {/* Modal */}
-
-        <ModalAddProduct
-          show={isShowAddProduct}
-          handleCloses={handleCloses}
-          getProducts={getProducts}
-          currentPage={currentPage}
-        />
-
-        <ModalShowProduct
-          show={isShowProductDetail}
-          handleClose={handleCloses}
-          dataDetail={dataDetail}
-          getProducts={getProducts}
-          currentPage={currentPage}
-          search={search}
-          handleSearch={handleSearch}
-          currentPageSearch={currentPageSearch}
-        />
-
-        <div
-          className="modal show "
-          style={{ display: "block", position: "initial" }}
-        >
-          <Modal
-            show={isShowNotify}
-            onHide={handleCloses}
-            size="lg"
-            centered
-            scrollable
-            className="custom-modal"
-          >
-            <Modal.Header closeButton>
-              <Modal.Title className="text-center">Thông báo</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Table striped bordered hover>
-                <thead>
-                  <tr>
-                    <th>Loại lỗi</th>
-                    <th>Số hàng </th>
-                    <th>Mô tả lỗi </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data &&
-                    data.length > 0 &&
-                    data.map((item, index) => {
-                      return (
-                        <tr key={`sc-${index}`}>
-                          <td>{item.type}</td>
-                          <td>{item.position}</td>
-                          <td>{item.errorDescription}</td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </Table>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloses}>
-                Close
-              </Button>
-              <Button variant="primary" onClick={handleExportNotify}>
-                Export
-              </Button>
-            </Modal.Footer>
-          </Modal>
-        </div>
-      </div>
+        </>
+      ) : (
+        <>
+          <Alert variant="danger" className=" error-login">
+            <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+            <p>Bạn không có quyền truy cập</p>
+          </Alert>
+        </>
+      )}
     </>
   );
 };
