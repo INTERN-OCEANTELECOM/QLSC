@@ -277,10 +277,10 @@ const getAllPoDetail = () => {
 };
 
 // api update product
-const updateProduct = (productId, productName, imagesBase64) => {
+const updateProduct = (productId, productName, imagesBase64, productGroup) => {
   return axioss.put(
     `/product/update/${productId}`,
-    { productId, productName, imagesBase64 },
+    { productId, productName, imagesBase64, productGroup },
     {
       headers: {
         // "Content-Type": "multipart/form-data",
@@ -291,13 +291,14 @@ const updateProduct = (productId, productName, imagesBase64) => {
 };
 
 // api add product
-const addProduct = (productId, productName, imagesBase64) => {
+const addProduct = (productId, productName, imagesBase64, productGroup) => {
   return axioss.post(
     "/product/add",
     {
       productId,
       productName,
       imagesBase64: Array.isArray(imagesBase64) ? imagesBase64 : [imagesBase64],
+      productGroup,
     },
     {
       headers: {

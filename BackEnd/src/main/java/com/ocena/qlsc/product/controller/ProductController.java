@@ -11,14 +11,11 @@ import com.ocena.qlsc.product.dto.product.ProductResponse;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -76,7 +73,7 @@ public class ProductController extends BaseApiImpl<Product, ProductRequest, Prod
     }
 
     @ApiShow
-    @GetMapping("/get-all-product-name")
+    @GetMapping("/get-names")
     public ListResponse<List<String>> getAllProductName() {
         return productService.getAllProductName();
     }

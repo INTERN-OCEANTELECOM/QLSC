@@ -119,15 +119,11 @@ public class HistoryService {
                 field.setAccessible(true);
                 Object oldFieldValue = field.get(oldObject);
                 Object newFieldValue = field.get(newObject);
-                System.out.println(field.getName());
-                System.out.println(oldFieldValue);
-                System.out.println(newFieldValue);
 
                 if(field.getName().equals("roles")) {
                     compareRoles(oldFieldValue, newFieldValue, fieldNames, oldValues, newValues);
                     continue;
                 }
-
                 if (ReflectionUtils.isComplexType(field.getType())
                         || FieldsNameConstants.FIELD_TO_EXCLUDE.contains(field.getName()))
                     continue;

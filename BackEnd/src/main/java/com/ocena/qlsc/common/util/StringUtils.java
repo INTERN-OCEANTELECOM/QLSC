@@ -9,6 +9,9 @@ public class StringUtils {
         return str.replace(subStr, "");
     }
 
+    public static String replaceChar(String str, String oldChar, String newChar) {
+        return str == null ? null : str.replace(oldChar, newChar);
+    }
     public static List<String> splitWhiteSpaceToList(String input) {
         return input != null && !input.trim().equals("")
                 ? Arrays.stream(input.trim().split("\\s+")).toList()

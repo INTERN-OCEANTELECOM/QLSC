@@ -12,7 +12,7 @@ import com.ocena.qlsc.user.dto.user.LoginRequest;
 import com.ocena.qlsc.user.dto.user.UserRequest;
 import com.ocena.qlsc.user.dto.user.UserResponse;
 import com.ocena.qlsc.user.model.User;
-import com.ocena.qlsc.user.service.user.UserService;
+import com.ocena.qlsc.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

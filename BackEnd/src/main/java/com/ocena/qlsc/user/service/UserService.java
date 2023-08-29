@@ -1,4 +1,4 @@
-package com.ocena.qlsc.user.service.user;
+package com.ocena.qlsc.user.service;
 
 import com.ocena.qlsc.common.constants.message.StatusCode;
 import com.ocena.qlsc.common.constants.message.StatusMessage;
@@ -8,6 +8,7 @@ import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
+import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.common.service.BaseServiceAdapter;
 import com.ocena.qlsc.common.util.SystemUtils;
 import com.ocena.qlsc.user.dto.role.RoleResponse;
@@ -29,8 +30,6 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +39,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService extends BaseServiceAdapter<User, UserRequest, UserResponse> implements IUserService {
+public class UserService extends BaseServiceAdapter<User, UserRequest, UserResponse> implements BaseService<User, UserRequest, UserResponse> {
     @Autowired
     UserRepository userRepository;
     @Autowired

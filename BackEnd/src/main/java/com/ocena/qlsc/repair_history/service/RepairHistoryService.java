@@ -32,7 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class RepairHistoryService extends BaseServiceAdapter<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> implements IRepairHistoryService {
+public class RepairHistoryService extends BaseServiceAdapter<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> {
 
     @Autowired
     RepairHistoryRepository repairHistoryRepository;
@@ -119,6 +119,8 @@ public class RepairHistoryService extends BaseServiceAdapter<RepairHistory, Repa
         String poNumber = searchKeywordDto.getKeyword().get(2);
         String creator = searchKeywordDto.getKeyword().get(3);
         String repairResult = searchKeywordDto.getKeyword().get(4);
+
+        System.out.println(serialNumber);
 
         Page<PoDetail> pageSearchRepairHistory = repairHistoryRepository
                 .searchRepairHistory(serialNumber, poNumber, productName, pageable);

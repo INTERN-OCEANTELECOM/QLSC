@@ -1,6 +1,7 @@
 package com.ocena.qlsc.product.dto.product;
 
 import com.ocena.qlsc.product.dto.image.ProductImageDto;
+import com.ocena.qlsc.product.dto.product_group.GroupResponse;
 import lombok.*;
 
 import java.io.Serial;
@@ -16,5 +17,6 @@ public class ProductResponse {
     private String productId;
     private String productName;
     private Integer amount;
+    private GroupResponse productGroup;
     private List<ProductImageDto> images;
 }

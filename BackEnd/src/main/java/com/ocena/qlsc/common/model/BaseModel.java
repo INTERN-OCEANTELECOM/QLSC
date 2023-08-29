@@ -15,7 +15,7 @@ import java.util.UUID;
 @MappedSuperclass
 public class BaseModel implements Cloneable, Serializable {
     @Serial
-    private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
     @Id
     private String id;
     private Long created;
@@ -31,7 +31,7 @@ public class BaseModel implements Cloneable, Serializable {
     }
 
     @PrePersist
-    public void ensureId() {
+    private void ensureId() {
         this.setId(UUID.randomUUID().toString());
         this.setCreated(System.currentTimeMillis());
         this.setCreator(SystemUtils.getCurrentEmail());

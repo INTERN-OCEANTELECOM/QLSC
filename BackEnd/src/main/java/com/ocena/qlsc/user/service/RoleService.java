@@ -1,4 +1,4 @@
-package com.ocena.qlsc.user.service.role;
+package com.ocena.qlsc.user.service;
 
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RoleService extends BaseServiceAdapter<Role, RoleRequest, RoleResponse> implements IRoleService {
+public class RoleService extends BaseServiceAdapter<Role, RoleRequest, RoleResponse> {
 
     @Autowired
     RoleMapper roleMapper;

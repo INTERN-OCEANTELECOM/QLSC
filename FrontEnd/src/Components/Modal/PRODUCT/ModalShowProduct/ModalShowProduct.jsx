@@ -6,6 +6,7 @@ import Form from "react-bootstrap/Form";
 import { getImages, updateProduct } from "../../../../service/service";
 import { toast } from "react-toastify";
 import imageCompression from "browser-image-compression";
+import { Col } from "react-bootstrap";
 
 const ModalShowProduct = (props) => {
   const {
@@ -28,6 +29,7 @@ const ModalShowProduct = (props) => {
   const [imageData1, setImageData1] = useState([]);
   const [imageData2, setImageData2] = useState([]);
   const [imageData, setImageData] = useState([]);
+  const [deviceGroup, setDeviceGroup] = useState(null)
 
 
   useEffect(() => {
@@ -38,7 +40,10 @@ const ModalShowProduct = (props) => {
     if (show) {
       setValidate("")
       setProductId(dataDetail.productId);
-      console.log(dataDetail.productName);
+      if (dataDetail.productGroup !== null) {
+        setDeviceGroup(dataDetail.productGroup.id);
+      }
+      console.log(dataDetail.productGroup);
       // Tách dữ liệu thành mảng các tên thiết bị
       const names = dataDetail.productName.split("\n").map((name) => {
         const trimmedName = name.trim();
@@ -64,11 +69,12 @@ const ModalShowProduct = (props) => {
 
   const getImage = async () => {
     let res = await getImages(productId);
-    console.log(res);
+    console.log(res.data.productGroup.groupName);
     if (res && res.statusCode === 200) {
       setImageData1(res.data.images[0].fileBytes);
       setImageData2(res.data.images[1].fileBytes);
       imageData.push(imageData1, imageData2)
+      // setDeviceGroup(res.data.productGroup.groupName)
     }
   };
 
@@ -204,14 +210,23 @@ const ModalShowProduct = (props) => {
        imagesBase64.push(imageData1);
      }
      
+     let productGroup = {
+      id : deviceGroup
+     }
 
-    let res = await updateProduct(productId,mergedProductNames, imagesBase64);
+    let res = await updateProduct(
+      productId,
+      mergedProductNames,
+      imagesBase64,
+      productGroup
+    );
     if (res && res.statusCode === 200) {
       handleClose();
       toast.success("Cập nhật thành công!!!");
       setImageData([])
       setImageData1([])
       setImageData2([])
+      setDeviceGroup(null)
       getImage()
       if(search) {
         handleSearch(currentPageSearch);
@@ -271,6 +286,8 @@ const ModalShowProduct = (props) => {
     setImageData([])
     setProductId("")
     setProductName("")
+    setDeviceGroup(null);
+
   }
 
   return (
@@ -286,6 +303,36 @@ const ModalShowProduct = (props) => {
           <Form className="d-flex justify-content-between  form-product">
             <div className="form-input">
               <div className="validate-add-product">{validate}</div>
+              <Form.Group
+                as={Col}
+                controlId="validationCustom03"
+                className="mb-3"
+              >
+                <Form.Label>Nhóm thiết bị</Form.Label>
+                <Form.Select
+                  aria-label="Default select example"
+                  // className="me-5"
+                  value={
+                    deviceGroup === null ? "Chọn nhóm thiết bị" : deviceGroup
+                  }
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setDeviceGroup(
+                      value === "Chọn nhóm thiết bị" ? null : value
+                    );
+                  }}
+                >
+                  <option value={null}>Chọn nhóm thiết bị</option>
+                  <option value="PTTBVT">Card phụ trợ thiết bị vô tuyến</option>
+                  <option value="XLCTBVT">
+                    Card xử lí chính thiết bị vô tuyến
+                  </option>
+                  <option value="TBTDCĐBR">
+                    Thiết bị truyền dẫn và CĐBR
+                  </option>
+                  <option value="TBCĐ">Thiết bị cơ điện</option>
+                </Form.Select>
+              </Form.Group>
               <Form.Group
                 className="mb-3"
                 controlId="exampleForm.ControlInput1"

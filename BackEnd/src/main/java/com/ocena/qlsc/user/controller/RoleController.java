@@ -8,7 +8,7 @@ import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.user.dto.role.RoleRequest;
 import com.ocena.qlsc.user.dto.role.RoleResponse;
 import com.ocena.qlsc.user.model.Role;
-import com.ocena.qlsc.user.service.role.RoleService;
+import com.ocena.qlsc.user.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

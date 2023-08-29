@@ -5,7 +5,7 @@ import {  utils, writeFile } from "xlsx";
 import ReactPaginate from "react-paginate";
 import "./product.scss";
 import _ from "lodash";
-import { Modal, Button, Alert } from "react-bootstrap";
+import { Modal, Button, Alert, NavDropdown } from "react-bootstrap";
 import { fecthAll, getAllProduct, searchProduct } from "../../service/service";
 import {  FaFileExport } from "react-icons/fa";
 import { AiOutlineSearch } from "react-icons/ai";
@@ -98,7 +98,7 @@ const Product = () => {
 
   // Export
   const handleExport = () => {
-    const columnHeader = ["Mã hàng hóa", "Tên thiết bị", "Thống kê SL"];
+    const columnHeader = ["Mã hàng hóa", "Tên thiết bị","Nhóm thiết bị", "Thống kê SL"];
     const exportData = [
       columnHeader,
       ...dataExport.map((item, index) => {
@@ -111,6 +111,11 @@ const Product = () => {
             }
             if (column === "Mã hàng hóa") {
               return item.productId;
+            }
+            if (column === "Nhóm thiết bị") {
+              if (item.productGroup !== null) {
+                return item.productGroup.groupName;
+              } 
             }
             if (column === "Thống kê SL") {
               return item.amount;
@@ -267,6 +272,27 @@ const Product = () => {
                   <th>Stt</th>
                   <th>Mã thiết bị</th>
                   <th>Tên thiết bị</th>
+                  <th className="col-group-name">
+                    Nhóm thiết bị
+                    {/* <NavDropdown
+                      title="Nhóm thiết bị"
+                      id="basic-nav-dropdown"
+                      className="float-start"
+                    >
+                      <NavDropdown.Item href="#action/3.1">
+                        Card phụ trợ thiết bị vô tuyến
+                      </NavDropdown.Item>
+                      <NavDropdown.Item href="#action/3.2">
+                        Card xử lí chính thiết bị vô tuyến
+                      </NavDropdown.Item>
+                      <NavDropdown.Item href="#action/3.3">
+                        Sửa chữa thiết bị truyền dẫn và CĐBR
+                      </NavDropdown.Item>
+                      <NavDropdown.Item href="#action/3.4">
+                        Sửa chữa thiết bị cơ điện
+                      </NavDropdown.Item>
+                    </NavDropdown> */}
+                  </th>
                   <th className="col-amount">Thống kê SL</th>
                 </tr>
               </thead>
@@ -278,6 +304,11 @@ const Product = () => {
                     const formattedProductName = formatProductName(
                       item.productName
                     );
+
+                    const group =
+                      item.productGroup !== null
+                        ? item.productGroup.groupName
+                        : "Chưa cập nhật";
                     return (
                       <tr
                         key={`sc-${currentIndex}`}
@@ -286,6 +317,7 @@ const Product = () => {
                         <td>{currentIndex + 1}</td>
                         <td>{item.productId}</td>
                         <td>{formattedProductName}</td>
+                        <td>{group}</td>
                         <td className="col-amount-sl">{item.amount}</td>
                       </tr>
                     );

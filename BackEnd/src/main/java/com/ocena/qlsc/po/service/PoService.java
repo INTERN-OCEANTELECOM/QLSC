@@ -12,6 +12,7 @@ import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
+import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.common.service.BaseServiceAdapter;
 import com.ocena.qlsc.po.dto.PoRequest;
 import com.ocena.qlsc.po.dto.PoResponse;
@@ -21,6 +22,8 @@ import com.ocena.qlsc.po.repository.PoRepository;
 import com.ocena.qlsc.podetail.enumrate.KcsVT;
 import com.ocena.qlsc.podetail.enumrate.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
+import com.ocena.qlsc.product.model.ProductGroup;
+import com.ocena.qlsc.product.repository.GroupRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,9 +38,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoService extends BaseServiceAdapter<Po, PoRequest, PoResponse> implements IPoService {
+public class PoService extends BaseServiceAdapter<Po, PoRequest, PoResponse> implements BaseService<Po, PoRequest, PoResponse> {
     @Autowired
     PoRepository poRepository;
+    @Autowired
+    GroupRepository groupRepository;
     @Autowired
     PoMapper poMapper;
     @Override
@@ -142,6 +147,19 @@ public class PoService extends BaseServiceAdapter<Po, PoRequest, PoResponse> imp
         return result;
     }
 
+    public static Map<String, Long> getCountsByProductGroup(List<PoDetail> poDetails, List<String> groups) {
+        Map<String, Long> result = new HashMap<>();
+        for(String id: groups) {
+            long count = poDetails
+                    .stream()
+                    .filter(poDetail -> poDetail.getProduct().getProductGroup() != null
+                            && poDetail.getProduct().getProductGroup().getId().equals(id))
+                    .count();
+            result.put(id, count);
+        }
+        return result;
+     }
+
     /**
      * Gets various statistics on the PoDetail objects associated with the Po with the given poNumber,
      * @param poNumber the poNumber of the Po to get statistics for
@@ -154,6 +172,10 @@ public class PoService extends BaseServiceAdapter<Po, PoRequest, PoResponse> imp
         // Create a new map to store the results of the statistics
         HashMap<String, Map<String, Long>> resultsMap = new HashMap<>();
         List<PoDetail> listPoDetail = poRepository.getPoDetailsByPoNumber(poNumber);
+        List<String> groups = groupRepository.findAll()
+                .stream()
+                .map(ProductGroup::getId)
+                .collect(Collectors.toList());;
         if(optionalPO.isPresent()) {
             Po po = optionalPO.get();
             Map<String, Long> totalMap = new HashMap<>();
@@ -161,11 +183,11 @@ public class PoService extends BaseServiceAdapter<Po, PoRequest, PoResponse> imp
             totalMap.put("SO_LUONG_IMPORT", (long) listPoDetail.size());
             resultsMap.put("TONG_SO_LUONG", totalMap);
 
-
             resultsMap.put("TRANG_THAI_SC", getCountsByRepairStatus(listPoDetail, RepairStatus.SC_XONG));
             resultsMap.put("KSC_VT", getCountsByKSCVT(listPoDetail, KcsVT.PASS));
             resultsMap.put("BAO_HANH", getCountsByWarrantyPeriod(listPoDetail));
             resultsMap.put("XUAT_KHO", getCountsByExportPartner(listPoDetail));
+            resultsMap.put("NHOM_THIET_BI", getCountsByProductGroup(listPoDetail, groups));
             return ResponseMapper.toDataResponse(resultsMap, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
         }
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);

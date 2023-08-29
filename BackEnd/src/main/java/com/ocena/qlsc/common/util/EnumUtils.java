@@ -34,19 +34,15 @@ public class EnumUtils {
 
     public static String getEnumNameByValue(Object obj, String fieldName) {
         String enumName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-        System.out.println(enumName);
         try {
             Class<?> enumClass = Class.forName("com.ocena.qlsc.podetail.enumrate." + enumName);
             Method valuesMethod = enumClass.getMethod("values");
             Enum<?>[] enumValues = (Enum<?>[]) valuesMethod.invoke(null);
 
             for (Enum<?> enumValue : enumValues) {
-                System.out.println("Vao day");
                 Method getValueMethod = enumValue.getClass().getMethod("getValue");
                 int enumValueValue = (int) getValueMethod.invoke(enumValue);
-                System.out.println("Value: " + enumValueValue);
                 if (enumValueValue == (short) obj) {
-                    System.out.println("EnumValue: " + enumValue.name());;
                     return enumValue.name();
                 }
             }

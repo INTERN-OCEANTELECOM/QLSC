@@ -6,6 +6,7 @@ import Form from "react-bootstrap/Form";
 import { addProduct, updateProduct } from "../../../../service/service";
 import { toast } from "react-toastify";
 import imageCompression from "browser-image-compression";
+import { Col } from "react-bootstrap";
 
 const ModalAddProduct = (props) => {
   const {
@@ -24,6 +25,7 @@ const ModalAddProduct = (props) => {
   const [selectedNameIndex, setSelectedNameIndex] = useState(0);
   const [imageData, setImageData] = useState([]);
   const [imageFile, setImageFile] = useState(null);
+  const [deviceGroup, setDeviceGroup] = useState(null)
 
   // check if show then get data product
   useEffect(() => {
@@ -44,7 +46,7 @@ const ModalAddProduct = (props) => {
     }
 
     const isAnyChecked = productNames.some((nameObj) => nameObj.checked);
-    if (!productId || !isAnyChecked) {
+    if (!productId || !isAnyChecked || !deviceGroup) {
       setValidate("Cần điền đầy đủ thông tin");
       return;
     } else {
@@ -66,8 +68,17 @@ const ModalAddProduct = (props) => {
     const imagesByteArrays = imageData.map(convertToByteArray);
     const imagesBase64 = imagesByteArrays.map(convertToBase64);
 
+    let productGroup = {
+      id : deviceGroup
+    }
+
     // call api
-    let res = await addProduct(productId, mergedProductNames, imagesBase64);
+    let res = await addProduct(
+      productId,
+      mergedProductNames,
+      imagesBase64,
+      productGroup
+    );
     if (res && res.statusCode === 200) {
       setProductId("");
       setProductName("");
@@ -75,6 +86,7 @@ const ModalAddProduct = (props) => {
       handleCloses();
       toast.success("Thêm thành công!!");
       getProducts(page);
+      setDeviceGroup(null)
     } else {
       setValidate(res.data.data);
     }
@@ -87,6 +99,7 @@ const ModalAddProduct = (props) => {
     setProductNames([{ value: "", checked: false }]);
     setSelectedNameIndex(0)
     setImageData([])
+    setDeviceGroup(null);
   }
 
   const handleAddProductName = () => {
@@ -154,6 +167,32 @@ const ModalAddProduct = (props) => {
           <Form className="d-flex justify-content-between  form-product">
             <div className="form-input">
               <div className="validate-add-product">{validate}</div>
+              <Form.Group
+                as={Col}
+                controlId="validationCustom03"
+                className="mb-3"
+              >
+                <Form.Label>Nhóm thiết bị</Form.Label>
+                <Form.Select
+                  aria-label="Default select example"
+                  // className="me-5"
+                  value={deviceGroup === null ? "Tất cả" : deviceGroup}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setDeviceGroup(value === "Tất cả" ? null : value);
+                  }}
+                >
+                  <option>Chọn nhóm thiết bị</option>
+                  <option value="PTTBVT">Card phụ trợ thiết bị vô tuyến</option>
+                  <option value="XLCTBVT">
+                    Card xử lí chính thiết bị vô tuyến
+                  </option>
+                  <option value="TBTDCĐBR">
+                    Thiết bị truyền dẫn và CĐBR
+                  </option>
+                  <option value="TBCĐ">Thiết bị cơ điện</option>
+                </Form.Select>
+              </Form.Group>
               <Form.Group
                 className="mb-3"
                 controlId="exampleForm.ControlInput1"

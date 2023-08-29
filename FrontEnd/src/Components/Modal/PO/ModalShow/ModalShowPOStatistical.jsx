@@ -222,10 +222,15 @@ const ModalShowPOStatistical = (props) => {
   return (
     <>
       <Modal show={show} onHide={handleClose} fullscreen size="lg">
-        <Modal.Header >
+        <Modal.Header>
           <Modal.Title>Thống kê {dataStatistical.poNumber}</Modal.Title>
-          <button type="button" class="btn-closes" aria-label="Close" onClick={handleClose}>
-            <GrClose/>
+          <button
+            type="button"
+            class="btn-closes"
+            aria-label="Close"
+            onClick={handleClose}
+          >
+            <GrClose />
           </button>
         </Modal.Header>
         <Modal.Body>
@@ -308,6 +313,7 @@ const ModalShowPOStatistical = (props) => {
                       <th colSpan={2}>Xuất kho</th>
                       <th colSpan={3}>KCS</th>
                       <th colSpan={2}>Bảo hành</th>
+                      <th colSpan={4}>Nhóm thiết bị</th>
                     </tr>
                     <tr className="text-md-center">
                       <th className="col-content">Sửa chữa xong</th>
@@ -321,6 +327,10 @@ const ModalShowPOStatistical = (props) => {
                       <th className="col-content">Chưa cập nhật</th>
                       <th className="col-content">Đã cập nhật</th>
                       <th className="col-content">Chưa cập nhật</th>
+                      <th className="col-content">Card phụ trợ TBVT</th>
+                      <th className="col-content">Card xử lí TBVT</th>
+                      <th className="col-content">Tb truyền dẫn & CĐBR</th>
+                      <th className="col-content">Thiết bị cơ điện</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -338,10 +348,14 @@ const ModalShowPOStatistical = (props) => {
                           <td>{listPo.KSC_VT.CHUA_CAP_NHAT}</td>
                           <td>{listPo.BAO_HANH.DA_CAP_NHAT}</td>
                           <td>{listPo.BAO_HANH.CHUA_CAP_NHAT}</td>
+                          <td>{listPo.NHOM_THIET_BI.PTTBVT}</td>
+                          <td>{listPo.NHOM_THIET_BI.XLCTBVT}</td>
+                          <td>{listPo.NHOM_THIET_BI.TBTDCĐBR}</td>
+                          <td>{listPo.NHOM_THIET_BI.TBCĐ}</td>
                         </tr>
                         <tr>
-                          <td>Tỉ lệ hoàn thành: </td>
-                          <td colSpan={10}>
+                          <td colSpan={2}>Tỉ lệ hoàn thành: </td>
+                          <td colSpan={14}>
                             {listPo.KSC_VT.PASS
                               ? (
                                   (listPo.KSC_VT.PASS /

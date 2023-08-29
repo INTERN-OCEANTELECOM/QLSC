@@ -8,17 +8,22 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
+import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.common.service.BaseServiceAdapter;
 import com.ocena.qlsc.common.util.StringUtils;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 import com.ocena.qlsc.product.dto.product.ProductRequest;
 import com.ocena.qlsc.product.dto.product.ProductResponse;
+import com.ocena.qlsc.product.dto.product_group.GroupResponse;
 import com.ocena.qlsc.product.mapper.ProductMapper;
 import com.ocena.qlsc.product.model.Product;
+import com.ocena.qlsc.product.model.ProductGroup;
 import com.ocena.qlsc.product.model.ProductImage;
+import com.ocena.qlsc.product.repository.GroupRepository;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import com.ocena.qlsc.product.utils.FileUtil;
 import com.ocena.qlsc.user_history.mapper.HistoryMapper;
+import jakarta.transaction.Transactional;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,9 +38,11 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class ProductService extends BaseServiceAdapter<Product, ProductRequest, ProductResponse> implements IProductService {
+public class ProductService extends BaseServiceAdapter<Product, ProductRequest, ProductResponse> implements BaseService<Product, ProductRequest, ProductResponse> {
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    GroupRepository groupRepository;
     @Autowired
     ProductMapper productMapper;
     @Autowired
@@ -89,7 +96,8 @@ public class ProductService extends BaseServiceAdapter<Product, ProductRequest, 
         Page<ProductResponse> productResponsePage = resultPage.map(objects -> ProductResponse.builder()
                 .productId(objects[0].toString())
                 .productName(objects[1].toString())
-                .amount(Integer.valueOf(objects[2].toString()))
+                .productGroup(objects[2] == null ? null : new GroupResponse(objects[2].toString(), objects[3].toString()))
+                .amount(Integer.valueOf(objects[4].toString()))
                 .build());
 
         if(listKeywords.stream().allMatch(str -> str.isEmpty() || str == null) || listKeywords.isEmpty()) {
@@ -110,7 +118,8 @@ public class ProductService extends BaseServiceAdapter<Product, ProductRequest, 
         Page<ProductResponse> productResponsePage = resultPage.map(objects -> ProductResponse.builder()
                 .productId(objects[0].toString())
                 .productName(objects[1].toString())
-                .amount(Integer.valueOf(objects[2].toString()))
+                .productGroup(objects[2] == null ? null : new GroupResponse(objects[2].toString(), objects[3].toString()))
+                .amount(Integer.valueOf(objects[4].toString()))
                 .build());
 
         return ResponseMapper.toPagingResponseSuccess(productResponsePage);
@@ -121,6 +130,7 @@ public class ProductService extends BaseServiceAdapter<Product, ProductRequest, 
         return ResponseMapper.toListResponseSuccess(allProducts);
     }
 
+    @Transactional
     public DataResponse<ProductResponse> createProduct(ProductRequest productRequest) {
         List<ProductImage> productImages = new ArrayList<>();
 
@@ -131,6 +141,7 @@ public class ProductService extends BaseServiceAdapter<Product, ProductRequest, 
         Product product = Product.builder()
                 .productId(productRequest.getProductId())
                 .productName(productRequest.getProductName())
+                .productGroup(new ProductGroup(productRequest.getProductGroup().getId()))
                 .build();
 
         for(String fileBase64: productRequest.getImagesBase64()) {
@@ -143,22 +154,29 @@ public class ProductService extends BaseServiceAdapter<Product, ProductRequest, 
         return ResponseMapper.toDataResponseSuccess(productMapper.entityToDto(savedProduct));
     }
 
+    @Transactional
     public DataResponse<ProductResponse> updateProduct(ProductRequest productRequest, String productId) {
         List<ProductImage> images = new ArrayList<>();
+        // Get data from db
         Optional<Product> optionalProduct = productRepository.findByProductId(productId);
-
+        ProductGroup productGroup = productRequest.getProductGroup().getId() == null ? null :
+                groupRepository.findById(productRequest.getProductGroup().getId()).get();
         if(optionalProduct.isEmpty()) {
             throw new ResourceNotFoundException(productId + "doesn't exist");
         }
         Product product = optionalProduct.get();
-        product.getImages().clear();
-        productMapper.dtoToEntity(productRequest, product);
 
+        product.setProductName(productRequest.getProductName());
+        product.getImages().clear();
+        // Get image from request
         for(String fileBase64 : productRequest.getImagesBase64()) {
             byte[] fileBytes = fileUtil.convertBase64ToByteArray(fileBase64);
             images.add(new ProductImage(fileBytes, product));
         }
         product.getImages().addAll(images);
+        product.setProductGroup(productGroup);
+
+        // Save product to db
         Product savedProduct = productRepository.save(product);
         return ResponseMapper.toDataResponseSuccess(productMapper.entityToDto(savedProduct));
     }

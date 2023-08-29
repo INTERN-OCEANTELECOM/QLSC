@@ -4,6 +4,7 @@ import com.ocena.qlsc.common.error.exception.DataAlreadyExistException;
 import com.ocena.qlsc.common.error.exception.InvalidHeaderException;
 import com.ocena.qlsc.common.error.exception.NotPermissionException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
+import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.common.service.BaseServiceAdapter;
 import com.ocena.qlsc.common.util.CacheUtils;
 import com.ocena.qlsc.common.util.ReflectionUtils;
@@ -56,7 +57,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoDetailService extends BaseServiceAdapter<PoDetail, PoDetailRequest, PoDetailResponse> implements IPoDetailService {
+public class PoDetailService extends BaseServiceAdapter<PoDetail, PoDetailRequest, PoDetailResponse> implements BaseService<PoDetail, PoDetailRequest, PoDetailResponse> {
     @Autowired
     PoDetailMapper poDetailMapper;
     @Autowired

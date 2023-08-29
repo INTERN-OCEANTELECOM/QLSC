@@ -38,15 +38,10 @@ public class Product extends BaseModel {
     @Column(name = "product_name", length = 500)
     private String productName;
 
+    @ManyToOne(targetEntity = ProductGroup.class, fetch = FetchType.EAGER)
+    @JoinColumn(name = "product_group", foreignKey = @ForeignKey(name = "fk_product_product_groups"))
+    private ProductGroup productGroup;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images;
-
-//    @Override
-//    public String toString() {
-//        return "Product{" +
-//                "productId='" + productId + '\'' +
-//                ", productName='" + productName + '\'' +
-//                ", images=" + images +
-//                '}';
-//    }
 }

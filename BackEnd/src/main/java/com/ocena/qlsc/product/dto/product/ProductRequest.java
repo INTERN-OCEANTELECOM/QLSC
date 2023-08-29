@@ -1,5 +1,6 @@
 package com.ocena.qlsc.product.dto.product;
 
+import com.ocena.qlsc.product.dto.product_group.GroupRequest;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -23,6 +24,7 @@ public class ProductRequest implements Serializable {
     @NotNull(message = "ProductName is required")
     private String productName;
     private List<String> imagesBase64;
+    private GroupRequest productGroup;
     public ProductRequest(String productId) {
         this.productId = productId;
     }
