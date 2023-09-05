@@ -6,6 +6,8 @@ services:
       - 6379:6379
     networks:
       - networkDB
+    restart: always
+
   backend:
     build:
       context: ./BackEnd
@@ -26,6 +28,7 @@ services:
     volumes:
       - D:\data-qlsc\data\history:/mnt/d/data-qlsc
       - D:\data-qlsc\data\logs:/mnt/d/logs
+    restart: always
 
   frontend:
     build:
@@ -35,7 +38,8 @@ services:
       - 5173:5173
     networks:
       - networkDB
-  
+    restart: always
+
   mysql-db:
     image: mysql:8.0.26
     ports:
@@ -48,10 +52,12 @@ services:
       - D:\data-qlsc\database:/var/lib/mysql
     networks:
       - networkDB
+    restart: always
 
 volumes:
   mysql_data:
   qlsc-history:
+
 
 networks:
   networkDB:
