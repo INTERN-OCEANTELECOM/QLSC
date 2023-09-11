@@ -3,6 +3,8 @@ package com.ocena.qlsc.product.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +22,9 @@ import java.util.Set;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ProductGroup {
+public class ProductGroup implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     @Id
     private String id;
     @Column(name = "group_name")

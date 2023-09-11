@@ -15,7 +15,7 @@ import java.util.UUID;
 @MappedSuperclass
 public class BaseModel implements Cloneable, Serializable {
     @Serial
-        private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     @Id
     private String id;
     private Long created;

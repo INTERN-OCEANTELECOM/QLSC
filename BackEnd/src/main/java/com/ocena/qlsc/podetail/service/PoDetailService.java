@@ -296,8 +296,6 @@ public class PoDetailService extends BaseServiceAdapter<PoDetail, PoDetailReques
                 .findFirst()
                 .orElse(null);
 
-        System.out.println(product);
-
         PoDetail poDetail = getBaseMapper().dtoToEntity(poDetailDto);
 
         if (product != null) {
@@ -394,7 +392,6 @@ public class PoDetailService extends BaseServiceAdapter<PoDetail, PoDetailReques
                 }
                 // If the PO detail is valid, convert it to an entity and add it to the list of PO details to be inserted
                 PoDetail poDetail = (PoDetail) object;
-                System.out.println(poDetail);
                 listInsertPoDetail.add(poDetail);
             }
         }
@@ -460,8 +457,6 @@ public class PoDetailService extends BaseServiceAdapter<PoDetail, PoDetailReques
         String poDetailId = poDetailDto.getPo().getPoNumber() + "-" + poDetailDto.getProduct().getProductId() + "-"
                 + poDetailDto.getSerialNumber();
         poDetailDto.setPoDetailId(poDetailId);
-        System.out.println(poDetailDto);
-
         // Validate the PO detail object and return it if it is valid
         List<String> resultError = validationRequest(poDetailDto);
         if (resultError == null) {
