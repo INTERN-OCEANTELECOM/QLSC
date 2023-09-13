@@ -123,7 +123,9 @@ public class PoDetailService extends BaseServiceAdapter<PoDetail, PoDetailReques
 
         List<PoDetail> mergeList = pageSearchPoDetails.getContent().stream()
                 .filter(poDetail -> (listProductIds.isEmpty() || listProductIds.contains(poDetail.getProduct().getProductId()))
-                        && (listSerialNumbers.isEmpty() || listSerialNumbers.contains(poDetail.getSerialNumber()))
+                        && (listSerialNumbers.isEmpty()
+                        || (listSerialNumbers.stream().anyMatch(serialNumber -> serialNumber.toLowerCase().contains(poDetail.getSerialNumber().toLowerCase()))
+                        || (listSerialNumbers.size() == 1 && poDetail.getSerialNumber().toLowerCase().contains(listSerialNumbers.get(0).toLowerCase()))))
                         && (listPoNumbers.isEmpty() || listPoNumbers.contains(poDetail.getPo().getPoNumber())))
                 .collect(Collectors.toList());
 
