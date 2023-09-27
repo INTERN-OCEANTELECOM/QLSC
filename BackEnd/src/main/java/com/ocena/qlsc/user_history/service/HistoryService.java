@@ -199,8 +199,8 @@ public class HistoryService {
                 .collect(Collectors.joining());
         description.setDetails(description.getDetailsDescription(descriptionHistory));
 
-//        String filePath = FileUtil.saveUploadedFile(file, action);
-        save(action, ObjectName.PoDetail, description.getDescription(), "", null);
+        String filePath = FileUtil.saveUploadedFile(file, action);
+        save(action, ObjectName.PoDetail, description.getDescription(), "", filePath);
     }
 
     public void loginHistory(String email) {
