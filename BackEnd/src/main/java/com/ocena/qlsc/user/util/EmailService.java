@@ -17,12 +17,6 @@ public class EmailService {
     @Autowired
     private JavaMailSender emailSender;
 
-    @Value("${SMTP_USERNAME}")
-    private String smtpUsername;
-
-    @Value("${SMTP_PASSWORD}")
-    private String smtpPassword;
-
     /**
      * Method for sending simple e-mail message.
      */
@@ -48,9 +42,6 @@ public class EmailService {
         mailMessage.setTo(email);
         mailMessage.setSubject("Password Reset ");
         mailMessage.setText(messageOTP);
-
-        System.out.println(smtpUsername);
-        System.out.println(smtpPassword);
 
         try
         {
